@@ -90,7 +90,7 @@ Verbs: Look at, Pick up, Use, Give, Talk to, Walk to. "Attack" = Use X on Y (sam
 ## 3. Rules for the implementing agent
 
 - Do **one step at a time**. Each step ends with: `npm test` green, `npm run e2e` green, a visible result,
-  a short `docs/learn/NN-<topic>.md` (≤15 lines: concept + where it lives in code), and a git commit.
+  a short `docs/learn/NN-<topic>.md` (≤15 lines: concept + where it lives in code). Do NOT run git commit (or push) - the human makes all commits.
 - `packages/engine` must not import Phaser, DOM, or `node:*`. `packages/client` must not contain
   Grelok-specific ids or strings — everything comes from `games/<id>/`.
 - Tests stay **basic**: a few unit tests per new pure module, one Playwright spec per visible feature.
@@ -120,11 +120,16 @@ Verbs: Look at, Pick up, Use, Give, Talk to, Walk to. "Attack" = Use X on Y (sam
   keep `performText()` on top of the existing `CommandParser`. Remove `node:path`/`FileSaveStore`;
   saving becomes `serialize()/deserialize()`. Fix the TODO bug (drinking from a jug you don't carry) along the way.
 - Copy `game-data/*.yml` into `games/grelok/logic/`.
-- Add `packages/engine/cli.ts` (tiny Node adapter, the only Node code) so `npm run cli` plays the text game.
+- Add `packages/engine/node/cli.ts` (tiny Node adapter) so `npm run cli` plays the text game. Node-only code lives in `packages/engine/node/`, never in `src/`.
 - **Output:** the text game is playable in the terminal from the new engine.
 - **Test:** port `walkthrough.txt` → last event is `game_over {won:true}`; `perform({verb:'pick_up',objects:['pebble']})`
   emits `inventory_changed`; serialize/deserialize roundtrip keeps location + inventory.
 - **Concept:** separating simulation (model) from presentation (view).
+- **Status: done.** Deviations from the text game: `Autocompleter` not ported (terminal tab-completion only);
+  `extended prompt`, `save`, `load`, `quit` are terminal-shell commands handled in `cli.ts`; engine start location
+  defaults to the first location in `locations.yml` (Step 3 adds `game.yml`); engine uses a `clone()` helper instead of
+  `structuredClone`; `noUncheckedIndexedAccess` is off for the engine package only; the jug bug is fixed in
+  `games/grelok/logic` (the text game's own data is untouched); after `game_over` the engine ignores further commands.
 
 ### Step 3 — Load game data in the browser + validator
 - `client` loads `games/grelok/**/*.yml` via `import.meta.glob(..., { query: '?raw' })` + `js-yaml`; game id from `?game=` (default `grelok`).
@@ -256,7 +261,7 @@ Verbs: Look at, Pick up, Use, Give, Talk to, Walk to. "Attack" = Use X on Y (sam
   palette test — every non-placeholder PNG in `assets/` uses only palette colors.
 - **Concept:** asset pipelines, why palettes and nearest-neighbour scaling make the "retro" look.
 
-### Step 17 — Art pass (sub-steps, one commit each)
+### Step 17 — Art pass (sub-steps, one logical change each, uncommitted)
 AI is bad at keeping a character consistent across many frames, so keep frame counts low and let code do the rest:
 mirror left↔right, walk bob via tween, talk = 2-frame mouth swap, idle = slow breathing scale tween.
 - 17a Grognak: generate a character sheet (front, back, side) → derive `idle` (3 dirs), `walk` (4 frames side,

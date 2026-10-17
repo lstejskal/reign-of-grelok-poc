@@ -1,2 +1,19 @@
-// Pure game logic lives here (no DOM, no Phaser, no Node). Filled in at Step 2.
-export const ENGINE_NAME = 'grelok-engine';
+// Public API of the engine package. Pure game logic: no DOM, no Phaser, no Node.
+export { Engine } from './Engine';
+export type { EngineOptions } from './Engine';
+export { Thing } from './models/Thing';
+export { chopToLines, toSentence } from './utils';
+export type {
+    Command,
+    CommandsData,
+    ConstraintsData,
+    CustomActionsData,
+    EngineEvent,
+    GameState,
+    LocationData,
+    LogicData,
+    MessagesData,
+    ThingData,
+    ThingState,
+    Verb,
+} from './types';
