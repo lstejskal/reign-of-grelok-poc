@@ -41,7 +41,7 @@ export interface LogicData {
 // ---------------------------------------------------------------------------
 
 /** The verbs a point-and-click UI can produce. (Text input may also yield data-only verbs like "drink".) */
-export type Verb = 'look_at' | 'pick_up' | 'drop' | 'use' | 'give' | 'talk_to' | 'ask' | 'go';
+export type Verb = 'look_at' | 'pick_up' | 'drop' | 'use' | 'give' | 'talk_to' | 'ask' | 'go' | 'push';
 
 /** A complete player intention, e.g. { verb: 'use', objects: ['rusty_sword', 'zombie'] }. Objects are thing aliases. */
 export interface Command {

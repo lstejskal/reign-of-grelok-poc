@@ -5,6 +5,11 @@ import type { LogicData } from './types';
 export const SCENE_WIDTH = 320;
 export const SCENE_HEIGHT = 144;
 
+/** Inventory icons are 24x16 pictures, one per pickable thing, at `assets/icons/<thing alias>.png`. */
+export const ICON_WIDTH = 24;
+export const ICON_HEIGHT = 16;
+export const iconPath = (thingAlias: string): string => `icons/${thingAlias}.png`;
+
 export type Point = [x: number, y: number];
 export type Facing = 'n' | 's' | 'e' | 'w';
 

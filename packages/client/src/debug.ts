@@ -40,6 +40,18 @@ export function installDebugHook(game: Phaser.Game): void {
     get sentence(): string | undefined {
       return (game.scene.getScene('RoomScene') as RoomScene | null)?.sentenceText;
     },
+    /** The answer text currently shown in the text box. */
+    get answer(): string | undefined {
+      return (game.scene.getScene('RoomScene') as RoomScene | null)?.answerText;
+    },
+    /** Aliases of the things shown in the inventory panel. */
+    get inventory(): string[] | undefined {
+      return (game.scene.getScene('RoomScene') as RoomScene | null)?.inventoryShown;
+    },
+    /** The verb selected in the verb grid (undefined = none). */
+    get verb(): string | undefined {
+      return (game.scene.getScene('RoomScene') as RoomScene | null)?.selectedVerb;
+    },
     get hovered(): string | undefined {
       return (game.scene.getScene('RoomScene') as RoomScene | null)?.hoveredId;
     },

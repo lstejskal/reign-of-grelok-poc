@@ -19,5 +19,5 @@ export type {
 } from './types';
 export { assembleBundle } from './bundle';
 export { validateGame } from './validateGame';
-export { SCENE_WIDTH, SCENE_HEIGHT } from './sceneTypes';
+export { SCENE_WIDTH, SCENE_HEIGHT, ICON_WIDTH, ICON_HEIGHT, iconPath } from './sceneTypes';
 export type { ExitData, Facing, GameBundle, GameConfig, HotspotData, Point, SceneData, SceneSpriteData } from './sceneTypes';

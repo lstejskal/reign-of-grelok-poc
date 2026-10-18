@@ -3,12 +3,13 @@
 //
 //   assets/backgrounds/<location>.png   320x144, a colour per location + a 16px grid
 //   assets/walkmasks/<location>.png     320x144, grayscale: white = the player may walk here, black = blocked
+//   assets/icons/<thing>.png            24x16, one per pickable thing: a coloured tile with a little symmetric pattern
 //
 // Existing files are never overwritten (real art will replace these under the same names) unless --force.
 import fs from 'node:fs';
 import path from 'node:path';
 import { PNG } from 'pngjs';
-import { SCENE_HEIGHT as H, SCENE_WIDTH as W } from '../packages/engine/src';
+import { ICON_HEIGHT, ICON_WIDTH, SCENE_HEIGHT as H, SCENE_WIDTH as W, iconPath } from '../packages/engine/src';
 import { GAMES_DIR, loadGameBundle } from '../packages/engine/node/loadGameBundle';
 
 const HORIZON_Y = 40; // sky above, ground below
@@ -84,6 +85,44 @@ function makeWalkmask(): Buffer {
     return PNG.sync.write(png, { colorType: 0, inputColorType: 6, inputHasAlpha: true });
 }
 
+// A small hash, so every thing always gets the same colour and pattern.
+function hashOf(text: string): number {
+    let h = 2166136261;
+    for (const c of text) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
+    return h;
+}
+
+function makeIcon(alias: string): Buffer {
+    const png = new PNG({ width: ICON_WIDTH, height: ICON_HEIGHT });
+    const h = hashOf(alias);
+    const base = hsl(h % 360, 0.55, 0.45);
+    const light = hsl(h % 360, 0.55, 0.7);
+    const dark = hsl(h % 360, 0.55, 0.2);
+    const set = (x: number, y: number, c: Rgb) => {
+        const i = (y * ICON_WIDTH + x) * 4;
+        png.data[i] = c[0];
+        png.data[i + 1] = c[1];
+        png.data[i + 2] = c[2];
+        png.data[i + 3] = 255;
+    };
+    for (let y = 0; y < ICON_HEIGHT; y++) {
+        for (let x = 0; x < ICON_WIDTH; x++) {
+            const edge = x === 0 || y === 0 || x === ICON_WIDTH - 1 || y === ICON_HEIGHT - 1;
+            set(x, y, edge ? dark : base);
+        }
+    }
+    // a left-right symmetric 5x3 pattern of 3x3 blocks, decided by the hash (an "identicon")
+    for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 3; col++) {
+            if (((h >>> (8 + row * 3 + col)) & 1) === 0) continue;
+            for (const c of [col, 4 - col]) {
+                for (let dy = 0; dy < 3; dy++) for (let dx = 0; dx < 3; dx++) set(4 + c * 3 + dx, 2 + row * 4 + dy, light);
+            }
+        }
+    }
+    return PNG.sync.write(png);
+}
+
 function writeAsset(gameId: string, relative: string, data: Buffer, force: boolean): string {
     const file = path.join(GAMES_DIR, gameId, 'assets', relative);
     if (fs.existsSync(file) && !force) return `kept    ${relative}`;
@@ -99,4 +138,7 @@ const gameId = args.find((a) => !a.startsWith('--')) ?? 'grelok';
 for (const location of Object.keys(loadGameBundle(gameId).logic.locations)) {
     console.log(writeAsset(gameId, `backgrounds/${location}.png`, makeBackground(location), force));
     console.log(writeAsset(gameId, `walkmasks/${location}.png`, makeWalkmask(), force));
+}
+for (const thing of Object.values(loadGameBundle(gameId).logic.things)) {
+    if (thing.pickable) console.log(writeAsset(gameId, iconPath(thing.alias), makeIcon(thing.alias), force));
 }

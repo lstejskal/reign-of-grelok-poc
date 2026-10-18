@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Engine } from '@grelok/engine';
+import { Engine, iconPath } from '@grelok/engine';
 import type { GameBundle } from '@grelok/engine';
 import { GAME_WIDTH, GAME_HEIGHT } from '../config';
 import { registerPixelFont, PIXEL_FONT } from '../gfx/pixelFont';
@@ -36,13 +36,22 @@ export class BootScene extends Phaser.Scene {
     }
   }
 
-  // Queue every scene background with Phaser's loader and call `done` when they have all arrived.
+  // Queue every scene background and inventory icon with Phaser's loader and call `done` when they have all arrived.
   private loadPictures(bundle: GameBundle, done: () => void): void {
     for (const scene of Object.values(bundle.scenes)) {
       if (scene.background === undefined) continue;
       const url = assetUrl(bundle.id, scene.background);
       if (url === undefined) throw new Error(`Missing picture: ${scene.background}`);
       this.load.image(textureKey(scene.background), url);
+    }
+
+    // inventory icons: one per thing the player can carry
+    for (const thing of Object.values(bundle.logic.things)) {
+      if (!thing.pickable) continue;
+      const icon = iconPath(thing.alias);
+      const url = assetUrl(bundle.id, icon);
+      if (url === undefined) throw new Error(`Missing icon: ${icon}`);
+      this.load.image(textureKey(icon), url);
     }
 
     if (this.load.list.size === 0) {  // (totalToLoad is only set once loading starts)

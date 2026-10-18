@@ -61,4 +61,15 @@ describe('validateGame', () => {
         const errors = validateGame(bundle, everythingExists, () => ({ width: 640, height: 288 }));
         expect(errors).toContain('scenes/plain.yml: background must be 320x144 pixels, but assets/backgrounds/plain.png is 640x288');
     });
+
+    it('reports a pickable thing without an icon, and an icon of the wrong size', () => {
+        const bundle = fresh();
+        const errors = validateGame(bundle, (asset) => asset !== 'icons/pebble.png').join('\n');
+        expect(errors).toContain('pickable thing "pebble" has no icon: assets/icons/pebble.png');
+
+        const sized = validateGame(bundle, everythingExists, (asset) =>
+            asset === 'icons/jug.png' ? { width: 32, height: 32 } : undefined,
+        ).join('\n');
+        expect(sized).toContain('icon must be 24x16 pixels, but assets/icons/jug.png is 32x32');
+    });
 });

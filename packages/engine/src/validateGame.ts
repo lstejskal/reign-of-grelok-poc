@@ -1,4 +1,4 @@
-import { SCENE_HEIGHT, SCENE_WIDTH } from './sceneTypes';
+import { ICON_HEIGHT, ICON_WIDTH, SCENE_HEIGHT, SCENE_WIDTH, iconPath } from './sceneTypes';
 import type { GameBundle } from './sceneTypes';
 
 /**
@@ -20,6 +20,20 @@ export function validateGame(
 
     if (!config?.title) problem('game.yml', 'missing "title"');
     if (!config || !(config.start in logic.locations)) problem('game.yml', `start location "${config?.start}" does not exist`);
+
+    // everything the player can carry is shown in the inventory, so it needs an icon
+    for (const thing of Object.values(logic.things)) {
+        if (!thing.pickable) continue;
+        const icon = iconPath(thing.alias);
+        if (!assetExists(icon)) {
+            problem(`things.yml`, `pickable thing "${thing.alias}" has no icon: assets/${icon}`);
+            continue;
+        }
+        const size = imageSize?.(icon);
+        if (size !== undefined && (size.width !== ICON_WIDTH || size.height !== ICON_HEIGHT)) {
+            problem(`things.yml`, `icon must be ${ICON_WIDTH}x${ICON_HEIGHT} pixels, but assets/${icon} is ${size.width}x${size.height}`);
+        }
+    }
 
     for (const id of Object.keys(scenes)) {
         if (!(id in logic.locations)) problem(`scenes/${id}.yml`, 'there is no such location in logic/locations.yml');
