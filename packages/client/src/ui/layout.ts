@@ -20,7 +20,7 @@ export const VERB_GRID = { x: 4, y: SCENE_HEIGHT + 14, cellW: 52, cellH: 9 };
  * Where the engine's answers appear: a dark band across the top of the scene (the bottom strip is full), 4 lines
  * of up to 52 characters. It is only drawn while there is something to read.
  */
-export const TEXT_BOX: Rect = { x: 0, y: 0, w: 320, h: 37 };
+export const TEXT_BOX: Rect = { x: 0, y: 0, w: 320, h: 38 };
 export const TEXT_BOX_TEXT = { x: 4, y: 3 };
 export const TEXT_BOX_LINES = 4;
 export const TEXT_BOX_CHARS = 52;

@@ -19,7 +19,14 @@ const walkthrough = fs
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
   await expect.poll(() => page.evaluate(() => window.__adv.scene)).toBe('RoomScene');
+  await page.evaluate(() => (window.__adv.speedFactor = 10)); // walking at 10x, so tests do not wait for him
 });
+
+/** Tell the engine a command, then wait until any fade between scenes is over. */
+async function say(page: Page, line: string): Promise<void> {
+  await page.evaluate((l) => window.__adv.session.performText(l), line);
+  await expect.poll(() => page.evaluate(() => window.__adv.transitioning)).toBe(false);
+}
 
 test('shows the background of the current location and changes it when the player moves', async ({ page }) => {
   // every scene background was loaded into Phaser's texture manager (not just queued)
@@ -31,7 +38,7 @@ test('shows the background of the current location and changes it when the playe
   expect(await page.evaluate(() => window.__adv.backgroundKey)).toBe('asset:backgrounds/plain.png');
   await page.screenshot({ path: 'tests/e2e/screenshots/room-plain.png' });
 
-  await page.evaluate(() => window.__adv.session.performText('north'));
+  await say(page, 'north');
   expect(await page.evaluate(() => window.__adv.backgroundKey)).toBe('asset:backgrounds/mountain.png');
   await page.screenshot({ path: 'tests/e2e/screenshots/room-mountain.png' });
 });
@@ -51,7 +58,7 @@ test('the whole game can be played from the debug console, from the first move t
 
   await expect(consoleLog).toContainText('THE END');
   expect(await page.evaluate(() => window.__adv.engine.state.over)).toBe(true);
-  expect(await page.evaluate(() => window.__adv.backgroundKey)).toBe('asset:backgrounds/mountain.png');
+  await expect.poll(() => page.evaluate(() => window.__adv.backgroundKey)).toBe('asset:backgrounds/mountain.png');
   await page.screenshot({ path: 'tests/e2e/screenshots/console-the-end.png' });
 
   await page.keyboard.press('Slash'); // close
@@ -78,10 +85,10 @@ async function moveMouseTo(page: Page, x: number, y: number): Promise<void> {
 
 test('pointing at a thing shows its name in the sentence line', async ({ page }) => {
   await moveMouseTo(page, 160, 60); // inside the standing stone
-  await expect.poll(() => page.evaluate(() => window.__adv.sentence)).toBe('standing stone');
+  await expect.poll(() => page.evaluate(() => window.__adv.sentence)).toBe('Walk to standing stone');
 
   await moveMouseTo(page, 66, 116); // the pebble
-  await expect.poll(() => page.evaluate(() => window.__adv.sentence)).toBe('pebble');
+  await expect.poll(() => page.evaluate(() => window.__adv.sentence)).toBe('Walk to pebble');
 
   await moveMouseTo(page, 10, 10); // empty sky
   await expect.poll(() => page.evaluate(() => window.__adv.sentence)).toBe('');
@@ -91,13 +98,13 @@ test('pointing at a thing shows its name in the sentence line', async ({ page })
 });
 
 test('hidden things cannot be pointed at until the engine reveals them', async ({ page }) => {
-  await page.evaluate(() => window.__adv.session.performText('north'));
+  await say(page, 'north');
   await moveMouseTo(page, 75, 112); // the gemstone sits on top of the rubble
-  await expect.poll(() => page.evaluate(() => window.__adv.sentence)).toBe('rubble');
+  await expect.poll(() => page.evaluate(() => window.__adv.sentence)).toBe('Walk to rubble');
 
-  await page.evaluate(() => window.__adv.session.performText('look at rubble')); // reveals the gemstone
+  await say(page, 'look at rubble'); // reveals the gemstone
   // the mouse did not move, but the sentence line follows the world
-  await expect.poll(() => page.evaluate(() => window.__adv.sentence)).toBe('gemstone');
+  await expect.poll(() => page.evaluate(() => window.__adv.sentence)).toBe('Walk to gemstone');
 });
 
 test('F1 toggles the outline overlay', async ({ page }) => {
@@ -160,7 +167,7 @@ test('"Use" builds a two-object sentence; Escape cancels it', async ({ page }) =
   await expect.poll(() => sentence(page)).toBe('Use pebble with standing stone');
 
   await page.keyboard.press('Escape');
-  await expect.poll(() => sentence(page)).toBe('standing stone');
+  await expect.poll(() => sentence(page)).toBe('Walk to standing stone');
   expect(await page.evaluate(() => window.__adv.verb)).toBeUndefined();
 
   // and finishing the sentence sends the command to the engine
@@ -171,8 +178,8 @@ test('"Use" builds a two-object sentence; Escape cancels it', async ({ page }) =
 });
 
 test('a long answer is shown a page at a time', async ({ page }) => {
-  await page.evaluate(() => window.__adv.session.performText('north'));
-  await page.evaluate(() => window.__adv.session.performText('look')); // the long room description
+  await say(page, 'north');
+  await say(page, 'look'); // the long room description
   const first = await page.evaluate(() => window.__adv.answer);
   expect(first.split('\n').length).toBeLessThanOrEqual(4);
   expect(first.split('\n').every((l: string) => l.length <= 52)).toBe(true);
@@ -210,11 +217,11 @@ test('the inventory shows what the engine says you carry, with an icon texture f
 });
 
 test('inventory items can be pointed at, looked at, and used in sentences', async ({ page }) => {
-  await page.evaluate(() => window.__adv.session.performText('take pebble'));
+  await say(page, 'take pebble');
   const slot = await page.evaluate(() => window.__adv.inventory.indexOf('pebble'));
   const r = slotRect(slot);
   await moveMouseTo(page, r.x + 12, r.y + 8);
-  await expect.poll(() => sentence(page)).toBe('pebble');
+  await expect.poll(() => sentence(page)).toBe('Look at pebble');
 
   await clickAt(page, r.x + 12, r.y + 8, 'right'); // right-click = look at
   await expect.poll(() => page.evaluate(() => window.__adv.answer)).toContain('pebble');
@@ -227,15 +234,14 @@ test('inventory items can be pointed at, looked at, and used in sentences', asyn
 });
 
 test('Give gemstone to wizard takes the gemstone out of the inventory', async ({ page }) => {
-  const say = (line: string) => page.evaluate((l) => window.__adv.session.performText(l), line);
-  await say('north');
-  await say('look at rubble'); // reveals the gemstone
+  await say(page, 'north');
+  await say(page, 'look at rubble'); // reveals the gemstone
   await clickVerb(page, 'pick_up');
   await clickAt(page, 75, 112);
   await expect.poll(() => page.evaluate(() => window.__adv.inventory)).toContain('gemstone');
 
-  await say('south');
-  await say('west'); // the swamp, where the wizard lives
+  await say(page, 'south');
+  await say(page, 'west'); // the swamp, where the wizard lives
   await dismissAnswer(page); // the room description covers the top of the scene, where the wizard stands
   await clickVerb(page, 'give');
   await clickInventoryItem(page, 'gemstone');
@@ -245,4 +251,175 @@ test('Give gemstone to wizard takes the gemstone out of the inventory', async ({
 
   await expect.poll(() => page.evaluate(() => window.__adv.answer)).toContain('Eye of Grub');
   expect(await page.evaluate(() => window.__adv.inventory)).not.toContain('gemstone');
+});
+
+// --- Step 8: Grognak walks -----------------------------------------------------------------------
+
+const player = (page: Page) => page.evaluate(() => window.__adv.player);
+const walkSpeed = (page: Page, factor: number) => page.evaluate((f) => (window.__adv.speedFactor = f), factor);
+const waitUntilStopped = (page: Page) =>
+  expect.poll(async () => (await player(page)).walking, { timeout: 15_000 }).toBe(false);
+
+test('Grognak starts where game.yml says, drawn from the sprite sheet, with depth = his y', async ({ page }) => {
+  const p = await player(page);
+  expect([p.x, p.y, p.facing, p.walking]).toEqual([160, 112, 's', false]);
+  expect(p.depth).toBe(p.y); // lower on the screen = nearer = drawn in front
+  // the sheet was cut into 3 columns x 4 rows of frames
+  expect(await page.evaluate(() => Object.keys(window.__adv.game.textures.get('asset:sprites/grognak.png').frames).filter((f) => f !== '__BASE').length)).toBe(12);
+});
+
+test('clicking the floor walks there and turns him the way he walked', async ({ page }) => {
+  await clickAt(page, 60, 120);
+  await waitUntilStopped(page);
+  const p = await player(page);
+  expect([p.x, p.y]).toEqual([60, 120]);
+  expect(p.facing).toBe('w');
+});
+
+test('he is drawn smaller in the distance (perspective) and always in front of what is behind him', async ({ page }) => {
+  await clickAt(page, 200, 130);
+  await waitUntilStopped(page);
+  const near = await player(page);
+  await clickAt(page, 200, 40);
+  await waitUntilStopped(page);
+  const far = await player(page);
+  expect(far.scale).toBeLessThan(near.scale);
+  expect(far.scale).toBeGreaterThan(0.55);
+  expect(near.scale).toBeLessThanOrEqual(1);
+  expect(far.depth).toBeLessThan(near.depth);
+});
+
+test('he walks around the base of the standing stone instead of through it', async ({ page }) => {
+  await walkSpeed(page, 3); // slow enough to sample his path every frame
+  await page.evaluate(() => {
+    const trail: [number, number][] = [];
+    (window as any).__trail = trail;
+    const tick = () => {
+      const p = window.__adv.player;
+      trail.push([p.x, p.y]);
+      requestAnimationFrame(tick);
+    };
+    tick();
+  });
+  await clickAt(page, 200, 60); // behind the stone's base (x 136-183, y 88-99 is blocked), beside the stone's hotspot
+  await waitUntilStopped(page);
+
+  const trail: [number, number][] = await page.evaluate(() => (window as any).__trail);
+  expect(trail.some(([x, y]) => x >= 136 && x < 184 && y >= 88 && y < 100)).toBe(false);
+  expect(trail.some(([x]) => x < 136 || x >= 184)).toBe(true); // he really went round the side
+  const end = await player(page);
+  expect([end.x, end.y]).toEqual([200, 60]);
+});
+
+test('he walks up to a thing before using it: the engine hears nothing until he arrives', async ({ page }) => {
+  await walkSpeed(page, 1);
+  await clickVerb(page, 'pick_up');
+  await clickAt(page, 66, 116); // the pebble
+  expect((await player(page)).walking).toBe(true);
+  expect(await page.evaluate(() => window.__adv.engine.state.inventory)).not.toContain('pebble');
+
+  await expect.poll(() => page.evaluate(() => window.__adv.engine.state.inventory), { timeout: 15_000 }).toContain('pebble');
+  const p = await player(page);
+  expect([p.x, p.y]).toEqual([66, 124]); // the hotspot's walkTo
+  expect(p.facing).toBe('n'); // no facing in the data: he turns towards the pebble
+});
+
+test('with no verb chosen, clicking a thing just walks there (and faces it as the data says)', async ({ page }) => {
+  await clickAt(page, 160, 60); // the standing stone
+  await waitUntilStopped(page);
+  const p = await player(page);
+  expect([p.x, p.y, p.facing]).toEqual([160, 108, 'n']);
+  expect(await page.evaluate(() => window.__adv.answer)).toBe('');
+});
+
+test('looking is done from where he stands', async ({ page }) => {
+  await clickVerb(page, 'look_at');
+  await clickAt(page, 160, 60);
+  await expect.poll(() => page.evaluate(() => window.__adv.answer)).toContain('menhir');
+  const p = await player(page);
+  expect([p.x, p.y, p.walking]).toEqual([160, 112, false]);
+});
+
+test('a new click redirects him, and the old walk is forgotten', async ({ page }) => {
+  await walkSpeed(page, 1);
+  await clickVerb(page, 'pick_up');
+  await clickAt(page, 66, 116); // starts walking to the pebble ...
+  await clickAt(page, 250, 120); // ... but the player changed his mind
+  await waitUntilStopped(page);
+  const p = await player(page);
+  expect([p.x, p.y]).toEqual([250, 120]);
+  expect(await page.evaluate(() => window.__adv.engine.state.inventory)).not.toContain('pebble');
+});
+
+test('arriving in a new location places him at the matching exit', async ({ page }) => {
+  await say(page, 'north');
+  const p = await player(page);
+  expect([p.x, p.y]).toEqual([160, 118]); // mountain's south exit spawn
+  await page.screenshot({ path: 'tests/e2e/screenshots/room-player.png' });
+});
+
+test('F1 also shows the walk grid and the route', async ({ page }) => {
+  await walkSpeed(page, 0.5);
+  await page.keyboard.press('F1');
+  await clickAt(page, 250, 50);
+  await expect.poll(async () => (await player(page)).x, { timeout: 15_000 }).toBeGreaterThan(190);
+  await page.screenshot({ path: 'tests/e2e/screenshots/room-walking.png' });
+});
+
+// --- Step 9: exits and scene transitions -------------------------------------------------------
+
+const sentenceLine = (page: Page) => page.evaluate(() => window.__adv.sentence);
+
+test('pointing at an exit says where it leads', async ({ page }) => {
+  await moveMouseTo(page, 160, 10);
+  await expect.poll(() => sentenceLine(page)).toBe('Go to Mountain');
+  await moveMouseTo(page, 60, 120); // empty ground again
+  await expect.poll(() => sentenceLine(page)).toBe('');
+});
+
+test('clicking an exit walks there and then through it; the way back works too', async ({ page }) => {
+  await clickAt(page, 160, 10);
+  await expect.poll(() => page.evaluate(() => window.__adv.backgroundKey), { timeout: 15_000 }).toBe('asset:backgrounds/mountain.png');
+  await expect.poll(() => page.evaluate(() => window.__adv.transitioning)).toBe(false);
+  let p = await player(page);
+  expect([p.x, p.y, p.facing]).toEqual([160, 118, 'n']);
+  await page.screenshot({ path: 'tests/e2e/screenshots/room-exit-mountain.png' });
+
+  await clickAt(page, 160, 138); // the south exit
+  await expect.poll(() => page.evaluate(() => window.__adv.backgroundKey), { timeout: 15_000 }).toBe('asset:backgrounds/plain.png');
+  await expect.poll(() => page.evaluate(() => window.__adv.transitioning)).toBe(false);
+  p = await player(page);
+  expect([p.x, p.y, p.facing]).toEqual([160, 40, 's']);
+});
+
+test('the screen fades to black and back when the scene changes', async ({ page }) => {
+  await walkSpeed(page, 1);
+  await page.evaluate(() => {
+    const w = window as any;
+    w.__maxFade = 0;
+    const tick = () => {
+      w.__maxFade = Math.max(w.__maxFade, w.__adv.fade ?? 0);
+      requestAnimationFrame(tick);
+    };
+    tick();
+    w.__adv.session.performText('north');
+  });
+  await expect.poll(() => page.evaluate(() => window.__adv.transitioning)).toBe(false);
+  expect(await page.evaluate(() => (window as any).__maxFade)).toBeGreaterThan(0.95);
+  expect(await page.evaluate(() => window.__adv.fade)).toBe(0);
+});
+
+test('a blocked exit shows the engine\'s message and he stays', async ({ page }) => {
+  await say(page, 'east'); // the chapel
+  await clickAt(page, 310, 80);
+  await expect.poll(() => page.evaluate(() => window.__adv.answer)).toBe('Chapel door is blocked by zombie.');
+  expect(await page.evaluate(() => window.__adv.backgroundKey)).toBe('asset:backgrounds/chapel.png');
+  const p = await player(page);
+  expect([p.x, p.y, p.facing]).toEqual([292, 110, 'e']);
+
+  await dismissAnswer(page);
+  await page.evaluate(() => window.__adv.session.performText('use rusty sword on zombie'));
+  await dismissAnswer(page);
+  await clickAt(page, 310, 80);
+  await expect.poll(() => page.evaluate(() => window.__adv.answer)).toBe('Chapel door is locked.');
 });

@@ -41,21 +41,47 @@ export interface SceneSpriteData {
     y: number;
 }
 
+/**
+ * Perspective: the player is drawn at scale `top` on the farthest walkable row of the scene and at scale `bottom`
+ * on the nearest one, and in between it changes smoothly. 1 = the sprite's own size.
+ */
+export interface SceneScale {
+    top: number;
+    bottom: number;
+}
+
 export interface SceneData {
     /** Asset paths are relative to the game's `assets/` folder. Added in Step 4. */
     background?: string;
     walkmask?: string;
+    scale?: SceneScale;
     music?: string;
     hotspots: HotspotData[];
     exits: ExitData[];
     sprites?: SceneSpriteData[];
 }
 
+/**
+ * The player's picture: one sheet of equally sized frames. Columns are idle, walk 1, walk 2; rows are the facings
+ * in the order of PLAYER_FACING_ROWS. The sprite's feet are at the bottom centre of a frame.
+ */
+export interface PlayerConfig {
+    /** Relative to the game's `assets/` folder. */
+    sprite: string;
+    frameWidth: number;
+    frameHeight: number;
+}
+export const PLAYER_SHEET_COLUMNS = 3;
+export const PLAYER_FACING_ROWS: readonly Facing[] = ['s', 'n', 'e', 'w'];
+
 /** games/<id>/game.yml */
 export interface GameConfig {
     title: string;
     /** Location alias where the player starts. */
     start: string;
+    /** Where the player stands at the start, in scene pixels (default: the middle of the floor). */
+    startPosition?: Point;
+    player: PlayerConfig;
 }
 
 /** Everything the engine and a client need to know about one game. */

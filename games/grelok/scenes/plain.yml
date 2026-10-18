@@ -2,6 +2,7 @@
 
 background: backgrounds/plain.png
 walkmask: walkmasks/plain.png   # white = walkable
+scale: {top: 0.6, bottom: 1.0}   # Grognak is drawn at 60% on the farthest floor row, 100% on the nearest
 
 hotspots:   # later entries are on top
   - id: standing_stone

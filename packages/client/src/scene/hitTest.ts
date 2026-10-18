@@ -1,4 +1,4 @@
-import type { HotspotData, Point } from '@grelok/engine';
+import type { Point } from '@grelok/engine';
 
 /**
  * Is point `p` inside `polygon`? (Ray casting.)
@@ -22,18 +22,18 @@ export function pointInPolygon(p: Point, polygon: Point[]): boolean {
 }
 
 /**
- * The hotspot under point `p`, or undefined. Hotspots later in the list are drawn on top, so they win
- * when polygons overlap. `isVisible` lets the engine hide things: a hidden thing cannot be hovered
- * or clicked, so the thing underneath (if any) is found instead.
+ * The item (hotspot, exit...) under point `p`, or undefined. Items later in the list are drawn on top, so they win
+ * when polygons overlap. `accept` lets the caller skip items: a hidden thing cannot be hovered or clicked, so the
+ * thing underneath (if any) is found instead.
  */
-export function hitTest(
-  hotspots: readonly HotspotData[],
+export function hitTest<T extends { polygon: Point[] }>(
+  items: readonly T[],
   p: Point,
-  isVisible: (id: string) => boolean = () => true,
-): HotspotData | undefined {
-  for (let i = hotspots.length - 1; i >= 0; i--) {
-    const hotspot = hotspots[i]!;
-    if (isVisible(hotspot.id) && pointInPolygon(p, hotspot.polygon)) return hotspot;
+  accept: (item: T) => boolean = () => true,
+): T | undefined {
+  for (let i = items.length - 1; i >= 0; i--) {
+    const item = items[i]!;
+    if (accept(item) && pointInPolygon(p, item.polygon)) return item;
   }
   return undefined;
 }

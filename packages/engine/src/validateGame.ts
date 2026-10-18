@@ -1,4 +1,4 @@
-import { ICON_HEIGHT, ICON_WIDTH, SCENE_HEIGHT, SCENE_WIDTH, iconPath } from './sceneTypes';
+import { ICON_HEIGHT, ICON_WIDTH, PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS, SCENE_HEIGHT, SCENE_WIDTH, iconPath } from './sceneTypes';
 import type { GameBundle } from './sceneTypes';
 
 /**
@@ -20,6 +20,25 @@ export function validateGame(
 
     if (!config?.title) problem('game.yml', 'missing "title"');
     if (!config || !(config.start in logic.locations)) problem('game.yml', `start location "${config?.start}" does not exist`);
+
+    const player = config?.player;
+    if (!player) {
+        problem('game.yml', 'missing "player" (sprite, frameWidth, frameHeight)');
+    } else {
+        const { sprite, frameWidth, frameHeight } = player;
+        if (!Number.isInteger(frameWidth) || !Number.isInteger(frameHeight) || frameWidth <= 0 || frameHeight <= 0) {
+            problem('game.yml', 'player frameWidth and frameHeight must be positive whole numbers');
+        } else if (!assetExists(sprite)) {
+            problem('game.yml', `player sprite not found: assets/${sprite}`);
+        } else {
+            const size = imageSize?.(sprite);
+            const [w, h] = [frameWidth * PLAYER_SHEET_COLUMNS, frameHeight * PLAYER_FACING_ROWS.length];
+            if (size !== undefined && (size.width !== w || size.height !== h)) {
+                problem('game.yml', `player sprite sheet must be ${w}x${h} pixels (${PLAYER_SHEET_COLUMNS} columns x ${PLAYER_FACING_ROWS.length} rows of ${frameWidth}x${frameHeight}), but assets/${sprite} is ${size.width}x${size.height}`);
+            }
+        }
+    }
+    if (config?.startPosition !== undefined) checkPoint(config.startPosition, 'startPosition', 'game.yml', problem);
 
     // everything the player can carry is shown in the inventory, so it needs an icon
     for (const thing of Object.values(logic.things)) {
@@ -55,6 +74,12 @@ export function validateGame(
             const size = path !== undefined && assetExists(path) ? imageSize?.(path) : undefined;
             if (size !== undefined && (size.width !== SCENE_WIDTH || size.height !== SCENE_HEIGHT)) {
                 problem(where, `${field} must be ${SCENE_WIDTH}x${SCENE_HEIGHT} pixels, but assets/${path} is ${size.width}x${size.height}`);
+            }
+        }
+        if (scene.scale !== undefined) {
+            const { top, bottom } = scene.scale;
+            if (![top, bottom].every((n) => typeof n === 'number' && n > 0 && n <= 2)) {
+                problem(where, `scale: "top" and "bottom" must be numbers above 0 and at most 2, got ${JSON.stringify(scene.scale)}`);
             }
         }
         for (const sprite of scene.sprites ?? []) {

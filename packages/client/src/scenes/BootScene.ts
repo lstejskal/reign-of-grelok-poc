@@ -36,7 +36,7 @@ export class BootScene extends Phaser.Scene {
     }
   }
 
-  // Queue every scene background and inventory icon with Phaser's loader and call `done` when they have all arrived.
+  // Queue every scene background and walkmask, the player's sheet and every inventory icon with Phaser's loader and call `done` when they have all arrived.
   private loadPictures(bundle: GameBundle, done: () => void): void {
     for (const scene of Object.values(bundle.scenes)) {
       if (scene.background === undefined) continue;
@@ -44,6 +44,20 @@ export class BootScene extends Phaser.Scene {
       if (url === undefined) throw new Error(`Missing picture: ${scene.background}`);
       this.load.image(textureKey(scene.background), url);
     }
+
+    // walkmasks (read later as numbers to build the walk grid)
+    for (const scene of Object.values(bundle.scenes)) {
+      if (scene.walkmask === undefined) continue;
+      const url = assetUrl(bundle.id, scene.walkmask);
+      if (url === undefined) throw new Error(`Missing picture: ${scene.walkmask}`);
+      this.load.image(textureKey(scene.walkmask), url);
+    }
+
+    // the player's sprite sheet: a spritesheet is an image the loader cuts into equally sized frames
+    const { sprite, frameWidth, frameHeight } = bundle.config.player;
+    const spriteUrl = assetUrl(bundle.id, sprite);
+    if (spriteUrl === undefined) throw new Error(`Missing picture: ${sprite}`);
+    this.load.spritesheet(textureKey(sprite), spriteUrl, { frameWidth, frameHeight });
 
     // inventory icons: one per thing the player can carry
     for (const thing of Object.values(bundle.logic.things)) {

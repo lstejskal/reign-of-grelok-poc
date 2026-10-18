@@ -9,6 +9,8 @@ export interface DebugState {
   engine?: Engine;
   session?: GameSession;
   error?: string;
+  /** Multiplies the walking speed (tests set it high so they do not wait). */
+  speedFactor?: number;
 }
 
 export const debugState: DebugState = {};
@@ -57,6 +59,24 @@ export function installDebugHook(game: Phaser.Game): void {
     },
     get overlayVisible(): boolean | undefined {
       return (game.scene.getScene('RoomScene') as RoomScene | null)?.overlayVisible;
+    },
+    /** Where Grognak is, which way he faces, whether he is walking, and how big he is drawn. */
+    get player() {
+      return (game.scene.getScene('RoomScene') as RoomScene | null)?.playerState;
+    },
+    /** True while the screen fades between scenes. */
+    get transitioning(): boolean | undefined {
+      return (game.scene.getScene('RoomScene') as RoomScene | null)?.isTransitioning;
+    },
+    /** How black the fade is (0 = clear, 1 = black). */
+    get fade(): number | undefined {
+      return (game.scene.getScene('RoomScene') as RoomScene | null)?.fadeAlpha;
+    },
+    get speedFactor(): number {
+      return debugState.speedFactor ?? 1;
+    },
+    set speedFactor(value: number) {
+      debugState.speedFactor = value;
     },
     get error() {
       return debugState.error;

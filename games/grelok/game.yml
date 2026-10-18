@@ -1,3 +1,10 @@
 # Game-level settings. Everything else lives in logic/ (rules, text) and scenes/ (what things look like where).
 title: Reign of Grelok
 start: plain
+startPosition: [160, 112]   # where Grognak stands when the game begins
+
+# Grognak's picture: a sheet of 32x48 frames. Columns: idle, walk 1, walk 2. Rows: facing south, north, east, west.
+player:
+  sprite: sprites/grognak.png
+  frameWidth: 32
+  frameHeight: 48

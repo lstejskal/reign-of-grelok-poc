@@ -44,7 +44,7 @@ describe('hitTest', () => {
   });
 
   it('skips hotspots the engine says are not visible', () => {
-    expect(hitTest([back, front], [20, 20], (id) => id !== 'front')?.id).toBe('back');
+    expect(hitTest([back, front], [20, 20], (h) => h.id !== 'front')?.id).toBe('back');
     expect(hitTest([back, front], [20, 20], () => false)).toBeUndefined();
   });
 });

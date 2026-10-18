@@ -55,12 +55,19 @@ describe('SentenceBuilder', () => {
     expect(b.text).toBe('Pick up');
   });
 
-  it('with no verb selected a click looks, and the line just names what is under the mouse', () => {
+  it('with no verb chosen, things in the scene are walked to and carried things are looked at', () => {
     const b = new SentenceBuilder();
+    expect(b.idle).toBe(true);
     expect(b.text).toBe('');
+
     b.hover('rubble');
-    expect(b.text).toBe('rubble');
-    expect(b.pickObject('rubble')).toEqual({ verb: 'look_at', objects: ['rubble'] });
+    expect(b.text).toBe('Walk to rubble');
+    expect(b.pickObject('rubble')).toBeUndefined(); // not a command: the scene walks there
+    expect(b.idle).toBe(true);
+
+    b.hover('pebble', true);
+    expect(b.text).toBe('Look at pebble');
+    expect(b.pickObject('pebble', true)).toEqual({ verb: 'look_at', objects: ['pebble'] });
   });
 
   it('right-click looks at the thing, whatever the sentence was', () => {

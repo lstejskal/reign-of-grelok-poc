@@ -10,6 +10,7 @@ import type { VerbSpec } from './verbs';
  *
  *   idle --selectVerb--> verb chosen --pickObject--> [first object chosen --pickObject-->] Command, back to idle
  *
+ * With no verb chosen the sentence is "Walk to X" for things in the scene and "Look at X" for things you carry.
  * "Look at" and "Pick up" need one object; "Use" and "Give" need two ("Use pebble with stone").
  * cancel() goes back to idle from anywhere.
  */
@@ -17,6 +18,7 @@ export class SentenceBuilder {
   private verb: Verb | undefined;
   private objects: string[] = [];
   private hovered: string | undefined;
+  private hoveredCarried = false;
 
   constructor(
     private readonly specs: readonly VerbSpec[] = VERBS,
@@ -39,17 +41,28 @@ export class SentenceBuilder {
     this.objects = [];
   }
 
-  /** What the mouse is over right now (only changes the preview text, never the state). */
-  hover(alias: string | undefined): void {
+  /** True while no verb is chosen. A click on a thing in the scene then means "walk there". */
+  get idle(): boolean {
+    return this.verb === undefined;
+  }
+
+  /**
+   * What the mouse is over right now (only changes the preview text, never the state).
+   * `carried` says the thing is in the inventory rather than in the scene.
+   */
+  hover(alias: string | undefined, carried = false): void {
     this.hovered = alias;
+    this.hoveredCarried = carried;
   }
 
   /**
    * The player clicked a thing. Returns the finished Command, or undefined when the sentence needs more
    * (a second object) or the click makes no sense (using a thing with itself).
    */
-  pickObject(alias: string): Command | undefined {
-    if (this.verb === undefined) return this.finish({ verb: DEFAULT_VERB, objects: [alias] });
+  pickObject(alias: string, carried = false): Command | undefined {
+    // With no verb chosen: a carried thing is looked at; a thing in the scene is not a command at all
+    // (the scene walks there instead), so we return nothing.
+    if (this.verb === undefined) return carried ? this.finish({ verb: DEFAULT_VERB, objects: [alias] }) : undefined;
 
     const spec = this.specs.find((s) => s.verb === this.verb)!;
     if (spec.objects === 1) return this.finish({ verb: spec.verb, objects: [alias] });
@@ -76,7 +89,10 @@ export class SentenceBuilder {
   /** The sentence as shown on screen, including a preview of the thing under the mouse. */
   get text(): string {
     const hovered = this.hovered === undefined ? '' : this.nameOf(this.hovered);
-    if (this.verb === undefined) return hovered;
+    if (this.verb === undefined) {
+      if (hovered === '') return '';
+      return `${this.hoveredCarried ? 'Look at' : 'Walk to'} ${hovered}`;
+    }
 
     const spec = this.specs.find((s) => s.verb === this.verb)!;
     const words = [spec.label];

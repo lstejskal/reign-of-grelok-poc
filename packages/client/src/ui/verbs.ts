@@ -23,8 +23,5 @@ export const VERBS: readonly VerbSpec[] = [
   { verb: 'push', label: 'Push', objects: 1 },
 ];
 
-/**
- * What a plain click on a thing does when no verb is selected. In Step 8 this becomes "walk there",
- * the classic SCUMM default; until then, looking is the harmless choice.
- */
+/** What a plain click on a thing you carry does when no verb is chosen (a thing in the scene is walked to instead). */
 export const DEFAULT_VERB: Verb = 'look_at';

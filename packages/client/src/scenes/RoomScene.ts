@@ -1,17 +1,27 @@
 import Phaser from 'phaser';
-import { SCENE_HEIGHT, iconPath } from '@grelok/engine';
-import type { Command, Point, Verb } from '@grelok/engine';
+import { SCENE_HEIGHT, SCENE_WIDTH, iconPath } from '@grelok/engine';
+import type { Command, ExitData, Facing, Point, Verb } from '@grelok/engine';
 import { GAME_WIDTH, GAME_HEIGHT } from '../config';
 import { PIXEL_FONT } from '../gfx/pixelFont';
 import { textureKey } from '../data/assets';
+import { debugState } from '../debug';
 import { hitTest } from '../scene/hitTest';
 import { HotspotOverlay } from '../scene/hotspotOverlay';
+import { PlayerActor } from '../scene/PlayerActor';
+import { readMask } from '../scene/readMask';
+import { gridFromMask, makeGrid } from '../walk/pathfinding';
+import { walkTargetFor, walkTargetForCommand } from '../walk/plan';
+import { arrivalAt } from '../walk/spawn';
+import { WalkArea } from '../walk/WalkArea';
 import { SentenceBuilder } from '../ui/SentenceBuilder';
 import { TextPager } from '../ui/textPages';
 import { VERBS } from '../ui/verbs';
 import { SENTENCE_Y, TEXT_BOX, TEXT_BOX_CHARS, TEXT_BOX_LINES, TEXT_BOX_TEXT, inRect, verbAt, verbRect } from '../ui/layout';
 import { SCROLL_LEFT, SCROLL_RIGHT, SLOTS, clampScroll, itemAt, maxScroll, slotRect, visibleItems } from '../ui/inventory';
 import type { GameSession } from '../session';
+
+/** Each half (out, in) of the fade between scenes, in milliseconds. */
+const FADE_MS = 200;
 
 const COLOR = {
   sentence: 0xf0e0a0,
@@ -39,6 +49,15 @@ export class RoomScene extends Phaser.Scene {
   private slotImages: Phaser.GameObjects.Image[] = [];
   private scrollButtons!: { left: Phaser.GameObjects.BitmapText; right: Phaser.GameObjects.BitmapText };
   private overlay!: HotspotOverlay;
+  private player!: PlayerActor;
+  /** A black rectangle over the scene (not the UI strip) that fades in and out between scenes. */
+  private fade!: Phaser.GameObjects.Rectangle;
+  /** The location whose picture is on screen. It lags behind the engine's location during a fade. */
+  private shownLocation = '';
+  private transitioning = false;
+  private hoveredExit: ExitData | undefined;
+  /** The walkable floor of each scene, built from its walkmask the first time it is needed. */
+  private readonly areas = new Map<string, WalkArea>();
 
   private readonly builder = new SentenceBuilder();
   private readonly pager = new TextPager(TEXT_BOX_CHARS, TEXT_BOX_LINES);
@@ -70,6 +89,21 @@ export class RoomScene extends Phaser.Scene {
   /** Aliases of the things shown in the inventory slots right now. */
   get inventoryShown(): string[] {
     return visibleItems(this.session.engine.state.inventory, this.inventoryScroll).filter((i): i is string => !!i);
+  }
+
+  /** True while the screen fades between two scenes (clicks are ignored then). */
+  get isTransitioning(): boolean {
+    return this.transitioning;
+  }
+
+  /** How black the fade rectangle is, 0..1 (for tests). */
+  get fadeAlpha(): number {
+    return this.fade.alpha;
+  }
+
+  /** Position, facing, size ... of Grognak (for tests and debugging). */
+  get playerState() {
+    return this.player.state;
   }
 
   get selectedVerb(): Verb | undefined {
@@ -117,14 +151,18 @@ export class RoomScene extends Phaser.Scene {
     this.background = this.add.image(0, 0, '__DEFAULT').setOrigin(0);
     this.overlay = new HotspotOverlay(this);
     this.showLocation(this.session.engine.state.location);
+    this.fade = this.add.rectangle(0, 0, SCENE_WIDTH, SCENE_HEIGHT, 0x000000).setOrigin(0).setDepth(400).setAlpha(0);
+
+    const { config } = this.session.bundle;
+    const area = this.areaFor(this.session.engine.state.location);
+    const start = area.snap(config.startPosition ?? [SCENE_WIDTH / 2, 112]);
+    this.player = new PlayerActor(this, config.player, start, area, () => debugState.speedFactor ?? 1);
     this.refreshUi();
 
     this.setUpInput();
 
     const stop = this.session.onEvents((events) => {
-      for (const event of events) {
-        if (event.type === 'location_changed') this.showLocation(event.to);
-      }
+      if (events.some((e) => e.type === 'location_changed')) this.transition();
       const said = events.flatMap((e) => (e.type === 'say' ? [e.text] : []));
       if (said.length > 0) this.pager.set(said.join('\n'));
       // Things can appear or vanish (the gemstone under the rubble), also under a motionless mouse.
@@ -132,6 +170,12 @@ export class RoomScene extends Phaser.Scene {
       this.refreshUi();
     });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, stop);
+  }
+
+  /** Runs every frame. `delta` is the milliseconds since the last frame; movement is always speed x time. */
+  update(_time: number, delta: number): void {
+    this.player.update(delta);
+    if (this.overlay.visible) this.overlay.drawPath(this.player.follower.position, this.player.follower.remaining);
   }
 
   private createInventoryPanel(): void {
@@ -162,7 +206,7 @@ export class RoomScene extends Phaser.Scene {
     });
     this.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
       this.pointer = [Math.floor(pointer.x), Math.floor(pointer.y)];
-      this.onClick(this.pointer, pointer.rightButtonDown());
+      if (!this.transitioning) this.onClick(this.pointer, pointer.rightButtonDown());
       this.refreshHotspots();
       this.refreshUi();
     });
@@ -178,7 +222,7 @@ export class RoomScene extends Phaser.Scene {
 
   private onClick([x, y]: Point, right: boolean): void {
     // a click on the answer band reads on (and does nothing else)
-    if (this.pager.current !== '' && inRect(TEXT_BOX, x, y)) {
+    if (this.pager.current !== '' && y < this.answerBand.height) {
       this.pager.next();
       return;
     }
@@ -189,23 +233,58 @@ export class RoomScene extends Phaser.Scene {
     // things in the scene and things in the inventory are clicked the same way
     const id = this.thingAt(x, y);
     if (id !== undefined) {
-      if (right) this.execute(this.builder.lookAt(id));
+      const carried = y >= SCENE_HEIGHT;
+      if (right) this.act(this.builder.lookAt(id));
+      else if (this.builder.idle && !carried) this.walkToThing(id); // no verb chosen: just walk there
       else {
-        const command = this.builder.pickObject(id);
-        if (command) this.execute(command);
+        const command = this.builder.pickObject(id, carried);
+        if (command) this.act(command);
       }
       return;
     }
 
-    // not on a thing: right-click cancels, left-click may hit a verb
+    // an exit: walk to it, then ask the engine to go that way (it may say no)
+    const exit = y < SCENE_HEIGHT && !right ? this.exitAt(x, y) : undefined;
+    if (exit) {
+      this.builder.cancel();
+      this.pager.clear();
+      this.player.walkTo(exit.walkTo, {
+        facing: exit.direction as Facing,
+        then: () => this.session.perform({ verb: 'go', objects: [exit.direction] }),
+      });
+      return;
+    }
+
+    // the floor: left-click walks there (dropping any half-built sentence), right-click cancels the sentence
+    if (y < SCENE_HEIGHT && !right) {
+      this.builder.cancel();
+      this.player.walkTo([x, y]);
+      return;
+    }
+
+    // not on the scene: right-click cancels, left-click may hit a verb
     const verb = verbAt(x, y);
     if (right) this.builder.cancel();
     else if (verb) this.builder.selectVerb(verb);
   }
 
-  private execute(command: Command): void {
-    this.pager.clear(); // old answer out; the new one arrives with the events
-    this.session.perform(command);
+  private walkToThing(id: string): void {
+    const target = walkTargetFor(this.session.bundle.scenes[this.shownLocation], id);
+    if (target) this.player.walkTo(target.point, { facing: target.facing, toward: target.toward });
+  }
+
+  /** Carry out a command: first walk to what it is about (if it needs that), then let the engine do it. */
+  private act(command: Command): void {
+    this.pager.clear();
+    const target = walkTargetForCommand(this.session.bundle.scenes[this.shownLocation], command);
+    if (target === undefined) this.session.perform(command);
+    else {
+      this.player.walkTo(target.point, {
+        facing: target.facing,
+        toward: target.toward,
+        then: () => this.session.perform(command),
+      });
+    }
   }
 
   // --- showing what the world looks like ----------------------------------------------------------
@@ -217,12 +296,68 @@ export class RoomScene extends Phaser.Scene {
       throw new Error(`Scene "${location}" has no background`);
     }
 
+    this.shownLocation = location;
     this.background.setTexture(textureKey(asset));
     this.locationLabel.setText(bundle.logic.locations[location]?.name ?? location);
     this.refreshHotspots();
   }
 
-  private isVisible = (id: string): boolean => this.session.engine.visibleThings().includes(id);
+  /** The floor of a scene; built from its walkmask picture the first time (no mask = everything is floor). */
+  private areaFor(location: string): WalkArea {
+    let area = this.areas.get(location);
+    if (area === undefined) {
+      const scene = this.session.bundle.scenes[location];
+      const grid =
+        scene?.walkmask !== undefined
+          ? gridFromMask(readMask(this.textures, textureKey(scene.walkmask)))
+          : makeGrid(SCENE_WIDTH / 4, SCENE_HEIGHT / 4, 4, () => true);
+      area = new WalkArea(grid, scene?.scale);
+      this.areas.set(location, area);
+    }
+    return area;
+  }
+
+  /** The player arrives in a new scene: at the matching exit's spawn point if there is one, looking into the scene. */
+  private enterLocation(from: string, to: string): void {
+    const area = this.areaFor(to);
+    const arrival = arrivalAt(this.session.bundle, from, to);
+    this.player.enter(area, area.snap(arrival?.point ?? [SCENE_WIDTH / 2, 112]), arrival?.facing);
+  }
+
+  /**
+   * Change scene with a fade: the picture goes black, the new scene is set up while nothing can be seen, then it
+   * fades back in. The engine has already moved (it does not wait for pictures); only what we SHOW is delayed.
+   * Several changes in a row just share one fade, which ends in the engine's latest location.
+   */
+  private transition(): void {
+    if (this.transitioning) return;
+    this.transitioning = true;
+    const half = FADE_MS / (debugState.speedFactor ?? 1);
+    this.tweens.add({
+      targets: this.fade,
+      alpha: 1,
+      duration: half,
+      onComplete: () => {
+        const from = this.shownLocation;
+        const to = this.session.engine.state.location;
+        this.showLocation(to);
+        if (to !== from) this.enterLocation(from, to);
+        this.refreshUi();
+        this.tweens.add({
+          targets: this.fade,
+          alpha: 0,
+          duration: half,
+          onComplete: () => {
+            this.transitioning = false;
+            this.refreshHotspots(false);
+            this.refreshUi();
+          },
+        });
+      },
+    });
+  }
+
+  private isVisible = (id: string): boolean => this.session.engine.visibleThings(this.shownLocation).includes(id);
 
   /** The thing under a point: a scene hotspot above the strip, an inventory item in it. */
   private thingAt(x: number, y: number): string | undefined {
@@ -232,22 +367,33 @@ export class RoomScene extends Phaser.Scene {
 
   /** The hotspot under a point (game pixels), if the engine currently shows its thing. */
   private hotspotAt(x: number, y: number): string | undefined {
-    const scene = this.session.bundle.scenes[this.session.engine.state.location];
+    const scene = this.session.bundle.scenes[this.shownLocation];
     if (!scene || y >= SCENE_HEIGHT) return undefined;
     // Test the pixel's centre, not its corner, so edges never sit exactly on a polygon edge.
-    return hitTest(scene.hotspots, [x + 0.5, y + 0.5], this.isVisible)?.id;
+    return hitTest(scene.hotspots, [x + 0.5, y + 0.5], (h) => this.isVisible(h.id))?.id;
+  }
+
+  /** The exit under a point (game pixels) in the scene being shown. */
+  private exitAt(x: number, y: number): ExitData | undefined {
+    const scene = this.session.bundle.scenes[this.shownLocation];
+    if (!scene || y >= SCENE_HEIGHT) return undefined;
+    return hitTest(scene.exits, [x + 0.5, y + 0.5]);
   }
 
   /** Work out what the mouse points at; `redraw` also redraws the F1 outlines (only needed when the world changed). */
   private refreshHotspots(redraw = true): void {
-    if (redraw) this.overlay.draw(this.session.bundle.scenes[this.session.engine.state.location], this.isVisible);
+    if (redraw) {
+      const location = this.shownLocation;
+      this.overlay.draw(this.session.bundle.scenes[location], this.isVisible, this.areaFor(location));
+    }
     this.hovered = this.pointer && this.thingAt(...this.pointer);
-    this.builder.hover(this.hovered);
+    this.hoveredExit = this.pointer && this.hovered === undefined ? this.exitAt(...this.pointer) : undefined;
+    this.builder.hover(this.hovered, this.pointer !== undefined && this.pointer[1] >= SCENE_HEIGHT);
   }
 
   /** Bring every piece of the UI strip in line with the builder and the pager. */
   private refreshUi(): void {
-    this.sentenceLine.setText(this.builder.text);
+    this.sentenceLine.setText(this.exitAwareSentence());
     // centre on whole pixels (half pixels would blur a pixel font)
     this.sentenceLine.setX(Math.round(GAME_WIDTH / 2 - this.sentenceLine.width / 2));
 
@@ -259,10 +405,21 @@ export class RoomScene extends Phaser.Scene {
     }
 
     this.answerBox.setText(this.pager.current);
-    this.answerBand.setVisible(this.pager.current !== '').setSize(TEXT_BOX.w, 6 + 8 * this.pager.current.split('\n').length);
-    this.moreMarker.setVisible(this.pager.hasMore);
+    // the band is as tall as the text, plus a row for "MORE >" when there is another page
+    const lines = this.pager.current === '' ? 0 : this.pager.current.split('\n').length;
+    this.answerBand.setVisible(lines > 0).setSize(TEXT_BOX.w, 6 + 8 * (lines + (this.pager.hasMore ? 1 : 0)));
+    this.moreMarker.setY(TEXT_BOX_TEXT.y + 8 * lines).setVisible(this.pager.hasMore);
 
     this.refreshInventory();
+  }
+
+  /** The sentence line: the builder's sentence, or "Go to <place>" when idly pointing at an exit. */
+  private exitAwareSentence(): string {
+    const sentence = this.builder.text;
+    if (sentence !== '' || !this.hoveredExit || this.transitioning) return sentence;
+    const { locations } = this.session.bundle.logic;
+    const destination = locations[this.shownLocation]?.directions[this.hoveredExit.direction];
+    return destination === undefined ? '' : `Go to ${locations[destination]?.name ?? destination}`;
   }
 
   private refreshInventory(): void {

@@ -20,4 +20,5 @@ export type {
 export { assembleBundle } from './bundle';
 export { validateGame } from './validateGame';
 export { SCENE_WIDTH, SCENE_HEIGHT, ICON_WIDTH, ICON_HEIGHT, iconPath } from './sceneTypes';
-export type { ExitData, Facing, GameBundle, GameConfig, HotspotData, Point, SceneData, SceneSpriteData } from './sceneTypes';
+export { PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS } from './sceneTypes';
+export type { ExitData, Facing, GameBundle, GameConfig, HotspotData, PlayerConfig, Point, SceneData, SceneScale, SceneSpriteData } from './sceneTypes';

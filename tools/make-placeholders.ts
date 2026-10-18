@@ -3,13 +3,15 @@
 //
 //   assets/backgrounds/<location>.png   320x144, a colour per location + a 16px grid
 //   assets/walkmasks/<location>.png     320x144, grayscale: white = the player may walk here, black = blocked
+//   assets/sprites/<player>.png         the player's sheet (see GameConfig.player): a stocky horned-helmet figure, 4 facings x 3 frames
 //   assets/icons/<thing>.png            24x16, one per pickable thing: a coloured tile with a little symmetric pattern
 //
 // Existing files are never overwritten (real art will replace these under the same names) unless --force.
 import fs from 'node:fs';
 import path from 'node:path';
 import { PNG } from 'pngjs';
-import { ICON_HEIGHT, ICON_WIDTH, SCENE_HEIGHT as H, SCENE_WIDTH as W, iconPath } from '../packages/engine/src';
+import { ICON_HEIGHT, ICON_WIDTH, PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS, SCENE_HEIGHT as H, SCENE_WIDTH as W, iconPath } from '../packages/engine/src';
+import type { Facing } from '../packages/engine/src';
 import { GAMES_DIR, loadGameBundle } from '../packages/engine/node/loadGameBundle';
 
 const HORIZON_Y = 40; // sky above, ground below
@@ -27,6 +29,14 @@ const PALETTES: Record<string, [Rgb, Rgb]> = {
     chapel: [[106, 106, 138], [58, 74, 58]],
     chapel_interior: [[42, 32, 48], [74, 58, 48]],
 };
+
+// Blocked rectangles [x0, y0, x1, y1) (not walkable), so there is something to walk around.
+const OBSTACLES: Record<string, [number, number, number, number][]> = {
+    plain: [[136, 88, 184, 100]], // the base of the standing stone
+    swamp: [[128, 70, 200, 84]], // the base of the wizard's tower
+};
+const inObstacle = (location: string, x: number, y: number) =>
+    (OBSTACLES[location] ?? []).some(([x0, y0, x1, y1]) => x >= x0 && x < x1 && y >= y0 && y < y1);
 
 function paletteFor(location: string): [Rgb, Rgb] {
     const known = PALETTES[location];
@@ -65,6 +75,7 @@ function makeBackground(location: string): Buffer {
             if (x % 64 === 0 || y % 64 === 0) k *= 0.8;
             let color: Rgb = [base[0] * k, base[1] * k, base[2] * k];
             if (y === HORIZON_Y) color = [20, 20, 20];
+            if (inObstacle(location, x, y)) color = [70, 52, 40]; // an obstacle, drawn so you can see it
             if (x === 0 || y === 0 || x === W - 1 || y === H - 1) color = [235, 235, 235];
             setPixel(png, x, y, color);
         }
@@ -72,11 +83,11 @@ function makeBackground(location: string): Buffer {
     return PNG.sync.write(png);
 }
 
-function makeWalkmask(): Buffer {
+function makeWalkmask(location: string): Buffer {
     const png = new PNG({ width: W, height: H });
     for (let y = 0; y < H; y++) {
         for (let x = 0; x < W; x++) {
-            const walkable = y >= WALK_TOP && x >= WALK_MARGIN && x < W - WALK_MARGIN;
+            const walkable = y >= WALK_TOP && x >= WALK_MARGIN && x < W - WALK_MARGIN && !inObstacle(location, x, y);
             const v = walkable ? 255 : 0;
             setPixel(png, x, y, [v, v, v]);
         }
@@ -123,6 +134,104 @@ function makeIcon(alias: string): Buffer {
     return PNG.sync.write(png);
 }
 
+// --- the player's sprite sheet ------------------------------------------------------------------
+
+const SKIN: Rgb = [224, 160, 112];
+const BEARD: Rgb = [208, 112, 32];
+const FUR: Rgb = [138, 90, 43];
+const BELT: Rgb = [58, 42, 26];
+const PANTS: Rgb = [90, 64, 40];
+const BOOTS: Rgb = [40, 30, 24];
+const HELMET: Rgb = [160, 160, 176];
+const HORN: Rgb = [240, 232, 208];
+const AXE: Rgb = [200, 200, 212];
+const OUTLINE: Rgb = [20, 16, 16];
+
+/** One 32x48 frame of the figure, facing 's' | 'n' | 'e' | 'w', frame 0 = idle, 1 and 2 = the two walking poses. */
+function drawGrognak(facing: Facing, frame: number, fw: number, fh: number): (Rgb | undefined)[][] {
+    const px: (Rgb | undefined)[][] = Array.from({ length: fh }, () => Array<Rgb | undefined>(fw).fill(undefined));
+    const rect = (x: number, y: number, w: number, h: number, c: Rgb) => {
+        for (let yy = y; yy < y + h; yy++) for (let xx = x; xx < x + w; xx++) px[yy]![xx] = c;
+    };
+    const side = facing === 'e' || facing === 'w';
+    const stride = frame === 0 ? 0 : frame === 1 ? 3 : -3; // how far the legs swing
+
+    // legs and boots (the feet end on the bottom row, which is where the sprite "stands")
+    if (side) {
+        rect(10 + stride, 36, 6, 8, PANTS);
+        rect(16 - stride, 36, 6, 8, PANTS);
+        rect(9 + stride, 44, 8, 4, BOOTS);
+        rect(15 - stride, 44, 8, 4, BOOTS);
+    } else {
+        rect(8, 36, 7, 8 - (stride > 0 ? 2 : 0), PANTS);
+        rect(17, 36, 7, 8 - (stride < 0 ? 2 : 0), PANTS);
+        rect(7, 44 - (stride > 0 ? 2 : 0), 9, 4 + (stride > 0 ? 2 : 0), BOOTS);
+        rect(16, 44 - (stride < 0 ? 2 : 0), 9, 4 + (stride < 0 ? 2 : 0), BOOTS);
+    }
+    // torso (fur tunic) and belt; broad, like a dwarf's
+    const bodyX = side ? 8 : 5;
+    const bodyW = side ? 16 : 22;
+    rect(bodyX, 20, bodyW, 16, FUR);
+    rect(bodyX, 32, bodyW, 3, BELT);
+    // arms
+    if (!side) {
+        rect(1, 21, 4, 12, SKIN);
+        rect(27, 21, 4, 12, SKIN);
+        if (facing === 's') rect(28, 14, 4, 8, AXE); // the axe head, held up on his right
+    } else {
+        rect(14, 22, 5, 11, SKIN);
+        rect(facing === 'e' ? 20 : 7, 14, 5, 6, AXE);
+    }
+    // head: helmet with horns, face, beard
+    const headX = 10;
+    rect(headX, 8, 12, 12, SKIN);
+    rect(headX - 1, 3, 14, 6, HELMET);
+    rect(headX - 3, 1, 3, 5, HORN);
+    rect(headX + 12, 1, 3, 5, HORN);
+    if (facing === 's') {
+        rect(13, 12, 2, 2, OUTLINE);
+        rect(18, 12, 2, 2, OUTLINE);
+        rect(headX, 15, 12, 7, BEARD);
+    } else if (facing === 'n') {
+        rect(headX, 8, 12, 12, HELMET); // the back of the helmet
+    } else {
+        const dir = facing === 'e' ? 1 : -1;
+        const eyeX = facing === 'e' ? 19 : 12;
+        rect(eyeX, 12, 2, 2, OUTLINE);
+        rect(headX + (dir > 0 ? 6 : 0), 15, 6, 7, BEARD);
+        rect(facing === 'e' ? 22 : 8, 13, 2, 3, SKIN); // nose
+    }
+
+    // a dark outline around the whole figure, which reads well on any background
+    const copy = px.map((row) => row.slice());
+    for (let y = 0; y < fh; y++) {
+        for (let x = 0; x < fw; x++) {
+            if (copy[y]![x] !== undefined) continue;
+            const next = [copy[y - 1]?.[x], copy[y + 1]?.[x], copy[y]?.[x - 1], copy[y]?.[x + 1]];
+            if (next.some((c) => c !== undefined)) px[y]![x] = OUTLINE;
+        }
+    }
+    return px;
+}
+
+function makePlayerSheet(frameWidth: number, frameHeight: number): Buffer {
+    const png = new PNG({ width: frameWidth * PLAYER_SHEET_COLUMNS, height: frameHeight * PLAYER_FACING_ROWS.length });
+    PLAYER_FACING_ROWS.forEach((facing, row) => {
+        for (let col = 0; col < PLAYER_SHEET_COLUMNS; col++) {
+            drawGrognak(facing, col, frameWidth, frameHeight).forEach((line, y) =>
+                line.forEach((color, x) => {
+                    const i = ((row * frameHeight + y) * png.width + col * frameWidth + x) * 4;
+                    png.data[i] = color?.[0] ?? 0;
+                    png.data[i + 1] = color?.[1] ?? 0;
+                    png.data[i + 2] = color?.[2] ?? 0;
+                    png.data[i + 3] = color === undefined ? 0 : 255; // transparent outside the figure
+                }),
+            );
+        }
+    });
+    return PNG.sync.write(png);
+}
+
 function writeAsset(gameId: string, relative: string, data: Buffer, force: boolean): string {
     const file = path.join(GAMES_DIR, gameId, 'assets', relative);
     if (fs.existsSync(file) && !force) return `kept    ${relative}`;
@@ -137,8 +246,12 @@ const gameId = args.find((a) => !a.startsWith('--')) ?? 'grelok';
 
 for (const location of Object.keys(loadGameBundle(gameId).logic.locations)) {
     console.log(writeAsset(gameId, `backgrounds/${location}.png`, makeBackground(location), force));
-    console.log(writeAsset(gameId, `walkmasks/${location}.png`, makeWalkmask(), force));
+    console.log(writeAsset(gameId, `walkmasks/${location}.png`, makeWalkmask(location), force));
 }
 for (const thing of Object.values(loadGameBundle(gameId).logic.things)) {
     if (thing.pickable) console.log(writeAsset(gameId, iconPath(thing.alias), makeIcon(thing.alias), force));
+}
+{
+    const { sprite, frameWidth, frameHeight } = loadGameBundle(gameId).config.player;
+    console.log(writeAsset(gameId, sprite, makePlayerSheet(frameWidth, frameHeight), force));
 }

@@ -6,7 +6,7 @@ import { GameSession } from './session';
 // A tiny made-up game: two rooms and a pebble.
 const bundle: GameBundle = {
   id: 'test',
-  config: { title: 'Test', start: 'a' },
+  config: { title: 'Test', start: 'a', player: { sprite: 'p.png', frameWidth: 32, frameHeight: 48 } },
   scenes: {},
   logic: {
     locations: {

@@ -2,6 +2,7 @@
 
 background: backgrounds/chapel_interior.png
 walkmask: walkmasks/chapel_interior.png   # white = walkable
+scale: {top: 0.6, bottom: 1.0}   # Grognak is drawn at 60% on the farthest floor row, 100% on the nearest
 
 hotspots:   # later entries are on top
   - id: basin

@@ -201,6 +201,14 @@ Verbs: Look at, Pick up, Use, Give, Talk to, Walk to. "Attack" = Use X on Y (sam
 - **Output:** Grognak walks around obstacles, smaller in the distance, walks up to things before using them.
 - **Test:** A* unit tests on tiny hand-written masks (straight, around wall, unreachable → nearest point).
 - **Concept:** pathfinding, sprite depth, update loop & delta time.
+- **Status: done.** Pure code in `client/src/walk/` (`pathfinding.ts` A* + string pulling, `PathFollower.ts`, `WalkArea.ts`
+  perspective, `plan.ts`, `spawn.ts`); Phaser side in `client/src/scene/PlayerActor.ts`. Data: `game.yml` gained `player:` and
+  `startPosition:`, scenes gained `scale:`. Deviations: (1) looking is done from where he stands (only other verbs walk), as in
+  the classic games; (2) with no verb chosen, a click on a thing in the scene walks there (sentence "Walk to X") and on a
+  carried thing looks at it; (3) arrival at a new location already uses the exit `spawn` points (Step 9 adds the fade and
+  clickable exits); (4) the placeholder walkmasks of `plain` and `swamp` got an obstacle (regenerate with
+  `npm run placeholders -- --force`); (5) debug hooks `__adv.player` and `__adv.speedFactor` (tests walk at 10x);
+  (6) F1 also draws the blocked walk cells and the current route; (7) the "MORE >" marker got its own row.
 
 ### Step 9 — Exits & scene transitions
 - Exit hotspots (screen edges / doors). Walk to exit → `perform({verb:'go', objects:[dir]})`.
@@ -209,6 +217,11 @@ Verbs: Look at, Pick up, Use, Give, Talk to, Walk to. "Attack" = Use X on Y (sam
 - **Output:** walk plain → mountain → back; chapel door refuses entry until puzzle solved.
 - **Test:** e2e: `__adv.clickHotspot('walk_to','exit_n')` → scene id = mountain.
 - **Concept:** scene lifecycle, transitions, spawn points.
+- **Status: done.** `RoomScene` hit-tests exits (things win over exits), walks to `walkTo`, then calls `go`; hovering an exit
+  shows "Go to <place>". The engine's refusal is shown as the usual answer text. The fade (`transition()`) covers only the
+  scene area, so the verb bar stays visible. `shownLocation` is what is on screen (lags the engine during a fade).
+  Deviations: (1) tests use real mouse clicks, not a `clickHotspot` hook; (2) `__adv.transitioning` and `__adv.fade` were added.
+  See `docs/learn/09-exits-and-transitions.md`.
 
 ### Step 10 — Speech & dialogs
 - `say` events shown as text above the speaker (`speakers.yml` maps message keys → speaker; default = Grognak),

@@ -72,4 +72,19 @@ describe('validateGame', () => {
         ).join('\n');
         expect(sized).toContain('icon must be 24x16 pixels, but assets/icons/jug.png is 32x32');
     });
+
+    it('reports a missing player, a sprite sheet of the wrong size and a bad scale', () => {
+        const bundle = fresh();
+        delete (bundle.config as Partial<typeof bundle.config>).player;
+        expect(validateGame(bundle, everythingExists).join('\n')).toContain('game.yml: missing "player"');
+
+        const wrong = fresh();
+        const sheet = wrong.config.player.sprite;
+        const sized = validateGame(wrong, everythingExists, (a) => (a === sheet ? { width: 10, height: 10 } : undefined)).join('\n');
+        expect(sized).toContain('player sprite sheet must be 96x192 pixels');
+
+        const scaled = fresh();
+        scaled.scenes.plain!.scale = { top: 0, bottom: 5 };
+        expect(validateGame(scaled, everythingExists).join('\n')).toContain('scenes/plain.yml: scale:');
+    });
 });
