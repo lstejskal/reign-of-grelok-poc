@@ -1,0 +1,31 @@
+# Scene for location "plain". Coordinates: x 0-319, y 0-143. Music is added in Step 15.
+
+background: backgrounds/plain.png
+walkmask: walkmasks/plain.png   # white = walkable
+
+hotspots:   # later entries are on top
+  - id: standing_stone
+    polygon: [[140, 30], [180, 30], [180, 100], [140, 100]]
+    walkTo: [160, 108]
+    facing: n
+  - id: pebble
+    polygon: [[60, 112], [72, 112], [72, 120], [60, 120]]
+    walkTo: [66, 124]
+
+exits:
+  - direction: n
+    polygon: [[120, 0], [200, 0], [200, 28], [120, 28]]
+    walkTo: [160, 34]
+    spawn: [160, 40]
+  - direction: s
+    polygon: [[120, 128], [200, 128], [200, 144], [120, 144]]
+    walkTo: [160, 124]
+    spawn: [160, 118]
+  - direction: e
+    polygon: [[300, 40], [320, 40], [320, 130], [300, 130]]
+    walkTo: [292, 110]
+    spawn: [286, 110]
+  - direction: w
+    polygon: [[0, 40], [20, 40], [20, 130], [0, 130]]
+    walkTo: [28, 110]
+    spawn: [34, 110]

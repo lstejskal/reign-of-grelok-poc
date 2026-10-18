@@ -1,0 +1,27 @@
+# Scene for location "chapel". Coordinates: x 0-319, y 0-143. Music is added in Step 15.
+
+background: backgrounds/chapel.png
+walkmask: walkmasks/chapel.png   # white = walkable
+
+hotspots:   # later entries are on top
+  - id: open_grave
+    polygon: [[120, 100], [170, 100], [170, 125], [120, 125]]
+    walkTo: [145, 128]
+  - id: zombie
+    polygon: [[200, 50], [240, 50], [240, 110], [200, 110]]
+    walkTo: [190, 114]
+    facing: e
+  - id: chapel_door
+    polygon: [[255, 40], [295, 40], [295, 100], [255, 100]]
+    walkTo: [285, 110]
+    facing: n
+
+exits:
+  - direction: e
+    polygon: [[300, 40], [320, 40], [320, 130], [300, 130]]
+    walkTo: [292, 110]
+    spawn: [286, 110]
+  - direction: w
+    polygon: [[0, 40], [20, 40], [20, 130], [0, 130]]
+    walkTo: [28, 110]
+    spawn: [34, 110]

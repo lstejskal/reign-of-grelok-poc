@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from './config';
 import { keepIntegerZoom } from './scale';
 import { BootScene } from './scenes/BootScene';
+import { RoomScene } from './scenes/RoomScene';
 import { installDebugHook } from './debug';
 
 const game = new Phaser.Game({
@@ -12,7 +13,7 @@ const game = new Phaser.Game({
   backgroundColor: '#000000',
   pixelArt: true, // nearest-neighbour scaling, no smoothing
   scale: { mode: Phaser.Scale.NONE }, // we pick the zoom ourselves (integer only)
-  scene: [BootScene],
+  scene: [BootScene, RoomScene],
 });
 
 keepIntegerZoom(game);

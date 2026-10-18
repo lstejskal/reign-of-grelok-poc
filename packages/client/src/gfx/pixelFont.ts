@@ -63,6 +63,7 @@ const GLYPHS: Record<string, string[]> = {
   '(': ['...#.', '..#..', '.#...', '.#...', '.#...', '..#..', '...#.'],
   ')': ['.#...', '..#..', '...#.', '...#.', '...#.', '..#..', '.#...'],
   '=': ['.....', '.....', '#####', '.....', '#####', '.....', '.....'],
+  '`': ['.#...', '..#..', '.....', '.....', '.....', '.....', '.....'],
   _: ['.....', '.....', '.....', '.....', '.....', '.....', '#####'],
 };
 
@@ -74,7 +75,8 @@ const CELL_W = GLYPH_W + 1;
 const CELL_H = GLYPH_H + 1;
 const CHARS_PER_ROW = 16;
 
-const CHARS = Object.keys(GLYPHS).join('');
+// Lower-case letters get their own cells on the sheet, drawn with the upper-case glyphs.
+const CHARS = Object.keys(GLYPHS).join('') + 'abcdefghijklmnopqrstuvwxyz';
 
 /** Paint the font sheet and register it with Phaser. Safe to call more than once. */
 export function registerPixelFont(scene: Phaser.Scene): void {
@@ -89,7 +91,7 @@ export function registerPixelFont(scene: Phaser.Scene): void {
   [...CHARS].forEach((ch, i) => {
     const originX = (i % CHARS_PER_ROW) * CELL_W;
     const originY = Math.floor(i / CHARS_PER_ROW) * CELL_H;
-    GLYPHS[ch]!.forEach((row, y) => {
+    (GLYPHS[ch] ?? GLYPHS[ch.toUpperCase()])!.forEach((row, y) => {
       [...row].forEach((pixel, x) => {
         if (pixel === '#') ctx.fillRect(originX + x, originY + y, 1, 1);
       });

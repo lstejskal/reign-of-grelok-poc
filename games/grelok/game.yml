@@ -1,0 +1,3 @@
+# Game-level settings. Everything else lives in logic/ (rules, text) and scenes/ (what things look like where).
+title: Reign of Grelok
+start: plain

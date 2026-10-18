@@ -1,0 +1,22 @@
+# Scene for location "mountain". Coordinates: x 0-319, y 0-143. Music is added in Step 15.
+
+background: backgrounds/mountain.png
+walkmask: walkmasks/mountain.png   # white = walkable
+
+hotspots:   # later entries are on top
+  - id: rubble
+    polygon: [[40, 100], [110, 100], [110, 125], [40, 125]]
+    walkTo: [75, 128]
+  - id: gemstone
+    polygon: [[70, 108], [80, 108], [80, 116], [70, 116]]
+    walkTo: [75, 128]
+  - id: grelok
+    polygon: [[190, 30], [250, 30], [250, 105], [190, 105]]
+    walkTo: [215, 112]
+    facing: e
+
+exits:
+  - direction: s
+    polygon: [[120, 128], [200, 128], [200, 144], [120, 144]]
+    walkTo: [160, 124]
+    spawn: [160, 118]

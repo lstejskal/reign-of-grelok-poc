@@ -1,0 +1,20 @@
+# Scene for location "town". Coordinates: x 0-319, y 0-143. Music is added in Step 15.
+
+background: backgrounds/town.png
+walkmask: walkmasks/town.png   # white = walkable
+
+hotspots:   # later entries are on top
+  - id: blacksmith
+    polygon: [[60, 40], [100, 40], [100, 110], [60, 110]]
+    walkTo: [105, 114]
+    facing: w
+  - id: priest
+    polygon: [[220, 70], [250, 70], [250, 110], [220, 110]]
+    walkTo: [215, 116]
+    facing: e
+
+exits:
+  - direction: n
+    polygon: [[120, 0], [200, 0], [200, 28], [120, 28]]
+    walkTo: [160, 34]
+    spawn: [160, 40]

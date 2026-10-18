@@ -128,7 +128,7 @@ Verbs: Look at, Pick up, Use, Give, Talk to, Walk to. "Attack" = Use X on Y (sam
 - **Status: done.** Deviations from the text game: `Autocompleter` not ported (terminal tab-completion only);
   `extended prompt`, `save`, `load`, `quit` are terminal-shell commands handled in `cli.ts`; engine start location
   defaults to the first location in `locations.yml` (Step 3 adds `game.yml`); engine uses a `clone()` helper instead of
-  `structuredClone`; `noUncheckedIndexedAccess` is off for the engine package only; the jug bug is fixed in
+  `structuredClone`; the jug bug is fixed in
   `games/grelok/logic` (the text game's own data is untouched); after `game_over` the engine ignores further commands.
 
 ### Step 3 — Load game data in the browser + validator
@@ -140,15 +140,23 @@ Verbs: Look at, Pick up, Use, Give, Talk to, Walk to. "Attack" = Use X on Y (sam
 - **Output:** on boot, a debug panel shows current location name + visible things from the engine.
 - **Test:** validator unit test with a broken fixture (fails) and the real data (passes).
 - **Concept:** data-driven design; content vs. code.
+- **Status: done.** Added `games/<id>/game.yml` (title, start location). `assembleBundle()` (engine, pure) is shared by the
+  Node loader and the browser loader. Exit `spawn` = where the player appears in THIS scene when arriving through that exit.
+  `background`/`walkmask`/`music` are optional until Step 4. The validator also requires a hotspot for every thing that
+  starts in a location. `noUncheckedIndexedAccess` is now off project-wide (the engine source is also compiled by the client).
 
 ### Step 4 — Scene rendering + debug console
 - `tools/make-placeholders.ts`: generates 320×144 background PNGs (distinct color per location + grid) and
   1-bit walkmask PNGs (white = walkable floor area) using `pngjs`.
 - `RoomScene` renders the background for the engine's current location; reacts to `location_changed`.
-- Debug console (backtick key): text input → `engine.performText()`; prints `say` events.
+- Debug console (opens with the "/" key, Esc closes): text input → `engine.performText()`; prints `say` events.
 - **Output:** the full game is playable in the browser via the debug console; backgrounds switch with location.
 - **Test:** e2e types the walkthrough into the console → "THE END" appears.
 - **Concept:** scenes, asset loading, event subscriptions.
+- **Status: done.** Placeholders never overwrite existing files (`--force` to regenerate); the walkmask is 8-bit grayscale
+  (white = walkable, floor starts at y=30). New `GameSession` (client) = engine + event fan-out; the debug console is plain
+  HTML and prints every engine event (`:events` toggles non-text ones). The validator also checks that background and
+  walkmask images are 320x144. Tests check the texture actually on screen, not just a variable.
 
 ### Step 5 — Hotspots & mouse hover
 - Hotspot polygons from scene yml, only for things the engine reports visible. Pointer → hit test (point-in-polygon,

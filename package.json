@@ -8,16 +8,20 @@
   "scripts": {
     "dev": "npm run dev -w @grelok/client",
     "build": "npm run build -w @grelok/client",
-    "typecheck": "tsc -p packages/engine/tsconfig.json && tsc -p packages/engine/tsconfig.node.json && tsc -b packages/client",
+    "typecheck": "tsc -p packages/engine/tsconfig.json && tsc -p packages/engine/tsconfig.node.json && tsc -p tools/tsconfig.json && tsc -b packages/client",
     "test": "vitest run",
     "e2e": "playwright test",
-    "cli": "tsx packages/engine/node/cli.ts"
+    "cli": "tsx packages/engine/node/cli.ts",
+    "validate": "tsx tools/validate.ts",
+    "placeholders": "tsx tools/make-placeholders.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.1",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^26.6.5",
+    "@types/pngjs": "^6.0.5",
     "js-yaml": "^5.5.0",
+    "pngjs": "^7.0.0",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.4",

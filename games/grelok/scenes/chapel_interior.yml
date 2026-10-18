@@ -1,0 +1,16 @@
+# Scene for location "chapel_interior". Coordinates: x 0-319, y 0-143. Music is added in Step 15.
+
+background: backgrounds/chapel_interior.png
+walkmask: walkmasks/chapel_interior.png   # white = walkable
+
+hotspots:   # later entries are on top
+  - id: basin
+    polygon: [[150, 60], [180, 60], [180, 110], [150, 110]]
+    walkTo: [165, 116]
+    facing: n
+
+exits:
+  - direction: w
+    polygon: [[0, 40], [20, 40], [20, 130], [0, 130]]
+    walkTo: [28, 110]
+    spawn: [34, 110]

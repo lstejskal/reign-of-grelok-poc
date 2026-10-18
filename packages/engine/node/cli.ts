@@ -5,12 +5,14 @@ import path from 'node:path';
 import readline from 'node:readline/promises';
 import { Engine, chopToLines } from '../src';
 import type { EngineEvent } from '../src';
-import { loadLogicData, GRELOK_LOGIC_DIR } from './loadLogicData';
+import { loadGameBundle } from './loadGameBundle';
 
 const SAVE_DIR = path.resolve(import.meta.dirname, '../../../saved-games');
 
-const data = loadLogicData(GRELOK_LOGIC_DIR);
-let engine = new Engine(data);
+const bundle = loadGameBundle(process.argv[2] ?? 'grelok');
+const data = bundle.logic;
+const newEngine = () => new Engine(data, { startLocation: bundle.config.start });
+let engine = newEngine();
 let extendedPrompt = false;
 
 function show(events: EngineEvent[]): boolean {
@@ -58,7 +60,7 @@ function shellCommand(line: string): boolean | 'quit' {
     return false;
 }
 
-console.log('REIGN OF GRELOK (engine CLI)');
+console.log(`${bundle.config.title.toUpperCase()} (engine CLI)`);
 console.log(engine.describeLocation().map((l) => chopToLines(l)).join('\n'));
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
