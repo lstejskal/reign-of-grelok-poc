@@ -165,6 +165,9 @@ Verbs: Look at, Pick up, Use, Give, Talk to, Walk to. "Attack" = Use X on Y (sam
 - **Output:** hovering the rubble shows "rubble"; F1 shows outlines.
 - **Test:** unit `pointInPolygon`, `hitTest` ordering; e2e hover via `__adv` coordinates shows the name.
 - **Concept:** input handling, screen→world coordinates.
+- **Status: done.** Code in `client/src/scene/` (`hitTest.ts`, `hotspotOverlay.ts`); hover is re-checked after every engine
+  event batch so hidden things appear under a still mouse. Sentence line is centred at the top of the UI strip; the
+  location name moved to the bottom-left. Exits are drawn in the overlay but not yet hoverable (Step 9).
 
 ### Step 6 — Verb UI & sentence builder
 - Pure `SentenceBuilder` state machine in `client/src/ui/` (no Phaser): verb → object1 → (preposition) → object2

@@ -36,6 +36,16 @@ export function installDebugHook(game: Phaser.Game): void {
     get backgroundKey(): string | undefined {
       return (game.scene.getScene('RoomScene') as RoomScene | null)?.backgroundKey;
     },
+    /** What the sentence line says (the name of the hovered hotspot). */
+    get sentence(): string | undefined {
+      return (game.scene.getScene('RoomScene') as RoomScene | null)?.sentenceText;
+    },
+    get hovered(): string | undefined {
+      return (game.scene.getScene('RoomScene') as RoomScene | null)?.hoveredId;
+    },
+    get overlayVisible(): boolean | undefined {
+      return (game.scene.getScene('RoomScene') as RoomScene | null)?.overlayVisible;
+    },
     get error() {
       return debugState.error;
     },
