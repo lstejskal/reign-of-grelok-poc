@@ -16,6 +16,13 @@ hotspots:   # later entries are on top
     walkTo: [215, 112]
     facing: e
 
+sprites:
+  - id: gemstone
+    thing: gemstone            # appears when the engine reveals it, vanishes when picked up
+    x: 75
+    y: 116
+    image: sprites/gemstone.png
+
 exits:
   - direction: s
     polygon: [[120, 128], [200, 128], [200, 144], [120, 144]]

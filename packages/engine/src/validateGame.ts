@@ -54,6 +54,21 @@ export function validateGame(
         }
     }
 
+    const { speakers } = bundle;
+    if (!(speakers.default in speakers.speakers)) problem('speakers.yml', `default speaker "${speakers.default}" is not listed under speakers`);
+    for (const [id, speaker] of Object.entries(speakers.speakers)) {
+        const where = `speakers.yml (${id})`;
+        if (!/^#[0-9a-fA-F]{6}$/.test(speaker.color ?? '')) problem(where, `color must look like "#rrggbb", not "${speaker.color}"`);
+        if (!speaker.name) problem(where, 'missing "name"');
+        for (const thing of [speaker.thing, ...(speaker.topics ?? [])]) {
+            if (thing !== undefined && !(thing in logic.things)) problem(where, `there is no thing "${thing}" in logic/things.yml`);
+        }
+        for (const pattern of speaker.messages ?? []) {
+            const matches = Object.keys(logic.messages).some((key) => pattern.endsWith('*') ? key.startsWith(pattern.slice(0, -1)) : key === pattern);
+            if (!matches) problem(where, `message pattern "${pattern}" matches no message in logic/messages.yml`);
+        }
+    }
+
     for (const id of Object.keys(scenes)) {
         if (!(id in logic.locations)) problem(`scenes/${id}.yml`, 'there is no such location in logic/locations.yml');
     }
@@ -82,9 +97,21 @@ export function validateGame(
                 problem(where, `scale: "top" and "bottom" must be numbers above 0 and at most 2, got ${JSON.stringify(scene.scale)}`);
             }
         }
+        const spriteIds = new Set<string>();
         for (const sprite of scene.sprites ?? []) {
-            if (!assetExists(sprite.image)) problem(where, `sprite asset not found: assets/${sprite.image}`);
-            if (sprite.thing !== undefined && !(sprite.thing in logic.things)) problem(where, `sprite refers to unknown thing "${sprite.thing}"`);
+            const label = `sprite "${sprite.id}"`;
+            if (!sprite.id) problem(where, 'a sprite has no "id"');
+            if (spriteIds.has(sprite.id)) problem(where, `${label}: defined twice`);
+            spriteIds.add(sprite.id);
+            checkPoint([sprite.x, sprite.y], `${label} x, y`, where, problem);
+            if (sprite.thing !== undefined && !(sprite.thing in logic.things)) problem(where, `${label}: unknown thing "${sprite.thing}"`);
+            if (!sprite.states?.length) problem(where, `${label}: needs "states" (or a single "image")`);
+            for (const state of sprite.states ?? []) {
+                if (!assetExists(state.image)) problem(where, `${label}: image not found: assets/${state.image}`);
+                for (const name of Object.keys(state.when ?? {})) {
+                    if (!(name in logic.constraints.boolean)) problem(where, `${label}: "when" uses unknown constraint "${name}" (see logic/constraints.yml)`);
+                }
+            }
         }
 
         // hotspots

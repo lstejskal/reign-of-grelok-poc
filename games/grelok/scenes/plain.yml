@@ -13,6 +13,13 @@ hotspots:   # later entries are on top
     polygon: [[60, 112], [72, 112], [72, 120], [60, 120]]
     walkTo: [66, 124]
 
+sprites:
+  - id: pebble
+    thing: pebble
+    x: 66
+    y: 120
+    image: sprites/pebble.png
+
 exits:
   - direction: n
     polygon: [[120, 0], [200, 0], [200, 28], [120, 28]]

@@ -423,3 +423,141 @@ test('a blocked exit shows the engine\'s message and he stays', async ({ page })
   await clickAt(page, 310, 80);
   await expect.poll(() => page.evaluate(() => window.__adv.answer)).toBe('Chapel door is locked.');
 });
+
+// --- Step 10: speech and dialogs ---------------------------------------------------------------
+
+import { choiceRect } from '../../packages/client/src/ui/dialog';
+
+const speech = (page: Page) => page.evaluate(() => window.__adv.speech);
+const dialog = (page: Page) => page.evaluate(() => window.__adv.dialog);
+
+/** In the town, "Talk to" the blacksmith; leaves the narration read and his first words on screen. */
+async function talkToBlacksmith(page: Page): Promise<void> {
+  await say(page, 'south');
+  await clickVerb(page, 'talk_to');
+  await clickAt(page, 80, 70);
+  await expect.poll(() => page.evaluate(() => window.__adv.answer), { timeout: 15_000 }).toContain('Blacksmith smiles');
+  await walkSpeed(page, 0.05); // speech stays up 20 times longer, so tests can look at it
+  await dismissAnswer(page);
+}
+
+test('quoted words are spoken above the speaker in his colour; the rest stays narration', async ({ page }) => {
+  await talkToBlacksmith(page);
+  const line = await speech(page);
+  expect(line.speaker).toBe('blacksmith');
+  expect(line.color).toBe('#ff9a3c');
+  expect(line.text).toContain('Greetings');
+  await page.screenshot({ path: 'tests/e2e/screenshots/speech-blacksmith.png' });
+});
+
+test('speech goes away by itself, and a click in the scene skips it', async ({ page }) => {
+  await talkToBlacksmith(page);
+  expect(await speech(page)).toBeDefined();
+  await clickAt(page, 250, 120); // skips; does not walk
+  await expect.poll(() => speech(page), { message: 'first page skipped' }).not.toMatchObject({ text: expect.stringContaining('Greetings') });
+  expect((await player(page)).walking).toBe(false);
+
+  await walkSpeed(page, 10); // time passes quickly: whatever is left expires
+  await expect.poll(() => speech(page)).toBeUndefined();
+});
+
+test('Talk to opens a menu of questions; asking gets an answer, Goodbye closes the menu', async ({ page }) => {
+  await talkToBlacksmith(page);
+  expect(await dialog(page)).toEqual({ npc: 'blacksmith', choices: ['Ask about grelok', 'Ask about rusty sword', 'Goodbye'] });
+  await page.screenshot({ path: 'tests/e2e/screenshots/dialog-menu.png' });
+
+  const r = choiceRect(0);
+  await moveMouseTo(page, r.x + 5, r.y + 3);
+  await expect.poll(() => sentence(page)).toBe('Ask blacksmith about grelok');
+  await clickAt(page, r.x + 5, r.y + 3);
+  await expect.poll(async () => (await speech(page))?.text).toContain('evil wizard');
+
+  const bye = choiceRect(2);
+  await clickAt(page, bye.x + 5, bye.y + 3);
+  expect(await dialog(page)).toBeUndefined();
+  expect(await speech(page)).toBeUndefined();
+});
+
+test('clicking the scene (once he has finished speaking) ends the conversation', async ({ page }) => {
+  await talkToBlacksmith(page);
+  for (let i = 0; i < 10 && (await speech(page)); i++) await clickAt(page, 250, 120); // clicks first skip the speech...
+  expect(await dialog(page)).toBeDefined(); // ...and the menu stays while he is still talking
+  await clickAt(page, 250, 120); // ...then a click walks, and the conversation is over
+  expect(await dialog(page)).toBeUndefined();
+  await expect.poll(async () => (await player(page)).walking).toBe(true);
+});
+
+// --- Step 11: sprites that follow the game state -----------------------------------------------
+
+const sprites = (page: Page) => page.evaluate(() => window.__adv.sprites);
+const spriteIds = async (page: Page) => (await sprites(page)).map((s: { id: string }) => s.id);
+
+test('a sprite is drawn for a thing in the scene, at its feet position and sorted by y, and goes when it is picked up', async ({ page }) => {
+  expect(await sprites(page)).toEqual([{ id: 'pebble', image: 'sprites/pebble.png', x: 66, y: 120, depth: 120 }]);
+  await page.screenshot({ path: 'tests/e2e/screenshots/sprite-pebble.png' });
+
+  await say(page, 'take pebble');
+  expect(await sprites(page)).toEqual([]);
+});
+
+test('a hidden thing gets its sprite only when the engine reveals it', async ({ page }) => {
+  await say(page, 'north');
+  expect(await spriteIds(page)).toEqual([]); // the gemstone is hidden under the rubble
+  await say(page, 'look at rubble');
+  expect(await spriteIds(page)).toEqual(['gemstone']);
+  await say(page, 'take gemstone');
+  expect(await spriteIds(page)).toEqual([]);
+});
+
+test('the world changes visibly as the puzzle is solved: zombie falls, door opens', async ({ page }) => {
+  await say(page, 'south');
+  await say(page, 'talk to priest'); // gives the chapel key
+  await say(page, 'north');
+  await say(page, 'east');
+
+  expect(await sprites(page)).toEqual([{ id: 'zombie', image: 'sprites/zombie_standing.png', x: 220, y: 110, depth: 110 }]);
+  await page.screenshot({ path: 'tests/e2e/screenshots/sprite-zombie-standing.png' });
+
+  await say(page, 'use rusty sword on zombie');
+  expect(await spriteIds(page)).toEqual(['zombie']);
+  expect((await sprites(page))[0].image).toBe('sprites/zombie_down.png');
+
+  await say(page, 'use chapel key on chapel door');
+  expect(await spriteIds(page)).toEqual(['zombie', 'door_open']);
+  await page.screenshot({ path: 'tests/e2e/screenshots/sprite-door-open.png' });
+});
+
+test('leaving a scene swaps its sprites for the new scene\'s', async ({ page }) => {
+  expect(await spriteIds(page)).toEqual(['pebble']);
+  await say(page, 'east'); // the chapel
+  expect(await spriteIds(page)).toEqual(['zombie']);
+  await say(page, 'west');
+  expect(await spriteIds(page)).toEqual(['pebble']);
+});
+
+test('double-clicking an exit goes through at once instead of walking there', async ({ page }) => {
+  await walkSpeed(page, 0.05); // so slow that walking to the exit would take minutes
+  const [x, y] = [160, 10];
+  const box = (await page.locator('canvas').boundingBox())!;
+  const zoom: number = await page.evaluate(() => window.__adv.zoom);
+  await page.mouse.dblclick(box.x + (x + 0.5) * zoom, box.y + (y + 0.5) * zoom);
+  // (the engine moves at once; the fade itself is slowed by speedFactor too, so we look at the engine, not the picture)
+  await expect.poll(() => page.evaluate(() => window.__adv.engine.state.location), { timeout: 3_000 }).toBe('mountain');
+});
+
+test('a single click on a far exit still walks', async ({ page }) => {
+  await walkSpeed(page, 0.05);
+  await clickAt(page, 160, 10);
+  await page.waitForTimeout(500);
+  expect(await page.evaluate(() => window.__adv.backgroundKey)).toBe('asset:backgrounds/plain.png');
+  expect((await player(page)).walking).toBe(true);
+});
+
+test('double-clicking a blocked exit shows the refusal at once', async ({ page }) => {
+  await say(page, 'east');
+  await walkSpeed(page, 0.05);
+  const box = (await page.locator('canvas').boundingBox())!;
+  const zoom: number = await page.evaluate(() => window.__adv.zoom);
+  await page.mouse.dblclick(box.x + 310.5 * zoom, box.y + 80.5 * zoom);
+  await expect.poll(() => page.evaluate(() => window.__adv.answer), { timeout: 3_000 }).toBe('Chapel door is blocked by zombie.');
+});

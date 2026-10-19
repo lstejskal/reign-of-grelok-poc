@@ -33,12 +33,30 @@ export interface ExitData {
     spawn: Point;
 }
 
-/** Extra picture bound to a thing's state. Minimal for now; Step 11 extends it. */
-export interface SceneSpriteData {
-    thing?: string;
+/** One look of a sprite, and when it applies. */
+export interface SpriteState {
+    /** Conditions on the game's boolean constraints, e.g. { zombie_blocks_chapel_door: true }. All must hold. */
+    when?: Record<string, boolean>;
+    /** Relative to the game's `assets/` folder. */
     image: string;
+    /** Move the sprite for this look (default: the sprite's own x, y). */
+    x?: number;
+    y?: number;
+}
+
+/**
+ * A picture in a scene that follows the world's state instead of being part of the background. It is drawn with its
+ * feet (bottom centre) at x, y, and sorted by y like the player. The FIRST state whose `when` holds is drawn; a state
+ * without `when` always holds; if none holds, nothing is drawn.
+ */
+export interface SceneSpriteData {
+    /** Unique within the scene. */
+    id: string;
+    /** Only drawn while this thing is visible in this scene's location (so a picked-up thing vanishes). */
+    thing?: string;
     x: number;
     y: number;
+    states: SpriteState[];
 }
 
 /**
@@ -84,11 +102,32 @@ export interface GameConfig {
     player: PlayerConfig;
 }
 
+/** One person who can speak: Grognak, the blacksmith... (games/<id>/speakers.yml). */
+export interface SpeakerData {
+    name: string;
+    /** Text colour, "#rrggbb". */
+    color: string;
+    /** The thing this speaker is. Their words appear above its hotspot. Leave out for the player (above his head). */
+    thing?: string;
+    /** Message keys this speaker says. A trailing * matches anything: "ask_blacksmith_about_*". */
+    messages?: string[];
+    /** Things you can ask this speaker about (besides whatever you carry). */
+    topics?: string[];
+}
+
+export interface SpeakersConfig {
+    /** Who speaks any quoted text no speaker claims. */
+    default: string;
+    speakers: Record<string, SpeakerData>;
+}
+
 /** Everything the engine and a client need to know about one game. */
 export interface GameBundle {
     id: string;
     config: GameConfig;
     logic: LogicData;
+    /** speakers.yml; a game without one gets just the player as the default speaker. */
+    speakers: SpeakersConfig;
     /** Keyed by location alias. */
     scenes: Record<string, SceneData>;
 }

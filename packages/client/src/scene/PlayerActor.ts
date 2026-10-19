@@ -61,6 +61,13 @@ export class PlayerActor {
     this.follower.setPath(this.area.path(this.follower.position, point));
   }
 
+  /** Skip the rest of the walk: appear at its end and do what he would have done on arriving there. */
+  skipWalk(): void {
+    const end = this.follower.remaining.at(-1);
+    if (end) this.follower.teleport(end);
+    this.arrive();
+  }
+
   /** Call every frame with the time since the last one. */
   update(deltaMs: number): void {
     const seconds = Math.min(deltaMs, MAX_FRAME_MS) / 1000;

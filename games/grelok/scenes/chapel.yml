@@ -17,6 +17,23 @@ hotspots:   # later entries are on top
     walkTo: [285, 110]
     facing: n
 
+sprites:   # follow the game state; the first state whose "when" holds is drawn
+  - id: zombie
+    thing: zombie              # only drawn while the zombie is visible here
+    x: 220
+    y: 110
+    states:
+      - when: {zombie_blocks_chapel_door: true}
+        image: sprites/zombie_standing.png
+      - image: sprites/zombie_down.png
+  - id: door_open
+    thing: chapel_door
+    x: 275
+    y: 100
+    states:
+      - when: {chapel_door_locked: false}   # no other state: drawn only once the door is unlocked
+        image: sprites/chapel_door_open.png
+
 exits:
   - direction: e
     polygon: [[300, 40], [320, 40], [320, 130], [300, 130]]

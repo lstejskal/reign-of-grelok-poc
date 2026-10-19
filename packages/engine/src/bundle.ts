@@ -1,5 +1,5 @@
 import type { LogicData } from './types';
-import type { GameBundle, GameConfig, SceneData } from './sceneTypes';
+import type { GameBundle, GameConfig, SceneData, SceneSpriteData, SpeakersConfig } from './sceneTypes';
 
 const LOGIC_FILES = {
     locations: 'logic/locations.yml',
@@ -33,9 +33,19 @@ export function assembleBundle(id: string, files: Record<string, string>, parseY
         const match = path.match(/^scenes\/([^/]+)\.yml$/);
         if (match?.[1] !== undefined) {
             const raw = (read(path) ?? {}) as Partial<SceneData>;
-            scenes[match[1]] = { ...raw, hotspots: raw.hotspots ?? [], exits: raw.exits ?? [] };
+            scenes[match[1]] = { ...raw, hotspots: raw.hotspots ?? [], exits: raw.exits ?? [], sprites: (raw.sprites ?? []).map(normalizeSprite) };
         }
     }
 
-    return { id, config: read('game.yml') as GameConfig, logic, scenes };
+    // speakers.yml is optional: without it everything is narration and the player speaks the quotes
+    const noSpeakers: SpeakersConfig = { default: 'player', speakers: { player: { name: 'Player', color: '#ffffff' } } };
+    const speakers = 'speakers.yml' in files ? (read('speakers.yml') as SpeakersConfig) : noSpeakers;
+
+    return { id, config: read('game.yml') as GameConfig, logic, speakers, scenes };
+}
+
+/** A sprite with one look may be written `image: x.png` instead of a `states:` list. */
+function normalizeSprite(raw: SceneSpriteData & { image?: string }): SceneSpriteData {
+    const { image, ...sprite } = raw;
+    return { ...sprite, states: sprite.states ?? (image === undefined ? [] : [{ image }]) };
 }

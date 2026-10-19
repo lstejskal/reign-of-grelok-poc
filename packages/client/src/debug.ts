@@ -64,6 +64,18 @@ export function installDebugHook(game: Phaser.Game): void {
     get player() {
       return (game.scene.getScene('RoomScene') as RoomScene | null)?.playerState;
     },
+    /** The scene sprites currently drawn: { id, image, x, y, depth }. */
+    get sprites() {
+      return (game.scene.getScene('RoomScene') as RoomScene | null)?.spritesShown;
+    },
+    /** The speech on screen: { speaker, text, color }, or undefined. */
+    get speech() {
+      return (game.scene.getScene('RoomScene') as RoomScene | null)?.speechNow;
+    },
+    /** The open talk menu: { npc, choices }, or undefined. */
+    get dialog() {
+      return (game.scene.getScene('RoomScene') as RoomScene | null)?.dialogState;
+    },
     /** True while the screen fades between scenes. */
     get transitioning(): boolean | undefined {
       return (game.scene.getScene('RoomScene') as RoomScene | null)?.isTransitioning;

@@ -4,6 +4,7 @@
 //   assets/backgrounds/<location>.png   320x144, a colour per location + a 16px grid
 //   assets/walkmasks/<location>.png     320x144, grayscale: white = the player may walk here, black = blocked
 //   assets/sprites/<player>.png         the player's sheet (see GameConfig.player): a stocky horned-helmet figure, 4 facings x 3 frames
+//   assets/sprites/<name>.png           every picture a scene sprite uses: a coloured figure the size of its thing's hotspot
 //   assets/icons/<thing>.png            24x16, one per pickable thing: a coloured tile with a little symmetric pattern
 //
 // Existing files are never overwritten (real art will replace these under the same names) unless --force.
@@ -232,6 +233,28 @@ function makePlayerSheet(frameWidth: number, frameHeight: number): Buffer {
     return PNG.sync.write(png);
 }
 
+/** A scene sprite's placeholder: a coloured block with a dark outline, rounded at the top, as big as `w` x `h`. */
+function makeSprite(name: string, w: number, h: number): Buffer {
+    const png = new PNG({ width: w, height: h });
+    const hue = hashOf(name) % 360;
+    const base = hsl(hue, 0.5, 0.45);
+    const light = hsl(hue, 0.5, 0.65);
+    const dark = hsl(hue, 0.5, 0.15);
+    const round = Math.min(4, Math.floor(Math.min(w, h) / 3));
+    for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+            const cx = Math.min(x, w - 1 - x);
+            const cutCorner = y < round && cx < round - y; // the two top corners stay see-through
+            const i = (y * w + x) * 4;
+            if (cutCorner) continue;
+            const edge = x === 0 || y === 0 || x === w - 1 || y === h - 1 || (y < round && cx === round - y - 1);
+            const colour = edge ? dark : x < w / 3 && y < h / 2 ? light : base;
+            [png.data[i], png.data[i + 1], png.data[i + 2], png.data[i + 3]] = [colour[0], colour[1], colour[2], 255];
+        }
+    }
+    return PNG.sync.write(png);
+}
+
 function writeAsset(gameId: string, relative: string, data: Buffer, force: boolean): string {
     const file = path.join(GAMES_DIR, gameId, 'assets', relative);
     if (fs.existsSync(file) && !force) return `kept    ${relative}`;
@@ -254,4 +277,17 @@ for (const thing of Object.values(loadGameBundle(gameId).logic.things)) {
 {
     const { sprite, frameWidth, frameHeight } = loadGameBundle(gameId).config.player;
     console.log(writeAsset(gameId, sprite, makePlayerSheet(frameWidth, frameHeight), force));
+}
+{
+    // scene sprites: as big as the hotspot of their thing (or 24x32 when they have none)
+    const bundle = loadGameBundle(gameId);
+    for (const scene of Object.values(bundle.scenes)) {
+        for (const sprite of scene.sprites ?? []) {
+            const hotspot = scene.hotspots.find((h) => h.id === sprite.thing);
+            const xs = hotspot?.polygon.map((p) => p[0]) ?? [0, 24];
+            const ys = hotspot?.polygon.map((p) => p[1]) ?? [0, 32];
+            const [w, h] = [Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)];
+            for (const state of sprite.states) console.log(writeAsset(gameId, state.image, makeSprite(state.image, w, h), force));
+        }
+    }
 }

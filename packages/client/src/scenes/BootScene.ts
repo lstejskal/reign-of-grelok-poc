@@ -59,6 +59,14 @@ export class BootScene extends Phaser.Scene {
     if (spriteUrl === undefined) throw new Error(`Missing picture: ${sprite}`);
     this.load.spritesheet(textureKey(sprite), spriteUrl, { frameWidth, frameHeight });
 
+    // pictures of the scene sprites: every look of every sprite (several sprites may share one picture)
+    const spritePictures = new Set(Object.values(bundle.scenes).flatMap((s) => (s.sprites ?? []).flatMap((sp) => sp.states.map((st) => st.image))));
+    for (const picture of spritePictures) {
+      const url = assetUrl(bundle.id, picture);
+      if (url === undefined) throw new Error(`Missing picture: ${picture}`);
+      this.load.image(textureKey(picture), url);
+    }
+
     // inventory icons: one per thing the player can carry
     for (const thing of Object.values(bundle.logic.things)) {
       if (!thing.pickable) continue;

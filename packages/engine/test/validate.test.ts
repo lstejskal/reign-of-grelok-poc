@@ -24,6 +24,37 @@ describe('validateGame', () => {
         expect(errors.join()).toContain('thing "standing_stone" starts here but has no hotspot');
     });
 
+    it('reports broken speakers: unknown default, bad colour, unknown thing, a pattern matching no message', () => {
+        const bundle = fresh();
+        bundle.speakers.default = 'nobody';
+        bundle.speakers.speakers.blacksmith!.color = 'orange';
+        bundle.speakers.speakers.priest!.thing = 'no_such_thing';
+        bundle.speakers.speakers.wizard!.messages = ['no_such_message_*'];
+
+        const errors = validateGame(bundle, everythingExists);
+        expect(errors).toContain('speakers.yml: default speaker "nobody" is not listed under speakers');
+        expect(errors).toContain('speakers.yml (blacksmith): color must look like "#rrggbb", not "orange"');
+        expect(errors).toContain('speakers.yml (priest): there is no thing "no_such_thing" in logic/things.yml');
+        expect(errors).toContain('speakers.yml (wizard): message pattern "no_such_message_*" matches no message in logic/messages.yml');
+    });
+
+    it('reports broken sprites: unknown thing, unknown constraint, missing image, no states, duplicate id', () => {
+        const bundle = fresh();
+        const sprites = bundle.scenes.chapel!.sprites!;
+        sprites[0]!.thing = 'no_such_thing';
+        sprites[0]!.states[0]!.when = { no_such_constraint: true };
+        sprites[1]!.states = [];
+        sprites[1]!.id = sprites[0]!.id;
+        const missing = (path: string) => path !== 'sprites/zombie_down.png';
+
+        const errors = validateGame(bundle, missing);
+        expect(errors).toContain('scenes/chapel.yml: sprite "zombie": unknown thing "no_such_thing"');
+        expect(errors).toContain('scenes/chapel.yml: sprite "zombie": "when" uses unknown constraint "no_such_constraint" (see logic/constraints.yml)');
+        expect(errors).toContain('scenes/chapel.yml: sprite "zombie": image not found: assets/sprites/zombie_down.png');
+        expect(errors).toContain('scenes/chapel.yml: sprite "zombie": defined twice');
+        expect(errors).toContain('scenes/chapel.yml: sprite "zombie": needs "states" (or a single "image")');
+    });
+
     it('reports a location without a scene, and a scene without a location', () => {
         const bundle = fresh();
         delete bundle.scenes.town;

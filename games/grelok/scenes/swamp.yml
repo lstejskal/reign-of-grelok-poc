@@ -17,6 +17,13 @@ hotspots:   # later entries are on top
     polygon: [[100, 110], [120, 110], [120, 120], [100, 120]]
     walkTo: [110, 124]
 
+sprites:
+  - id: gemstone_shards
+    thing: gemstone_shards
+    x: 110
+    y: 120
+    image: sprites/gemstone_shards.png
+
 exits:
   - direction: e
     polygon: [[300, 40], [320, 40], [320, 130], [300, 130]]

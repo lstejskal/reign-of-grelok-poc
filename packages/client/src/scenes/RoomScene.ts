@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { SCENE_HEIGHT, SCENE_WIDTH, iconPath } from '@grelok/engine';
+import { SCENE_HEIGHT, SCENE_WIDTH, Thing, iconPath } from '@grelok/engine';
 import type { Command, ExitData, Facing, Point, Verb } from '@grelok/engine';
 import { GAME_WIDTH, GAME_HEIGHT } from '../config';
 import { PIXEL_FONT } from '../gfx/pixelFont';
@@ -9,16 +9,23 @@ import { hitTest } from '../scene/hitTest';
 import { HotspotOverlay } from '../scene/hotspotOverlay';
 import { PlayerActor } from '../scene/PlayerActor';
 import { readMask } from '../scene/readMask';
+import { lookOf } from '../scene/spriteState';
 import { gridFromMask, makeGrid } from '../walk/pathfinding';
 import { walkTargetFor, walkTargetForCommand } from '../walk/plan';
 import { arrivalAt } from '../walk/spawn';
 import { WalkArea } from '../walk/WalkArea';
 import { SentenceBuilder } from '../ui/SentenceBuilder';
 import { TextPager } from '../ui/textPages';
+import { DIALOG_MAX, DIALOG_PANEL, choiceAt, choiceRect, dialogChoices } from '../ui/dialog';
+import type { DialogChoice } from '../ui/dialog';
+import { SpeechQueue, interpretSay } from '../ui/speech';
 import { VERBS } from '../ui/verbs';
 import { SENTENCE_Y, TEXT_BOX, TEXT_BOX_CHARS, TEXT_BOX_LINES, TEXT_BOX_TEXT, inRect, verbAt, verbRect } from '../ui/layout';
 import { SCROLL_LEFT, SCROLL_RIGHT, SLOTS, clampScroll, itemAt, maxScroll, slotRect, visibleItems } from '../ui/inventory';
 import type { GameSession } from '../session';
+
+/** Two clicks on the same exit this close together (milliseconds) are a double-click: go through at once. */
+const DOUBLE_CLICK_MS = 400;
 
 /** Each half (out, in) of the fade between scenes, in milliseconds. */
 const FADE_MS = 200;
@@ -56,11 +63,22 @@ export class RoomScene extends Phaser.Scene {
   private shownLocation = '';
   private transitioning = false;
   private hoveredExit: ExitData | undefined;
+  private lastExitClick: { exit: ExitData; at: number } | undefined;
+  /** One picture per sprite of the scene on screen (hidden when its state says "draw nothing"). */
+  private spriteImages = new Map<string, Phaser.GameObjects.Image>();
   /** The walkable floor of each scene, built from its walkmask the first time it is needed. */
   private readonly areas = new Map<string, WalkArea>();
 
   private readonly builder = new SentenceBuilder();
   private readonly pager = new TextPager(TEXT_BOX_CHARS, TEXT_BOX_LINES);
+  /** What people are saying, one page at a time, above their heads. */
+  private readonly speech = new SpeechQueue();
+  private speechText!: Phaser.GameObjects.BitmapText;
+  private speechShadow!: Phaser.GameObjects.BitmapText;
+  /** The open talk menu: who we are talking to and what can be asked. */
+  private dialog: { npc: string; speaker: string; choices: DialogChoice[] } | undefined;
+  private dialogPanel!: Phaser.GameObjects.Rectangle;
+  private choiceLabels: Phaser.GameObjects.BitmapText[] = [];
   /** Where the mouse is, in game pixels (undefined = outside the canvas). */
   private pointer: Point | undefined;
   private hovered: string | undefined;
@@ -101,6 +119,29 @@ export class RoomScene extends Phaser.Scene {
     return this.fade.alpha;
   }
 
+  /** The sprites currently drawn in the scene: id, picture, feet position and depth (for tests). */
+  get spritesShown(): { id: string; image: string; x: number; y: number; depth: number }[] {
+    return [...this.spriteImages].filter(([, i]) => i.visible).map(([id, i]) => ({
+      id,
+      image: i.texture.key.replace(/^asset:/, ''),
+      x: i.x,
+      y: i.y,
+      depth: i.depth,
+    }));
+  }
+
+  /** The speech on screen: who speaks, what, and in which colour (undefined = nobody). */
+  get speechNow(): { speaker: string; text: string; color: string } | undefined {
+    const line = this.speech.current;
+    if (!line || this.pager.current !== '') return undefined;
+    return { speaker: line.speaker, text: line.text, color: this.session.bundle.speakers.speakers[line.speaker]?.color ?? '#ffffff' };
+  }
+
+  /** The open talk menu, as the labels the player reads (undefined = no menu). */
+  get dialogState(): { npc: string; choices: string[] } | undefined {
+    return this.dialog && { npc: this.dialog.npc, choices: this.dialog.choices.map((c) => c.label) };
+  }
+
   /** Position, facing, size ... of Grognak (for tests and debugging). */
   get playerState() {
     return this.player.state;
@@ -138,6 +179,19 @@ export class RoomScene extends Phaser.Scene {
       .setTint(COLOR.verbSelected)
       .setDepth(501)
       .setVisible(false);
+    // the talk menu covers the verbs and inventory while it is open
+    this.dialogPanel = this.add
+      .rectangle(DIALOG_PANEL.x, DIALOG_PANEL.y, DIALOG_PANEL.w, DIALOG_PANEL.h, 0x14141c)
+      .setOrigin(0)
+      .setDepth(300)
+      .setVisible(false);
+    for (let i = 0; i < DIALOG_MAX; i++) {
+      const r = choiceRect(i);
+      this.choiceLabels.push(this.add.bitmapText(r.x, r.y + 1, PIXEL_FONT, '').setDepth(301).setVisible(false));
+    }
+    // speech: coloured text with a black copy one pixel lower-right, so it reads on any background
+    this.speechShadow = this.add.bitmapText(0, 0, PIXEL_FONT, '').setTint(0x000000).setDepth(450).setOrigin(0.5, 1).setCenterAlign();
+    this.speechText = this.add.bitmapText(0, 0, PIXEL_FONT, '').setDepth(451).setOrigin(0.5, 1).setCenterAlign();
     VERBS.forEach((spec, i) => {
       const r = verbRect(i);
       this.verbLabels.set(spec.verb, this.add.bitmapText(r.x, r.y + 1, PIXEL_FONT, spec.label));
@@ -162,9 +216,13 @@ export class RoomScene extends Phaser.Scene {
     this.setUpInput();
 
     const stop = this.session.onEvents((events) => {
-      if (events.some((e) => e.type === 'location_changed')) this.transition();
-      const said = events.flatMap((e) => (e.type === 'say' ? [e.text] : []));
-      if (said.length > 0) this.pager.set(said.join('\n'));
+      if (events.some((e) => e.type === 'location_changed')) {
+        this.speech.clear();
+        this.endDialog();
+        this.transition();
+      }
+      this.refreshSprites(); // things appear, vanish and change under the engine's hands
+      this.show(events.flatMap((e) => (e.type === 'say' ? [interpretSay(this.session.bundle.speakers, e.text, e.key)] : [])));
       // Things can appear or vanish (the gemstone under the rubble), also under a motionless mouse.
       this.refreshHotspots();
       this.refreshUi();
@@ -175,6 +233,8 @@ export class RoomScene extends Phaser.Scene {
   /** Runs every frame. `delta` is the milliseconds since the last frame; movement is always speed x time. */
   update(_time: number, delta: number): void {
     this.player.update(delta);
+    this.speech.update((delta / 1000) * (debugState.speedFactor ?? 1), this.pager.current !== '');
+    this.drawSpeech();
     if (this.overlay.visible) this.overlay.drawPath(this.player.follower.position, this.player.follower.remaining);
   }
 
@@ -216,6 +276,7 @@ export class RoomScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-F1', () => this.overlay.toggle());
     this.input.keyboard?.on('keydown-ESC', () => {
       this.builder.cancel();
+      this.endDialog();
       this.refreshUi();
     });
   }
@@ -226,6 +287,20 @@ export class RoomScene extends Phaser.Scene {
       this.pager.next();
       return;
     }
+
+    // a click on the talk menu picks a question (and the menu hides the verbs and inventory under it)
+    if (this.dialog && y >= DIALOG_PANEL.y) {
+      const picked = right ? undefined : choiceAt(this.dialog.choices.length, x, y);
+      if (picked !== undefined) this.choose(this.dialog.choices[picked]!);
+      return;
+    }
+
+    // a click in the scene while somebody speaks skips to the next line (and does nothing else)
+    if (this.speechNow && y < SCENE_HEIGHT) {
+      this.speech.skip();
+      return;
+    }
+    if (this.dialog) this.endDialog(); // any other click means the conversation is over
 
     if (!right && inRect(SCROLL_LEFT, x, y)) this.inventoryScroll--;
     else if (!right && inRect(SCROLL_RIGHT, x, y)) this.inventoryScroll++;
@@ -252,6 +327,10 @@ export class RoomScene extends Phaser.Scene {
         facing: exit.direction as Facing,
         then: () => this.session.perform({ verb: 'go', objects: [exit.direction] }),
       });
+      // a double-click does not wait for the walk: he is at the exit at once (the engine may still refuse)
+      const now = performance.now();
+      if (this.lastExitClick?.exit === exit && now - this.lastExitClick.at < DOUBLE_CLICK_MS) this.player.skipWalk();
+      this.lastExitClick = { exit, at: now };
       return;
     }
 
@@ -276,15 +355,86 @@ export class RoomScene extends Phaser.Scene {
   /** Carry out a command: first walk to what it is about (if it needs that), then let the engine do it. */
   private act(command: Command): void {
     this.pager.clear();
+    this.speech.clear();
     const target = walkTargetForCommand(this.session.bundle.scenes[this.shownLocation], command);
-    if (target === undefined) this.session.perform(command);
+    if (target === undefined) this.perform(command);
     else {
       this.player.walkTo(target.point, {
         facing: target.facing,
         toward: target.toward,
-        then: () => this.session.perform(command),
+        then: () => this.perform(command),
       });
     }
+  }
+
+  /** Hand a command to the engine; a successful "Talk to" a speaker opens the talk menu. */
+  private perform(command: Command): void {
+    this.session.perform(command);
+    const npc = command.verb === 'talk_to' ? command.objects[0] : undefined;
+    if (npc !== undefined) this.startDialog(npc);
+  }
+
+  // --- speech and talking -------------------------------------------------------------------------
+
+  /** Show what the engine said: narration in the text box; quoted words above the speaker, once the box is read. */
+  private show(said: { narration: string; speech: { speaker: string; text: string }[] }[]): void {
+    if (said.length === 0) return;
+    this.speech.clear();
+    const narration = said.map((s) => s.narration).filter((n) => n !== '').join('\n');
+    if (narration === '') this.pager.clear();
+    else this.pager.set(narration);
+    for (const { speech } of said) for (const line of speech) this.speech.say(line.speaker, line.text);
+  }
+
+  /** Where a speaker's words go: just above their hotspot in this scene, or above Grognak's head. */
+  private speechAnchor(speakerId: string): Point {
+    const { bundle } = this.session;
+    const thing = bundle.speakers.speakers[speakerId]?.thing;
+    const hotspot = thing === undefined ? undefined : bundle.scenes[this.shownLocation]?.hotspots.find((h) => h.id === thing);
+    if (hotspot) {
+      const xs = hotspot.polygon.map((p) => p[0]);
+      const top = Math.min(...hotspot.polygon.map((p) => p[1]));
+      return [Math.round((Math.min(...xs) + Math.max(...xs)) / 2), top - 2];
+    }
+    const p = this.player.state;
+    return [Math.round(p.x), Math.round(p.y - bundle.config.player.frameHeight * p.scale) - 2];
+  }
+
+  private drawSpeech(): void {
+    const line = this.speechNow;
+    this.speechText.setVisible(line !== undefined);
+    this.speechShadow.setVisible(line !== undefined);
+    if (!line) return;
+    this.speechText.setText(line.text).setTint(Number.parseInt(line.color.slice(1), 16));
+    this.speechShadow.setText(line.text);
+    const [ax, ay] = this.speechAnchor(line.speaker);
+    // keep the whole bubble inside the picture
+    const half = this.speechText.width / 2;
+    const x = Math.round(Math.min(Math.max(ax, half + 2), SCENE_WIDTH - half - 2));
+    const y = Math.round(Math.max(ay, this.speechText.height + 2));
+    this.speechText.setPosition(x, y);
+    this.speechShadow.setPosition(x + 1, y + 1);
+  }
+
+  private startDialog(npc: string): void {
+    const { bundle, engine } = this.session;
+    const speaker = Object.entries(bundle.speakers.speakers).find(([, s]) => s.thing === npc);
+    if (!speaker || !this.isVisible(npc)) return;
+    const choices = dialogChoices(speaker[1].topics ?? [], engine.state.inventory, Thing.aliasToName, npc);
+    this.dialog = { npc, speaker: speaker[0], choices };
+  }
+
+  private endDialog(): void {
+    this.dialog = undefined;
+  }
+
+  /** The player picked a question (or Goodbye). */
+  private choose(choice: DialogChoice): void {
+    const dialog = this.dialog!;
+    this.pager.clear();
+    this.speech.clear();
+    if (choice.topic === undefined) this.endDialog();
+    else this.session.perform({ verb: 'ask', objects: [dialog.npc, choice.topic] });
   }
 
   // --- showing what the world looks like ----------------------------------------------------------
@@ -299,6 +449,7 @@ export class RoomScene extends Phaser.Scene {
     this.shownLocation = location;
     this.background.setTexture(textureKey(asset));
     this.locationLabel.setText(bundle.logic.locations[location]?.name ?? location);
+    this.createSprites(location);
     this.refreshHotspots();
   }
 
@@ -357,6 +508,39 @@ export class RoomScene extends Phaser.Scene {
     });
   }
 
+  /** Make one (still hidden) picture for each sprite of a scene; refreshSprites decides what each shows. */
+  private createSprites(location: string): void {
+    for (const image of this.spriteImages.values()) image.destroy();
+    this.spriteImages.clear();
+    for (const sprite of this.session.bundle.scenes[location]?.sprites ?? []) {
+      this.spriteImages.set(sprite.id, this.add.image(0, 0, '__DEFAULT').setOrigin(0.5, 1).setVisible(false));
+    }
+    this.refreshSprites();
+  }
+
+  /**
+   * Bring the sprites in line with the world. Nothing is remembered between calls: for each sprite we ask
+   * lookOf(sprite, world) and draw whatever it says - so a sprite can never disagree with the engine.
+   */
+  private refreshSprites(): void {
+    const scene = this.session.bundle.scenes[this.shownLocation];
+    const world = {
+      booleans: this.session.engine.state.constraints.boolean,
+      visibleThings: this.session.engine.visibleThings(this.shownLocation),
+    };
+    for (const sprite of scene?.sprites ?? []) {
+      const image = this.spriteImages.get(sprite.id);
+      const look = lookOf(sprite, world);
+      if (!image) continue;
+      if (!look) {
+        image.setVisible(false);
+        continue;
+      }
+      // sorted by y, like the player: whoever is lower on the screen is in front
+      image.setTexture(textureKey(look.image)).setPosition(look.at[0], look.at[1]).setDepth(look.at[1]).setVisible(true);
+    }
+  }
+
   private isVisible = (id: string): boolean => this.session.engine.visibleThings(this.shownLocation).includes(id);
 
   /** The thing under a point: a scene hotspot above the strip, an inventory item in it. */
@@ -410,11 +594,27 @@ export class RoomScene extends Phaser.Scene {
     this.answerBand.setVisible(lines > 0).setSize(TEXT_BOX.w, 6 + 8 * (lines + (this.pager.hasMore ? 1 : 0)));
     this.moreMarker.setY(TEXT_BOX_TEXT.y + 8 * lines).setVisible(this.pager.hasMore);
 
+    // the talk menu replaces the verbs
+    const talking = this.dialog !== undefined;
+    this.dialogPanel.setVisible(talking);
+    this.choiceLabels.forEach((label, i) => {
+      const choice = this.dialog?.choices[i];
+      const hovering = choice !== undefined && this.pointer !== undefined && choiceAt(this.dialog!.choices.length, ...this.pointer) === i;
+      label.setVisible(choice !== undefined).setText(choice?.label ?? '').setTint(hovering ? COLOR.verbHover : COLOR.verb);
+    });
+    for (const label of this.verbLabels.values()) label.setVisible(!talking);
+
     this.refreshInventory();
   }
 
   /** The sentence line: the builder's sentence, or "Go to <place>" when idly pointing at an exit. */
   private exitAwareSentence(): string {
+    if (this.dialog) {
+      const at = this.pointer ? choiceAt(this.dialog.choices.length, ...this.pointer) : undefined;
+      const choice = at === undefined ? undefined : this.dialog.choices[at];
+      if (choice === undefined) return `Talk to ${Thing.aliasToName(this.dialog.npc)}`;
+      return choice.topic === undefined ? 'Say goodbye' : `Ask ${Thing.aliasToName(this.dialog.npc)} about ${Thing.aliasToName(choice.topic)}`;
+    }
     const sentence = this.builder.text;
     if (sentence !== '' || !this.hoveredExit || this.transitioning) return sentence;
     const { locations } = this.session.bundle.logic;

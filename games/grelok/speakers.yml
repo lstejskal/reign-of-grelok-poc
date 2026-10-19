@@ -1,0 +1,37 @@
+# Who speaks. A `say` event whose message key matches one speaker's `messages` is spoken by them: the quoted words
+# appear above the speaker in their colour; everything outside the quotes is narration (shown in the text box).
+# Quoted text nobody claims is spoken by the default speaker.
+
+default: grognak
+
+speakers:
+  grognak:          # the player: words appear above his head
+    name: Grognak
+    color: "#ffe040"
+
+  blacksmith:
+    name: Blacksmith
+    color: "#ff9a3c"
+    thing: blacksmith
+    messages: [talk_to_blacksmith, ask_blacksmith_about_*, give_anything_to_blacksmith]
+    topics: [grelok]
+
+  priest:
+    name: Priest
+    color: "#f4f0ff"
+    thing: priest
+    messages: [talk_to_priest*]
+    topics: [grelok]
+
+  wizard:
+    name: Wizard
+    color: "#7fd8ff"
+    thing: wizard
+    messages: [talk_to_wizard, ask_wizard_about_*, give_anything_to_wizard]
+    topics: [grelok]
+
+  grelok:           # wine red, like his cloak
+    name: Grelok
+    color: "#d8325a"
+    thing: grelok
+    messages: [talk_to_grelok, ask_grelok_about_*, give_anything_to_grelok]
