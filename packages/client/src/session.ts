@@ -1,6 +1,8 @@
 import { Engine } from '@grelok/engine';
 import type { Command, EngineEvent, GameBundle } from '@grelok/engine';
 import { MemoryStore, SaveStore } from './save/saveGame';
+import { silentAudio } from './audio/mix';
+import type { AudioPlayer } from './audio/mix';
 
 type Listener = (events: EngineEvent[]) => void;
 
@@ -20,6 +22,8 @@ export class GameSession {
     engine: Engine,
     /** Where this game's saves live (in tests: memory). */
     readonly saves: SaveStore = new SaveStore(new MemoryStore(), bundle.id),
+    /** Music and sound effects (silent in tests). */
+    readonly audio: AudioPlayer = silentAudio,
   ) {
     this.current = engine;
   }

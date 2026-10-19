@@ -13,7 +13,8 @@
     "e2e": "playwright test",
     "cli": "tsx packages/engine/node/cli.ts",
     "validate": "tsx tools/validate.ts",
-    "placeholders": "tsx tools/make-placeholders.ts"
+    "placeholders": "tsx tools/make-placeholders.ts",
+    "placeholder-music": "tsx tools/make-placeholder-music.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.1",

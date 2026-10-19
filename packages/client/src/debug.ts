@@ -104,6 +104,10 @@ export function installDebugHook(game: Phaser.Game): void {
     get fade(): number | undefined {
       return (game.scene.getScene('RoomScene') as RoomScene | null)?.fadeAlpha;
     },
+    /** Music and sound: { currentTrack, played, muted, volume }. */
+    get audio() {
+      return debugState.session?.audio.state;
+    },
     get speedFactor(): number {
       return debugState.speedFactor ?? 1;
     },

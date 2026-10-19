@@ -7,7 +7,7 @@
 #   narrate: "text"     text box, waits for a click (or  narrate: {message: <key>}  to use a message of the game)
 #   say: {speaker, text}  words above a speaker (a key of speakers.yml)
 #   wait: seconds       fade: out|in       shake: seconds
-#   sfx: name           music: name|stop   (sounds are played from Step 15 on)
+#   sfx: name           music: name|stop   (files: assets/sfx/<name>.wav, assets/music/<name>.wav)
 #   sync                show the world as it is NOW - until then the picture and inventory keep their old look
 #   end: {lines: [..]}  the end screen with optional credits
 

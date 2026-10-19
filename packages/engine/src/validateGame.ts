@@ -1,4 +1,4 @@
-import { ICON_HEIGHT, ICON_WIDTH, MAX_VERBS, MAX_VERB_LABEL, PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS, SCENE_HEIGHT, SCENE_WIDTH, iconPath } from './sceneTypes';
+import { ICON_HEIGHT, ICON_WIDTH, MAX_VERBS, MAX_VERB_LABEL, PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS, SCENE_HEIGHT, SCENE_WIDTH, iconPath, musicPath, sfxPath } from './sceneTypes';
 import type { GameBundle, VerbSpec } from './sceneTypes';
 import { parseStep } from './cutscene';
 
@@ -98,6 +98,8 @@ export function validateGame(
             if (step.type === 'narrate' && step.message !== undefined && !(step.message in logic.messages)) {
                 problem(where, `step ${i + 1}: no message "${step.message}" in logic/messages.yml`);
             }
+            if (step.type === 'sfx' && !assetExists(sfxPath(step.name))) problem(where, `step ${i + 1}: sound not found: assets/${sfxPath(step.name)}`);
+            if (step.type === 'music' && step.name !== 'stop' && !assetExists(musicPath(step.name))) problem(where, `step ${i + 1}: music not found: assets/${musicPath(step.name)}`);
             if (step.type === 'say' && !(step.speaker in speakers.speakers)) problem(where, `step ${i + 1}: unknown speaker "${step.speaker}"`);
         });
     }

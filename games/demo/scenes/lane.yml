@@ -2,6 +2,7 @@
 
 background: backgrounds/lane.png
 walkmask: walkmasks/lane.png   # white = walkable
+music: music/lane.mp3   # loops while the player is here; changing scene crossfades to the next tune
 scale: {top: 0.7, bottom: 1.0}
 
 hotspots:   # later entries are on top

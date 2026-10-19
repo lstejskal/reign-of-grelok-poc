@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
-import { SCENE_HEIGHT, SCENE_WIDTH, Thing, iconPath } from '@grelok/engine';
+import { SCENE_HEIGHT, SCENE_WIDTH, Thing, iconPath, musicPath } from '@grelok/engine';
 import { parseStep } from '@grelok/engine';
-import type { Command, CutsceneStep, ExitData, Facing, Point, Verb } from '@grelok/engine';
+import type { Command, CutsceneStep, EngineEvent, ExitData, Facing, Point, Verb } from '@grelok/engine';
 import { GAME_WIDTH, GAME_HEIGHT } from '../config';
 import { PIXEL_FONT } from '../gfx/pixelFont';
 import { textureKey } from '../data/assets';
@@ -22,6 +22,7 @@ import type { DialogChoice } from '../ui/dialog';
 import { SpeechQueue, interpretSay } from '../ui/speech';
 import { Sequencer } from '../cutscene/Sequencer';
 import { MenuPanel } from '../ui/MenuPanel';
+import { volumeLabel } from '../audio/mix';
 import { SLOTS as SAVE_SLOTS, makeSave, slotLabel } from '../save/saveGame';
 import type { SavedPlayer, Slot } from '../save/saveGame';
 import type { CutsceneActor } from '../cutscene/Sequencer';
@@ -82,9 +83,11 @@ export class RoomScene extends Phaser.Scene {
   private waiters: { done: () => boolean; resolve: () => void }[] = [];
   /** What the inventory panel shows. It follows the engine, except during a cutscene, until its `sync` step. */
   private inventoryView: string[] = [];
-  /** Sounds and music the cutscenes asked for (they are really played from Step 15 on). */
+  /** Sounds and music the cutscenes asked for (they are also really played, by session.audio). */
   private readonly audioLog: string[] = [];
   private ended = false;
+  /** How many things we carried after the last event, to tell "picked something up" from "gave something away". */
+  private carried = 0;
   private endObjects: Phaser.GameObjects.GameObject[] = [];
   private endLines: string[] = [];
   private lastExitClick: { exit: ExitData; at: number } | undefined;
@@ -203,6 +206,7 @@ export class RoomScene extends Phaser.Scene {
     this.waiters = [];
     this.inventoryView = [];
     this.audioLog.length = 0;
+    this.carried = this.session.engine.state.inventory.length;
     this.ended = false;
     this.endObjects = [];
     this.endLines = [];
@@ -271,7 +275,7 @@ export class RoomScene extends Phaser.Scene {
     });
     this.locationLabel = this.add.bitmapText(4, GAME_HEIGHT - 8, PIXEL_FONT, '').setTint(0x909090);
     this.add
-      .bitmapText(GAME_WIDTH - 4, GAME_HEIGHT - 8, PIXEL_FONT, 'F1 = OUTLINES  / = CONSOLE')
+      .bitmapText(GAME_WIDTH - 4, GAME_HEIGHT - 8, PIXEL_FONT, 'F1 OUTLINES  / CONSOLE  M MUTE')
       .setOrigin(1, 0)
       .setTint(COLOR.hint);
 
@@ -292,6 +296,7 @@ export class RoomScene extends Phaser.Scene {
     this.setUpInput();
 
     const stop = this.session.onEvents((events) => {
+      this.playEventSounds(events);
       if (events.some((e) => e.type === 'location_changed')) {
         this.speech.clear();
         this.endDialog();
@@ -317,6 +322,15 @@ export class RoomScene extends Phaser.Scene {
       this.refreshUi();
     });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, stop);
+  }
+
+  /** The small sounds of everyday life: a door when we change scene, a jingle when we pick something up. */
+  private playEventSounds(events: EngineEvent[]): void {
+    const { audio, engine } = this.session;
+    if (events.some((e) => e.type === 'location_changed')) audio.playSfx('door');
+    const carried = engine.state.inventory.length;
+    if (carried > this.carried) audio.playSfx('pickup');
+    this.carried = carried;
   }
 
   /** Runs every frame. `delta` is the milliseconds since the last frame; movement is always speed x time. */
@@ -362,6 +376,7 @@ export class RoomScene extends Phaser.Scene {
     });
     this.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
       this.pointer = [Math.floor(pointer.x), Math.floor(pointer.y)];
+      if (this.menu.visible || this.pointer[1] >= SCENE_HEIGHT) this.session.audio.playSfx('click');
       if (this.menu.visible) this.menu.click(...this.pointer); // a menu is modal: nothing else hears the click
       else if (this.locked) this.onLockedClick(this.pointer);
       else if (!this.transitioning) this.onClick(this.pointer, pointer.rightButtonDown());
@@ -372,6 +387,10 @@ export class RoomScene extends Phaser.Scene {
     // F1 normally opens the browser's help page; addCapture stops that.
     this.input.keyboard?.addCapture('F1');
     this.input.keyboard?.on('keydown-F1', () => this.overlay.toggle());
+    this.input.keyboard?.on('keydown-M', () => {
+      if (document.activeElement instanceof HTMLInputElement) return; // typing in the debug console
+      this.session.audio.toggleMute();
+    });
     this.input.keyboard?.on('keydown-ESC', () => {
       if (document.activeElement instanceof HTMLInputElement) return; // Esc belongs to the debug console then
       if (this.menu.visible) this.menu.hide();
@@ -500,6 +519,7 @@ export class RoomScene extends Phaser.Scene {
     this.menu.show('Menu', [
       { label: 'Save', onChoose: () => this.showSlots('save') },
       { label: 'Load', enabled: hasSave, onChoose: () => this.showSlots('load') },
+      { label: `Volume: ${volumeLabel(this.session.audio.settings)}`, onChoose: () => { this.session.audio.cycleVolume(); this.openMenu(); } },
       { label: 'Quit to title', onChoose: () => this.quitToTitle() },
       { label: 'Back', onChoose: () => this.menu.hide() },
     ]);
@@ -554,6 +574,7 @@ export class RoomScene extends Phaser.Scene {
 
   private quitToTitle(): void {
     this.autosave();
+    this.session.audio.setMusic(undefined);
     this.scene.start('TitleScene', { session: this.session });
   }
 
@@ -616,8 +637,14 @@ export class RoomScene extends Phaser.Scene {
       this.cameras.main.shake((seconds * 1000) / (debugState.speedFactor ?? 1), 0.008);
       return this.delay(seconds);
     },
-    sfx: (name) => void this.audioLog.push(`sfx ${name}`),
-    music: (name) => void this.audioLog.push(`music ${name}`),
+    sfx: (name) => {
+      this.audioLog.push(`sfx ${name}`);
+      this.session.audio.playSfx(name);
+    },
+    music: (name) => {
+      this.audioLog.push(`music ${name}`);
+      this.session.audio.setMusic(name === 'stop' ? undefined : musicPath(name));
+    },
     sync: () => {
       this.refreshSprites();
       this.inventoryView = this.session.engine.state.inventory;
@@ -717,6 +744,7 @@ export class RoomScene extends Phaser.Scene {
     }
 
     this.shownLocation = location;
+    this.session.audio.setMusic(bundle.scenes[location]?.music); // each scene has its own tune; the old one fades out
     this.background.setTexture(textureKey(asset));
     this.locationLabel.setText(bundle.logic.locations[location]?.name ?? location);
     this.createSprites(location);

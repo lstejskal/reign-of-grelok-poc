@@ -14,3 +14,19 @@ export function assetUrl(gameId: string, assetPath: string): string | undefined 
 
 /** Phaser texture key for a game asset. */
 export const textureKey = (assetPath: string): string => `asset:${assetPath}`;
+
+// Sounds: assets/music/*.mp3 and assets/sfx/*.wav (any of wav / mp3 / ogg is picked up).
+const sounds = import.meta.glob('../../../../games/*/assets/{music,sfx}/*.{mp3,wav,ogg}', {
+  query: '?url',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>;
+
+/** Every sound file of a game: its path inside assets/ ("sfx/clang.wav") and the URL to fetch it from. */
+export function soundAssets(gameId: string): { path: string; url: string }[] {
+  const prefix = `games/${gameId}/assets/`;
+  return Object.entries(sounds).flatMap(([key, url]) => {
+    const at = key.indexOf(prefix);
+    return at < 0 ? [] : [{ path: key.slice(at + prefix.length), url }];
+  });
+}

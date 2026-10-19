@@ -10,6 +10,13 @@ export const ICON_WIDTH = 24;
 export const ICON_HEIGHT = 16;
 export const iconPath = (thingAlias: string): string => `icons/${thingAlias}.png`;
 
+// Sound files (music is mp3, effects are wav: they are tiny, and mp3 adds a hair of silence at the start of a file).
+//  A cutscene says `sfx: clang` / `music: battle`; a scene says `music: music/plain.mp3` (a path, like its picture).
+export const sfxPath = (name: string): string => `sfx/${name}.wav`;
+export const musicPath = (name: string): string => `music/${name}.mp3`;
+/** Sounds the client plays by itself. A game may ship these files (assets/sfx/<name>.wav); without them there is silence. */
+export const STANDARD_SFX = ['click', 'pickup', 'door'] as const;
+
 export type Point = [x: number, y: number];
 export type Facing = 'n' | 's' | 'e' | 'w';
 

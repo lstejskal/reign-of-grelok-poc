@@ -5,7 +5,8 @@ import { GAME_WIDTH, GAME_HEIGHT } from '../config';
 import { registerPixelFont, PIXEL_FONT } from '../gfx/pixelFont';
 import { loadGame, requestedGameId, titleRequested } from '../data/loadGame';
 import { SaveStore, browserStore } from '../save/saveGame';
-import { assetUrl, textureKey } from '../data/assets';
+import { assetUrl, soundAssets, textureKey } from '../data/assets';
+import { AudioManager, audioKey } from '../audio/AudioManager';
 import { installDebugConsole } from '../debugConsole';
 import { debugState } from '../debug';
 import { GameSession } from '../session';
@@ -23,13 +24,16 @@ export class BootScene extends Phaser.Scene {
     try {
       const bundle = loadGame(requestedGameId());
       const engine = new Engine(bundle.logic, { startLocation: bundle.config.start });
-      const session = new GameSession(bundle, engine, new SaveStore(browserStore(), bundle.id));
+      const sounds = soundAssets(bundle.id);
+      const audio = new AudioManager(this.sound, browserStore(), new Set(sounds.map((s) => s.path)));
+      this.game.events.on(Phaser.Core.Events.STEP, (_time: number, delta: number) => audio.update(delta)); // drives the fades
+      const session = new GameSession(bundle, engine, new SaveStore(browserStore(), bundle.id), audio);
       Object.assign(debugState, { bundle, engine, session });
       installDebugConsole(session);
 
       this.text(GAME_WIDTH / 2, 90, 'LOADING...', 0xc8c8c8);
       // (after the title screen, the player picks New game / Continue / Load; `?title=off` goes straight into the game)
-      this.loadPictures(bundle, () => this.scene.start(titleRequested() ? 'TitleScene' : 'RoomScene', { session }));
+      this.loadPictures(bundle, sounds, () => this.scene.start(titleRequested() ? 'TitleScene' : 'RoomScene', { session }));
     } catch (error) {
       // A broken or missing game should be visible on screen, not just in the console.
       debugState.error = error instanceof Error ? error.message : String(error);
@@ -39,7 +43,9 @@ export class BootScene extends Phaser.Scene {
   }
 
   // Queue every scene background and walkmask, the player's sheet and every inventory icon with Phaser's loader and call `done` when they have all arrived.
-  private loadPictures(bundle: GameBundle, done: () => void): void {
+  private loadPictures(bundle: GameBundle, sounds: { path: string; url: string }[], done: () => void): void {
+    for (const { path, url } of sounds) this.load.audio(audioKey(path), url);
+
     for (const scene of Object.values(bundle.scenes)) {
       if (scene.background === undefined) continue;
       const url = assetUrl(bundle.id, scene.background);

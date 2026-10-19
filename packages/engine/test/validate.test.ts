@@ -161,4 +161,16 @@ describe('validateGame', () => {
         expect(errors.join('\n')).toContain('nobody answers "talk to blacksmith"');
         expect(errors.join('\n')).toContain('nobody answers "ask blacksmith about grelok"');
     });
+    it('reports sound files that do not exist: scene music, cutscene sfx and music', () => {
+        const bundle = fresh();
+        bundle.scenes.plain!.music = 'music/gone.mp3';
+        bundle.cutscenes.use_rusty_sword_on_zombie = [{ sfx: 'no_such_sound' }, { music: 'no_such_tune' }, { music: 'stop' }];
+        const only = (path: string) => !path.includes('gone') && !path.includes('no_such');
+
+        const errors = validateGame(bundle, only).join('\n');
+        expect(errors).toContain('scenes/plain.yml: music asset not found: assets/music/gone.mp3');
+        expect(errors).toContain('step 1: sound not found: assets/sfx/no_such_sound.wav');
+        expect(errors).toContain('step 2: music not found: assets/music/no_such_tune.mp3');
+        expect(errors).not.toContain('stop');
+    });
 });

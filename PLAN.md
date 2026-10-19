@@ -298,6 +298,7 @@ Verbs: Look at, Pick up, Use, Give, Talk to, Walk to. "Attack" = Use X on Y (sam
 - **Output:** each location has its own loop; crossfades on scene change; SFX on actions.
 - **Test:** validator checks audio files exist; e2e reads `__adv.audio.currentTrack` after scene change.
 - **Concept:** audio in games, browser autoplay policy.
+- **Status: done.** `AudioManager` (Phaser) + pure `audio/mix.ts` (fades, volume, settings; unit-tested). Scenes get a `music:` path; cutscene `sfx:`/`music:` now really play; click / pickup / door sounds are optional files. `M` mutes (not while typing in the console); the menu has a Volume row; both persist. `npm run placeholder-music` synthesises the tunes and effects itself (plain maths, deterministic; no jsfxr). Deviations: `.wav` only, one master volume. Validation also checks cutscene sound files. See `docs/learn/15-audio.md`.
 
 ### Step 16 — Art direction & AI asset pipeline
 - `docs/art-style.md`: Golden Axe-inspired guidelines — limited palette (~32 colors, Mega Drive-like 9-bit RGB look),

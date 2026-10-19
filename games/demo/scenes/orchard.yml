@@ -2,6 +2,7 @@
 
 background: backgrounds/orchard.png
 walkmask: walkmasks/orchard.png   # white = walkable
+music: music/orchard.mp3   # loops while the player is here; changing scene crossfades to the next tune
 scale: {top: 0.7, bottom: 1.0}
 
 hotspots:
