@@ -1,27 +1,15 @@
-import type { Verb } from '@grelok/engine';
+import { DEFAULT_VERBS } from '@grelok/engine';
+import type { GameConfig, Verb, VerbSpec } from '@grelok/engine';
 
-/** One verb button: what the player reads, and how many things the sentence needs. */
-export interface VerbSpec {
-  verb: Verb;
-  label: string;
-  /** 1 = "Look at X"; 2 = "Use X with Y". */
-  objects: 1 | 2;
-  /** Word between the two objects (only for objects = 2). */
-  preposition?: string;
-}
+export type { VerbSpec };
 
 /**
- * The verb grid, in column-major order (the first three are the left column). It is a constant for now;
- * a game that wants other verbs would move this list into its game.yml.
+ * The verb buttons for a game: its `verbs:` list from game.yml, or the engine's default six.
+ * (Column-major order: the first three are the left column.)
  */
-export const VERBS: readonly VerbSpec[] = [
-  { verb: 'give', label: 'Give', objects: 2, preposition: 'to' },
-  { verb: 'pick_up', label: 'Pick up', objects: 1 },
-  { verb: 'use', label: 'Use', objects: 2, preposition: 'with' },
-  { verb: 'look_at', label: 'Look at', objects: 1 },
-  { verb: 'talk_to', label: 'Talk to', objects: 1 },
-  { verb: 'push', label: 'Push', objects: 1 },
-];
+export function verbsOf(config: Pick<GameConfig, 'verbs'>): readonly VerbSpec[] {
+  return config.verbs ?? DEFAULT_VERBS;
+}
 
 /** What a plain click on a thing you carry does when no verb is chosen (a thing in the scene is walked to instead). */
 export const DEFAULT_VERB: Verb = 'look_at';

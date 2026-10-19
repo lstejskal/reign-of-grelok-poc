@@ -1,6 +1,6 @@
-import { Thing } from '@grelok/engine';
+import { DEFAULT_VERBS, Thing } from '@grelok/engine';
 import type { Command, Verb } from '@grelok/engine';
-import { DEFAULT_VERB, VERBS } from './verbs';
+import { DEFAULT_VERB } from './verbs';
 import type { VerbSpec } from './verbs';
 
 /**
@@ -21,7 +21,7 @@ export class SentenceBuilder {
   private hoveredCarried = false;
 
   constructor(
-    private readonly specs: readonly VerbSpec[] = VERBS,
+    private readonly specs: readonly VerbSpec[] = DEFAULT_VERBS,
     private readonly nameOf: (alias: string) => string = Thing.aliasToName,
   ) {}
 

@@ -41,7 +41,9 @@ export function assembleBundle(id: string, files: Record<string, string>, parseY
     const noSpeakers: SpeakersConfig = { default: 'player', speakers: { player: { name: 'Player', color: '#ffffff' } } };
     const speakers = 'speakers.yml' in files ? (read('speakers.yml') as SpeakersConfig) : noSpeakers;
 
-    return { id, config: read('game.yml') as GameConfig, logic, speakers, scenes };
+    const cutscenes = 'cutscenes.yml' in files ? ((read('cutscenes.yml') ?? {}) as Record<string, unknown[]>) : {};
+
+    return { id, config: read('game.yml') as GameConfig, logic, speakers, cutscenes, scenes };
 }
 
 /** A sprite with one look may be written `image: x.png` instead of a `states:` list. */

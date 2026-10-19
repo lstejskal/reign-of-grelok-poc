@@ -1,0 +1,28 @@
+---
+# Each action runs top to bottom; a failed "verify" stops it (saying its message, if it names one).
+# When an action finishes without "quiet", the message with the action's own name is said.
+
+look_at_haystack:
+- say look_at_haystack
+- verify boolean key_found false        # only the first look finds the key
+- set constraint-boolean key_found true
+- visible key
+- set description-thing haystack description_haystack_searched
+- say look_at_haystack_key
+- quiet
+
+use_key_on_gate:
+- verify boolean gate_locked true error_gate_open
+- verify boolean gate_oiled true error_gate_rusty
+- set constraint-boolean gate_locked false
+- set constraint-location lane-e nil
+- set description-thing gate description_gate_open
+- remove key
+
+use_oil_can_on_gate:
+- verify boolean gate_oiled false error_gate_oiled
+- set constraint-boolean gate_oiled true
+- set description-thing gate description_gate_oiled
+
+push_goat:
+- exit

@@ -40,8 +40,12 @@ export interface LogicData {
 // The engine's public API: commands go in, events come out.
 // ---------------------------------------------------------------------------
 
-/** The verbs a point-and-click UI can produce. (Text input may also yield data-only verbs like "drink".) */
-export type Verb = 'look_at' | 'pick_up' | 'drop' | 'use' | 'give' | 'talk_to' | 'ask' | 'go' | 'push';
+/**
+ * The verbs a point-and-click UI can produce. The first nine are built into the engine; any other lower_snake_case
+ * word ("open", "drink"...) is a data-only verb a game lists in its game.yml and answers in custom_actions.yml /
+ * messages.yml. (`string & {}` keeps editor autocomplete for the built-in ones.)
+ */
+export type Verb = 'look_at' | 'pick_up' | 'drop' | 'use' | 'give' | 'talk_to' | 'ask' | 'go' | 'push' | (string & {});
 
 /** A complete player intention, e.g. { verb: 'use', objects: ['rusty_sword', 'zombie'] }. Objects are thing aliases. */
 export interface Command {

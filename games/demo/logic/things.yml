@@ -1,0 +1,37 @@
+---
+haystack:
+  alias: haystack
+  description: a soggy haystack. Something glints inside
+  location: lane
+  pickable: false
+
+key:
+  alias: key
+  description: a rusty key
+  location: lane
+  visible: false          # hidden in the haystack until you look at it
+  pickable: true
+
+oil_can:
+  alias: oil_can
+  description: an oil can, half full
+  location: lane
+  pickable: true
+
+gate:
+  alias: gate
+  description: an iron gate. It is locked, and the lock is caked with rust
+  location: lane
+  pickable: false
+
+goat:
+  alias: goat
+  description: your goat, chewing an apple, not a care in the world
+  location: orchard
+  pickable: false
+
+apple_tree:
+  alias: apple_tree
+  description: an old apple tree, heavy with apples the goat has not reached yet
+  location: orchard
+  pickable: false

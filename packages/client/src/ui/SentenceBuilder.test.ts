@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { SentenceBuilder } from './SentenceBuilder';
 import { TextPager, wrapText } from './textPages';
 import { verbAt, verbRect } from './layout';
-import { VERBS } from './verbs';
+import { DEFAULT_VERBS as VERBS } from '@grelok/engine';
 
 describe('SentenceBuilder', () => {
   it('a one-object verb: Look at + thing', () => {
@@ -84,10 +84,10 @@ describe('verb grid layout', () => {
   it('finds every verb at its own button and nothing elsewhere', () => {
     VERBS.forEach((spec, i) => {
       const r = verbRect(i);
-      expect(verbAt(r.x + 1, r.y + 1)).toBe(spec.verb);
-      expect(verbAt(r.x + r.w - 1, r.y + r.h - 1)).toBe(spec.verb);
+      expect(verbAt(VERBS, r.x + 1, r.y + 1)).toBe(spec.verb);
+      expect(verbAt(VERBS, r.x + r.w - 1, r.y + r.h - 1)).toBe(spec.verb);
     });
-    expect(verbAt(160, 50)).toBeUndefined();
+    expect(verbAt(VERBS, 160, 50)).toBeUndefined();
   });
 });
 

@@ -9,6 +9,7 @@ const bundle: GameBundle = {
   config: { title: 'Test', start: 'a', player: { sprite: 'p.png', frameWidth: 32, frameHeight: 48 } },
   scenes: {},
   speakers: { default: 'p', speakers: { p: { name: 'P', color: '#ffffff' } } },
+  cutscenes: {},
   logic: {
     locations: {
       a: { alias: 'a', name: 'Room A', description: 'A.', directions: { n: 'b' } },

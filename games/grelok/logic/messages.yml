@@ -65,6 +65,10 @@ give_anything_to_grelok: "\"I don't have time for your silly gifts, human!\""
 
 talk_to_priest: "Priest smiles at you. \"My child, help me! Fill this vessel with holy water from the chapel on the north-east I had to abandon\" He hands you a vessel, which is actually just a lousy jug, and large brass key."
 
+ask_priest_about_grelok: "\"A wicked wizard, my child. May the light protect us all. Go to the blacksmith; he may know how to fight him.\""
+
+ask_priest_about_anything: "\"I'm afraid I can't help you with that, my child.\""
+
 talk_to_priest_2: "\"Please hurry and bring me some holy water.\""
 
 talk_to_priest_3: "\"Thank you again, my child.\""

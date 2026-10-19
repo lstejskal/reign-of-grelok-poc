@@ -55,6 +55,19 @@ describe('validateGame', () => {
         expect(errors).toContain('scenes/chapel.yml: sprite "zombie": needs "states" (or a single "image")');
     });
 
+    it('reports broken cutscenes: unknown message key, bad step, unknown message or speaker', () => {
+        const bundle = fresh();
+        bundle.cutscenes.no_such_message = [{ wait: 1 }];
+        bundle.cutscenes.use_rusty_sword_on_zombie = [{ jump: 1 }, { narrate: { message: 'nope' } }, { say: { speaker: 'nobody', text: 'hi' } }, { wait: 'long' }];
+
+        const errors = validateGame(bundle, everythingExists);
+        expect(errors.join('\n')).toContain('cutscenes.yml (no_such_message): "no_such_message" is not a message key');
+        expect(errors).toContain('cutscenes.yml (use_rusty_sword_on_zombie): step 1: unknown step "jump"');
+        expect(errors).toContain('cutscenes.yml (use_rusty_sword_on_zombie): step 2: no message "nope" in logic/messages.yml');
+        expect(errors).toContain('cutscenes.yml (use_rusty_sword_on_zombie): step 3: unknown speaker "nobody"');
+        expect(errors).toContain('cutscenes.yml (use_rusty_sword_on_zombie): step 4: wait needs a number of seconds');
+    });
+
     it('reports a location without a scene, and a scene without a location', () => {
         const bundle = fresh();
         delete bundle.scenes.town;
@@ -117,5 +130,35 @@ describe('validateGame', () => {
         const scaled = fresh();
         scaled.scenes.plain!.scale = { top: 0, bottom: 5 };
         expect(validateGame(scaled, everythingExists).join('\n')).toContain('scenes/plain.yml: scale:');
+    });
+    it('reports bad verb buttons: too many, duplicate, bad name, long label, missing preposition', () => {
+        const bundle = fresh();
+        bundle.config.verbs = [
+            { verb: 'use', label: 'Use', objects: 2 },
+            { verb: 'use', label: 'A very long label', objects: 1 },
+            { verb: 'Pick Up', label: 'Pick', objects: 1 },
+            { verb: 'a', label: 'a', objects: 1 },
+            { verb: 'b', label: 'b', objects: 1 },
+            { verb: 'c', label: 'c', objects: 1 },
+            { verb: 'd', label: 'd', objects: 1 },
+        ];
+        const errors = validateGame(bundle, everythingExists).join('\n');
+        expect(errors).toContain('"verbs" has 7 buttons but only 6 fit on screen');
+        expect(errors).toContain('verbs[1]: a two-object verb needs a "preposition"');
+        expect(errors).toContain('verbs[2]: verb "use" listed twice');
+        expect(errors).toContain('verbs[2]: "label" must be 1-9 characters');
+        expect(errors).toContain('verbs[3]: "verb" must be lower_snake_case');
+    });
+
+    it('reports a speaker nobody answers: no talk_to message, no reply for a topic', () => {
+        const bundle = fresh();
+        delete bundle.logic.messages.talk_to_blacksmith;
+        delete bundle.logic.messages.ask_blacksmith_about_anything;
+        bundle.speakers.speakers.blacksmith!.topics = ['grelok', 'standing_stone'];
+        delete bundle.logic.messages.ask_blacksmith_about_grelok;
+
+        const errors = validateGame(bundle, everythingExists);
+        expect(errors.join('\n')).toContain('nobody answers "talk to blacksmith"');
+        expect(errors.join('\n')).toContain('nobody answers "ask blacksmith about grelok"');
     });
 });

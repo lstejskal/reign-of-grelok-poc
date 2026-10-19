@@ -1,5 +1,6 @@
-import { ICON_HEIGHT, ICON_WIDTH, PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS, SCENE_HEIGHT, SCENE_WIDTH, iconPath } from './sceneTypes';
-import type { GameBundle } from './sceneTypes';
+import { ICON_HEIGHT, ICON_WIDTH, MAX_VERBS, MAX_VERB_LABEL, PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS, SCENE_HEIGHT, SCENE_WIDTH, iconPath } from './sceneTypes';
+import type { GameBundle, VerbSpec } from './sceneTypes';
+import { parseStep } from './cutscene';
 
 /**
  * Checks that a game's data hangs together: every location has a scene, every hotspot points at a real
@@ -54,6 +55,8 @@ export function validateGame(
         }
     }
 
+    checkVerbs(config?.verbs, problem);
+
     const { speakers } = bundle;
     if (!(speakers.default in speakers.speakers)) problem('speakers.yml', `default speaker "${speakers.default}" is not listed under speakers`);
     for (const [id, speaker] of Object.entries(speakers.speakers)) {
@@ -63,10 +66,40 @@ export function validateGame(
         for (const thing of [speaker.thing, ...(speaker.topics ?? [])]) {
             if (thing !== undefined && !(thing in logic.things)) problem(where, `there is no thing "${thing}" in logic/things.yml`);
         }
+        // The talk menu sends "talk to X" / "ask X about Y"; these naming rules are how the data answers them
+        const answered = (key: string) => key in logic.messages || key in logic.customActions;
+        if (speaker.thing !== undefined && speaker.thing in logic.things) {
+            if (!answered(`talk_to_${speaker.thing}`)) {
+                problem(where, `nobody answers "talk to ${speaker.thing}": add a "talk_to_${speaker.thing}" message (or custom action)`);
+            }
+            for (const topic of speaker.topics ?? []) {
+                if (!answered(`ask_${speaker.thing}_about_${topic}`) && !answered(`ask_${speaker.thing}_about_anything`)) {
+                    problem(where, `nobody answers "ask ${speaker.thing} about ${topic}": add "ask_${speaker.thing}_about_${topic}" (or a catch-all "ask_${speaker.thing}_about_anything") to messages.yml`);
+                }
+            }
+        }
         for (const pattern of speaker.messages ?? []) {
             const matches = Object.keys(logic.messages).some((key) => pattern.endsWith('*') ? key.startsWith(pattern.slice(0, -1)) : key === pattern);
             if (!matches) problem(where, `message pattern "${pattern}" matches no message in logic/messages.yml`);
         }
+    }
+
+    for (const [key, steps] of Object.entries(bundle.cutscenes)) {
+        const where = `cutscenes.yml (${key})`;
+        if (!(key in logic.messages)) problem(where, `"${key}" is not a message key in logic/messages.yml (a cutscene is announced by the message the engine says)`);
+        if (!Array.isArray(steps) || steps.length === 0) {
+            problem(where, 'needs a list of steps');
+            continue;
+        }
+        steps.forEach((raw, i) => {
+            const parsed = parseStep(raw);
+            if ('error' in parsed) return problem(where, `step ${i + 1}: ${parsed.error}`);
+            const { step } = parsed;
+            if (step.type === 'narrate' && step.message !== undefined && !(step.message in logic.messages)) {
+                problem(where, `step ${i + 1}: no message "${step.message}" in logic/messages.yml`);
+            }
+            if (step.type === 'say' && !(step.speaker in speakers.speakers)) problem(where, `step ${i + 1}: unknown speaker "${step.speaker}"`);
+        });
     }
 
     for (const id of Object.keys(scenes)) {
@@ -150,6 +183,24 @@ export function validateGame(
 }
 
 type Report = (where: string, message: string) => void;
+
+function checkVerbs(verbs: unknown, report: Report): void {
+    if (verbs === undefined) return; // the engine's default buttons
+    if (!Array.isArray(verbs) || verbs.length === 0) return report('game.yml', '"verbs" must be a list of buttons');
+    if (verbs.length > MAX_VERBS) report('game.yml', `"verbs" has ${verbs.length} buttons but only ${MAX_VERBS} fit on screen`);
+    const seen = new Set<string>();
+    verbs.forEach((spec: Partial<VerbSpec>, i) => {
+        const label = `verbs[${i + 1}]`;
+        if (typeof spec?.verb !== 'string' || !/^[a-z][a-z_]*$/.test(spec.verb)) return report('game.yml', `${label}: "verb" must be lower_snake_case, like "pick_up"`);
+        if (seen.has(spec.verb)) report('game.yml', `${label}: verb "${spec.verb}" listed twice`);
+        seen.add(spec.verb);
+        if (typeof spec.label !== 'string' || spec.label === '' || spec.label.length > MAX_VERB_LABEL) {
+            report('game.yml', `${label}: "label" must be 1-${MAX_VERB_LABEL} characters to fit the button`);
+        }
+        if (spec.objects !== 1 && spec.objects !== 2) report('game.yml', `${label}: "objects" must be 1 or 2`);
+        if (spec.objects === 2 && !spec.preposition) report('game.yml', `${label}: a two-object verb needs a "preposition" ("with", "to"...)`);
+    });
+}
 
 function isPoint(value: unknown): boolean {
     return (

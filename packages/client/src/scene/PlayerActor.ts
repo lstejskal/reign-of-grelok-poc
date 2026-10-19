@@ -61,6 +61,12 @@ export class PlayerActor {
     this.follower.setPath(this.area.path(this.follower.position, point));
   }
 
+  /** Turn on the spot. */
+  face(facing: Facing): void {
+    this.follower.facing = facing;
+    this.sync();
+  }
+
   /** Skip the rest of the walk: appear at its end and do what he would have done on arriving there. */
   skipWalk(): void {
     const end = this.follower.remaining.at(-1);

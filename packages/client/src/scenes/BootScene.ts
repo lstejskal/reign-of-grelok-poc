@@ -3,7 +3,8 @@ import { Engine, iconPath } from '@grelok/engine';
 import type { GameBundle } from '@grelok/engine';
 import { GAME_WIDTH, GAME_HEIGHT } from '../config';
 import { registerPixelFont, PIXEL_FONT } from '../gfx/pixelFont';
-import { loadGame, requestedGameId } from '../data/loadGame';
+import { loadGame, requestedGameId, titleRequested } from '../data/loadGame';
+import { SaveStore, browserStore } from '../save/saveGame';
 import { assetUrl, textureKey } from '../data/assets';
 import { installDebugConsole } from '../debugConsole';
 import { debugState } from '../debug';
@@ -22,12 +23,13 @@ export class BootScene extends Phaser.Scene {
     try {
       const bundle = loadGame(requestedGameId());
       const engine = new Engine(bundle.logic, { startLocation: bundle.config.start });
-      const session = new GameSession(bundle, engine);
+      const session = new GameSession(bundle, engine, new SaveStore(browserStore(), bundle.id));
       Object.assign(debugState, { bundle, engine, session });
       installDebugConsole(session);
 
       this.text(GAME_WIDTH / 2, 90, 'LOADING...', 0xc8c8c8);
-      this.loadPictures(bundle, () => this.scene.start('RoomScene', { session }));
+      // (after the title screen, the player picks New game / Continue / Load; `?title=off` goes straight into the game)
+      this.loadPictures(bundle, () => this.scene.start(titleRequested() ? 'TitleScene' : 'RoomScene', { session }));
     } catch (error) {
       // A broken or missing game should be visible on screen, not just in the console.
       debugState.error = error instanceof Error ? error.message : String(error);

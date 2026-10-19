@@ -92,9 +92,36 @@ export interface PlayerConfig {
 export const PLAYER_SHEET_COLUMNS = 3;
 export const PLAYER_FACING_ROWS: readonly Facing[] = ['s', 'n', 'e', 'w'];
 
+/** One verb button: what the player reads, and how many things the sentence needs. */
+export interface VerbSpec {
+    verb: string;
+    label: string;
+    /** 1 = "Look at X"; 2 = "Use X with Y". */
+    objects: 1 | 2;
+    /** Word between the two objects (required when objects = 2). */
+    preposition?: string;
+}
+
+/** The verb grid has room for this many buttons (2 columns of 3). */
+export const MAX_VERBS = 6;
+/** Longest label that fits a button. */
+export const MAX_VERB_LABEL = 9;
+
+/** Used when game.yml has no `verbs:`. Column-major: the first three are the left column. */
+export const DEFAULT_VERBS: readonly VerbSpec[] = [
+    { verb: 'give', label: 'Give', objects: 2, preposition: 'to' },
+    { verb: 'pick_up', label: 'Pick up', objects: 1 },
+    { verb: 'use', label: 'Use', objects: 2, preposition: 'with' },
+    { verb: 'look_at', label: 'Look at', objects: 1 },
+    { verb: 'talk_to', label: 'Talk to', objects: 1 },
+    { verb: 'push', label: 'Push', objects: 1 },
+];
+
 /** games/<id>/game.yml */
 export interface GameConfig {
     title: string;
+    /** The verb buttons, in column-major order (up to MAX_VERBS). Default: DEFAULT_VERBS. */
+    verbs?: VerbSpec[];
     /** Location alias where the player starts. */
     start: string;
     /** Where the player stands at the start, in scene pixels (default: the middle of the floor). */
@@ -126,6 +153,11 @@ export interface GameBundle {
     id: string;
     config: GameConfig;
     logic: LogicData;
+    /**
+     * cutscenes.yml: lists of steps (see cutscene.ts), keyed by the key of the message that announces them. When the
+     * engine says that message, the client plays the cutscene instead. Raw YAML, checked by validateGame.
+     */
+    cutscenes: Record<string, unknown[]>;
     /** speakers.yml; a game without one gets just the player as the default speaker. */
     speakers: SpeakersConfig;
     /** Keyed by location alias. */

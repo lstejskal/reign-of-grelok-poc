@@ -1,0 +1,12 @@
+# The ending: push the goat and she trots home. (Keyed by the message the engine says; see games/grelok/cutscenes.yml.)
+push_goat:
+  - face: e
+  - shake: 0.3
+  - sfx: goat_bleat
+  - narrate: {message: push_goat}
+  - fade: out
+  - end:
+      lines:
+        - The Rusty Gate
+        - ""
+        - A tiny demo for the same engine

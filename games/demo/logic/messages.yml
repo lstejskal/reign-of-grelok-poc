@@ -1,0 +1,38 @@
+---
+gibberish1: "Huh? The goat would understand that better."
+
+gibberish2: "I do not know how to do that."
+
+gibberish3: "That makes no sense, even to a goat herder."
+
+look_at_haystack: "A soggy haystack."
+
+look_at_haystack_key: "You dig through the hay and find a key!"
+
+description_haystack_searched: "a soggy haystack, thoroughly searched"
+
+use_key_on_gate: "Click! The gate creaks open. The key stays stuck in the lock."
+
+error_gate_rusty: "The key won't turn, the lock is rusted solid."
+
+error_gate_open: "The gate is already open."
+
+use_oil_can_on_gate: "You oil the lock generously."
+
+error_gate_oiled: "The lock is already dripping with oil."
+
+description_gate_oiled: "an iron gate with a freshly oiled lock"
+
+description_gate_open: "the iron gate, standing open"
+
+use_oil_can_on_goat: "The goat looks offended."
+
+use_key_on_goat: "The goat tries to eat the key. You take it back."
+
+pick_up_goat: "She is far too heavy to carry. Maybe give her a push towards home?"
+
+pick_up_apple_tree: "Even you are not that strong."
+
+push_gate: "It does not move. Locks are like that."
+
+push_goat: "You push and shove, and at last the goat trots out of the orchard and down the lane, all the way home.\n\nWell done, herder!\n\nTHE END"

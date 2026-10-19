@@ -15,6 +15,11 @@ export function requestedGameId(search: string = window.location.search): string
   return new URLSearchParams(search).get('game') ?? 'grelok';
 }
 
+/** `?title=off` skips the title screen (for development and tests). */
+export function titleRequested(search: string = window.location.search): boolean {
+  return new URLSearchParams(search).get('title') !== 'off';
+}
+
 export function loadGame(id: string): GameBundle {
   const marker = `games/${id}/`;
   const files: Record<string, string> = {};

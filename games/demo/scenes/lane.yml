@@ -1,0 +1,48 @@
+# Scene for location "lane". Coordinates: x 0-319, y 0-143.
+
+background: backgrounds/lane.png
+walkmask: walkmasks/lane.png   # white = walkable
+scale: {top: 0.7, bottom: 1.0}
+
+hotspots:   # later entries are on top
+  - id: haystack
+    polygon: [[16, 64], [84, 64], [84, 112], [16, 112]]
+    walkTo: [92, 118]
+    facing: w
+  - id: key
+    polygon: [[44, 100], [56, 100], [56, 108], [44, 108]]
+    walkTo: [92, 118]
+    facing: w
+  - id: oil_can
+    polygon: [[150, 82], [162, 82], [162, 96], [150, 96]]
+    walkTo: [156, 104]
+    facing: n
+  - id: gate
+    polygon: [[236, 36], [290, 36], [290, 110], [236, 110]]
+    walkTo: [262, 116]
+    facing: e
+
+exits:
+  - direction: e
+    polygon: [[296, 40], [320, 40], [320, 130], [296, 130]]
+    walkTo: [292, 116]
+    spawn: [286, 116]
+
+sprites:
+  - id: key
+    thing: key                  # appears when the haystack gives it up, vanishes when picked up
+    x: 50
+    y: 108
+    image: sprites/key.png
+  - id: oil_can
+    thing: oil_can
+    x: 156
+    y: 96
+    image: sprites/oil_can.png
+  - id: gate_open
+    thing: gate
+    x: 263
+    y: 110
+    states:
+      - when: {gate_locked: false}
+        image: sprites/gate_open.png

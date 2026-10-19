@@ -20,7 +20,7 @@ speakers:
     name: Priest
     color: "#f4f0ff"
     thing: priest
-    messages: [talk_to_priest*]
+    messages: [talk_to_priest*, ask_priest_about_*]
     topics: [grelok]
 
   wizard:

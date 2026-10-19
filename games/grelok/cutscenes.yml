@@ -1,0 +1,57 @@
+# Cutscenes: short scripted scenes. Each is keyed by the KEY OF THE MESSAGE the engine says when the moment happens.
+# It plays only if that command also CHANGED the world (a thing, the inventory, the place, the game's end): trying
+# the same thing again says the same message key but changes nothing, so it stays a plain message.
+# While a cutscene plays the player cannot act (he can still click to read text). Steps run one after another:
+#
+#   walk: [x, y]        Grognak walks there         face: n|s|e|w       he turns
+#   narrate: "text"     text box, waits for a click (or  narrate: {message: <key>}  to use a message of the game)
+#   say: {speaker, text}  words above a speaker (a key of speakers.yml)
+#   wait: seconds       fade: out|in       shake: seconds
+#   sfx: name           music: name|stop   (sounds are played from Step 15 on)
+#   sync                show the world as it is NOW - until then the picture and inventory keep their old look
+#   end: {lines: [..]}  the end screen with optional credits
+
+# The first hit: the zombie stumbles into the grave (the sprite changes at `sync`, not before).
+use_rusty_sword_on_zombie:
+  - face: e
+  - shake: 0.3
+  - sfx: sword_hit
+  - wait: 0.2
+  - sync
+  - sfx: zombie_fall
+  - wait: 0.4
+  - narrate: {message: use_rusty_sword_on_zombie}
+
+# The blacksmith takes the sword into the smithy; the screen goes dark; hammering; he comes back with the new sword.
+give_gemstone_shards_to_blacksmith:
+  - say: {speaker: blacksmith, text: "I'll forge one half of this gemstone into your sword and take the other half as payment."}
+  - fade: out
+  - sfx: clang
+  - wait: 0.6
+  - sfx: clang
+  - wait: 0.6
+  - sfx: clang
+  - wait: 0.8
+  - sync
+  - fade: in
+  - narrate: {message: give_gemstone_shards_to_blacksmith}
+
+# The finale.
+use_shining_sword_on_grelok:
+  - face: e
+  - music: stop
+  - say: {speaker: grelok, text: "No! The legendary Eye of Grub! You can't beat me!"}
+  - shake: 0.8
+  - sfx: explosion
+  - fade: out
+  - wait: 0.6
+  - narrate: {message: use_shining_sword_on_grelok}
+  - end:
+      lines:
+        - Reign of Grelok
+        - ""
+        - A proof of concept
+        - Hero Grognak
+        - Villain Grelok the Gruesome
+        - ""
+        - Made with Claude

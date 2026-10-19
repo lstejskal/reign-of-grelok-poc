@@ -14,6 +14,13 @@ export interface EngineOptions {
     random?: () => number;
 }
 
+/** Replies to input nobody understands, unless the game defines gibberish1..3 in its own messages.yml. */
+export const DEFAULT_GIBBERISH = [
+    "I don't understand that.",
+    "I'm not sure what you're trying to do.",
+    "That doesn't make sense.",
+] as const;
+
 // Bumped if the serialized format ever changes.
 const SAVE_VERSION = 1;
 
@@ -297,10 +304,9 @@ export class Engine {
 
     private sayGibberish(): void {
         const index = Math.floor(this.random() * 3) + 1;
-        const message = this.messages.findByAlias(`gibberish${index}`);
-        if (message !== undefined) {
-            this.say(message, `gibberish${index}`);
-        }
+        const key = `gibberish${index}`;
+        // a game may write its own in messages.yml; otherwise the engine's plain default is used
+        this.say(this.messages.findByAlias(key) ?? DEFAULT_GIBBERISH[index - 1], key);
     }
 
     // --- world queries -----------------------------------------------------------

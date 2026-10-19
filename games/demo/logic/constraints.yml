@@ -1,0 +1,7 @@
+---
+  locations:
+    "lane-e": "The gate is locked."      # going east is refused until the gate opens
+  boolean:
+    "key_found": false
+    "gate_oiled": false
+    "gate_locked": true

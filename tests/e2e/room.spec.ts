@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import type { Verb } from '@grelok/engine';
 import { verbRect } from '../../packages/client/src/ui/layout';
-import { VERBS } from '../../packages/client/src/ui/verbs';
+import { DEFAULT_VERBS as VERBS } from '../../packages/engine/src/sceneTypes';
 import { slotRect } from '../../packages/client/src/ui/inventory';
 
 declare global {
@@ -17,15 +17,27 @@ const walkthrough = fs
   .filter((line) => line.trim() !== '');
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/?title=off'); // straight into the game (the title screen has its own tests, below)
   await expect.poll(() => page.evaluate(() => window.__adv.scene)).toBe('RoomScene');
   await page.evaluate(() => (window.__adv.speedFactor = 10)); // walking at 10x, so tests do not wait for him
 });
 
-/** Tell the engine a command, then wait until any fade between scenes is over. */
+/**
+ * Tell the engine a command, then wait until the fade between scenes and any cutscene are over. A cutscene waits for
+ * the player to read its text, so while one runs we keep clicking the text box, like an impatient player.
+ */
 async function say(page: Page, line: string): Promise<void> {
   await page.evaluate((l) => window.__adv.session.performText(l), line);
-  await expect.poll(() => page.evaluate(() => window.__adv.transitioning)).toBe(false);
+  await expect
+    .poll(
+      async () => {
+        const cutsceneRunning: boolean = await page.evaluate(() => window.__adv.cutscene.running);
+        if (cutsceneRunning && (await page.evaluate(() => window.__adv.answer)) !== '') await clickAt(page, 200, 5);
+        return !cutsceneRunning && !(await page.evaluate(() => window.__adv.transitioning));
+      },
+      { timeout: 20_000, intervals: [50] },
+    )
+    .toBe(true);
 }
 
 test('shows the background of the current location and changes it when the player moves', async ({ page }) => {
@@ -226,7 +238,6 @@ test('inventory items can be pointed at, looked at, and used in sentences', asyn
   await clickAt(page, r.x + 12, r.y + 8, 'right'); // right-click = look at
   await expect.poll(() => page.evaluate(() => window.__adv.answer)).toContain('pebble');
 
-  await page.keyboard.press('Escape'); // (nothing pending, harmless)
   await clickVerb(page, 'use');
   await clickInventoryItem(page, 'pebble');
   await moveMouseTo(page, 160, 60);
@@ -418,8 +429,7 @@ test('a blocked exit shows the engine\'s message and he stays', async ({ page })
   expect([p.x, p.y, p.facing]).toEqual([292, 110, 'e']);
 
   await dismissAnswer(page);
-  await page.evaluate(() => window.__adv.session.performText('use rusty sword on zombie'));
-  await dismissAnswer(page);
+  await say(page, 'use rusty sword on zombie'); // a cutscene: plays out while we keep reading
   await clickAt(page, 310, 80);
   await expect.poll(() => page.evaluate(() => window.__adv.answer)).toBe('Chapel door is locked.');
 });
@@ -560,4 +570,274 @@ test('double-clicking a blocked exit shows the refusal at once', async ({ page }
   const zoom: number = await page.evaluate(() => window.__adv.zoom);
   await page.mouse.dblclick(box.x + 310.5 * zoom, box.y + 80.5 * zoom);
   await expect.poll(() => page.evaluate(() => window.__adv.answer), { timeout: 3_000 }).toBe('Chapel door is blocked by zombie.');
+});
+
+// --- Step 12: cutscenes -------------------------------------------------------------------------
+
+const cutscene = (page: Page) => page.evaluate(() => window.__adv.cutscene);
+
+test('hitting the zombie plays a cutscene: input is locked, the picture changes only at "sync", then control returns', async ({ page }) => {
+  await walkSpeed(page, 0.2); // slowly, so the test can look in between
+  await say(page, 'east');
+  await page.evaluate(() => window.__adv.session.performText('use rusty sword on zombie'));
+
+  expect((await cutscene(page)).running).toBe(true);
+  // the engine has already moved on, but the picture has not: the zombie still stands
+  expect(await page.evaluate(() => window.__adv.engine.state.things.zombie.description)).toContain('trapped');
+  expect((await sprites(page))[0].image).toBe('sprites/zombie_standing.png');
+
+  // locked: a click on the floor does not walk
+  await clickAt(page, 100, 120);
+  expect((await player(page)).walking).toBe(false);
+
+  await expect.poll(async () => (await sprites(page))[0].image, { timeout: 15_000 }).toBe('sprites/zombie_down.png');
+  await expect.poll(() => page.evaluate(() => window.__adv.answer), { timeout: 15_000 }).toContain('stumbles and falls');
+  expect((await cutscene(page)).running).toBe(true); // still waiting for the player to read
+
+  await walkSpeed(page, 10);
+  await dismissAnswer(page);
+  await expect.poll(async () => (await cutscene(page)).running).toBe(false);
+  expect((await cutscene(page)).log).toEqual(['face e', 'shake 0.3', 'sfx sword_hit', 'wait 0.2', 'sync', 'sfx zombie_fall', 'wait 0.4', 'narrate use_rusty_sword_on_zombie']);
+  expect((await cutscene(page)).audio).toEqual(['sfx sword_hit', 'sfx zombie_fall']);
+
+  await clickAt(page, 100, 120); // free again
+  await expect.poll(async () => (await player(page)).walking).toBe(true);
+});
+
+test('hitting the zombie again is NOT a cutscene (the success message is only said once)', async ({ page }) => {
+  await say(page, 'east');
+  await say(page, 'use rusty sword on zombie');
+  await page.evaluate(() => window.__adv.session.performText('use rusty sword on zombie'));
+  expect((await cutscene(page)).running).toBe(false);
+  expect(await page.evaluate(() => window.__adv.answer)).toContain('already trapped');
+});
+
+test('the blacksmith cutscene fades out, hammers, and the new sword appears in the inventory only at "sync"', async ({ page }) => {
+  await say(page, 'north');
+  await say(page, 'look at rubble');
+  await say(page, 'take gemstone');
+  await say(page, 'south');
+  await say(page, 'west');
+  await say(page, 'give gemstone to wizard');
+  await say(page, 'take gemstone shards');
+  await say(page, 'east');
+  await say(page, 'south');
+
+  await walkSpeed(page, 3);
+  await page.evaluate(() => window.__adv.session.performText('give gemstone shards to blacksmith'));
+  expect((await cutscene(page)).running).toBe(true);
+  expect(await page.evaluate(() => window.__adv.inventory)).toContain('rusty_sword'); // not yet reforged on screen
+  await expect.poll(async () => (await cutscene(page)).audio.length, { timeout: 15_000 }).toBeGreaterThanOrEqual(1);
+  await expect.poll(async () => (await cutscene(page)).log.includes('sync'), { timeout: 15_000 }).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.__adv.answer), { timeout: 20_000 }).toContain('forge one half');
+  await dismissAnswer(page);
+  await expect.poll(async () => (await cutscene(page)).running).toBe(false);
+  expect(await page.evaluate(() => window.__adv.inventory)).toContain('shining_sword');
+  expect((await cutscene(page)).audio).toEqual(['sfx clang', 'sfx clang', 'sfx clang']);
+});
+
+test('the final blow plays the finale and ends on the end screen with credits', async ({ page }) => {
+  for (const line of ['north', 'look at rubble', 'take gemstone', 'south', 'west', 'give gemstone to wizard', 'take gemstone shards', 'east', 'south', 'give gemstone shards to blacksmith', 'north', 'north']) {
+    await say(page, line);
+  }
+  await walkSpeed(page, 1); // real time, so the test can catch Grelok's words before they fade
+  await page.evaluate(() => window.__adv.session.performText('use shining sword on grelok'));
+  expect(await page.evaluate(() => window.__adv.engine.state.over)).toBe(true);
+  expect((await cutscene(page)).running).toBe(true);
+
+  // Grelok's last words, above Grelok, in wine red
+  await expect.poll(async () => (await page.evaluate(() => window.__adv.speech))?.speaker, { timeout: 15_000 }).toBe('grelok');
+  // keep reading until the end screen is up
+  await expect
+    .poll(
+      async () => {
+        if ((await page.evaluate(() => window.__adv.answer)) !== '') await clickAt(page, 200, 5);
+        return (await cutscene(page)).ended;
+      },
+      { timeout: 30_000, intervals: [50] },
+    )
+    .toBe(true);
+  expect((await cutscene(page)).endLines).toContain('Reign of Grelok');
+  await expect.poll(async () => (await cutscene(page)).running).toBe(false);
+  await page.waitForTimeout(1600); // the end screen fades in
+  await page.screenshot({ path: 'tests/e2e/screenshots/the-end.png' });
+
+  // the game is over: clicking does nothing any more
+  await clickAt(page, 100, 120);
+  expect((await player(page)).walking).toBe(false);
+});
+
+test('a game that ends without a cutscene still gets an end screen, once the text has been read', async ({ page }) => {
+  await page.evaluate(() => {
+    // pretend the game ends with a plain message that no cutscene announces
+    window.__adv.bundle.cutscenes = {};
+  });
+  for (const line of ['north', 'look at rubble', 'take gemstone', 'south', 'west', 'give gemstone to wizard', 'take gemstone shards', 'east', 'south', 'give gemstone shards to blacksmith', 'north', 'north', 'use shining sword on grelok']) {
+    await say(page, line);
+  }
+  expect((await cutscene(page)).ended).toBe(false); // the victory text is still waiting to be read
+  await dismissAnswer(page);
+  await expect.poll(async () => (await cutscene(page)).ended).toBe(true);
+});
+
+// --- Step 13: title screen, save & load ----------------------------------------------------------
+
+const menu = (page: Page) => page.evaluate(() => window.__adv.menu);
+
+/** Click the row of the menu on screen whose label starts with `label`. */
+async function clickMenu(page: Page, label: string): Promise<void> {
+  const items: { label: string; enabled: boolean; x: number; y: number; w: number; h: number }[] = (await menu(page)).items;
+  const item = items.find((i) => i.label.startsWith(label));
+  expect(item, `menu row "${label}" in ${JSON.stringify(items.map((i) => i.label))}`).toBeDefined();
+  await clickAt(page, Math.floor(item!.x + item!.w / 2), Math.floor(item!.y + item!.h / 2));
+}
+
+const sceneName = (page: Page) => page.evaluate(() => window.__adv.scene);
+
+/** Open the page on the title screen (a fresh page keeps localStorage, so saves survive a reload). */
+async function gotoTitle(page: Page): Promise<void> {
+  await page.goto('/');
+  await expect.poll(() => sceneName(page)).toBe('TitleScene');
+  await page.evaluate(() => (window.__adv.speedFactor = 10));
+}
+
+async function startNewGame(page: Page): Promise<void> {
+  await gotoTitle(page);
+  await clickMenu(page, 'New game');
+  await expect.poll(() => sceneName(page)).toBe('RoomScene');
+}
+
+/** Esc opens the menu, then Save, then slot `slot`. */
+async function saveInSlot(page: Page, slot: string): Promise<void> {
+  await page.keyboard.press('Escape');
+  await clickMenu(page, 'Save');
+  await clickMenu(page, `${slot}:`);
+  await expect.poll(() => page.evaluate(() => window.__adv.answer)).toBe('Game saved.');
+}
+
+test('the title screen offers New game, and Continue / Load only when there is something to load', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await expect.poll(() => sceneName(page)).toBe('TitleScene');
+  expect(((await menu(page)).items as { label: string; enabled: boolean }[]).map((i) => [i.label, i.enabled])).toEqual([
+    ['New game', true],
+    ['Continue', false],
+    ['Load', false],
+  ]);
+  await page.screenshot({ path: 'tests/e2e/screenshots/title.png' });
+
+  await clickMenu(page, 'Continue'); // disabled: nothing happens
+  expect(await sceneName(page)).toBe('TitleScene');
+  await clickMenu(page, 'New game');
+  await expect.poll(() => sceneName(page)).toBe('RoomScene');
+  expect(await page.evaluate(() => window.__adv.engine.state.location)).toBe('plain');
+});
+
+test('Esc or the disk icon opens the menu; it is modal, and Esc closes it', async ({ page }) => {
+  expect(await menu(page)).toBeUndefined();
+  await page.keyboard.press('Escape');
+  expect((await menu(page)).title).toBe('Menu');
+  await page.screenshot({ path: 'tests/e2e/screenshots/menu.png' });
+
+  await clickAt(page, 250, 120); // a click on the floor while the menu is open does nothing
+  expect((await player(page)).walking).toBe(false);
+
+  await page.keyboard.press('Escape');
+  expect(await menu(page)).toBeUndefined();
+
+  await clickAt(page, 311, 148); // the disk icon
+  expect((await menu(page)).title).toBe('Menu');
+  await clickMenu(page, 'Back');
+  expect(await menu(page)).toBeUndefined();
+});
+
+test('save, reload the page, Continue: same place, same inventory, same position', async ({ page }) => {
+  await startNewGame(page);
+  await say(page, 'take pebble');
+  await say(page, 'north');
+  await clickAt(page, 200, 100);
+  await waitUntilStopped(page);
+  const where = await player(page);
+
+  await saveInSlot(page, '2');
+  expect(await page.evaluate(() => window.__adv.saves.find((s: { slot: string }) => s.slot === '2').location)).toBe('mountain');
+
+  await gotoTitle(page); // a reload: everything in memory is gone, only localStorage is left
+  expect(((await menu(page)).items as { label: string; enabled: boolean }[]).find((i) => i.label === 'Continue')!.enabled).toBe(true);
+  await clickMenu(page, 'Continue');
+  await expect.poll(() => sceneName(page)).toBe('RoomScene');
+
+  expect(await page.evaluate(() => window.__adv.engine.state.location)).toBe('mountain');
+  expect(await page.evaluate(() => window.__adv.backgroundKey)).toBe('asset:backgrounds/mountain.png');
+  expect(await page.evaluate(() => window.__adv.inventory)).toContain('pebble');
+  const back = await player(page);
+  expect([back.x, back.y, back.facing]).toEqual([where.x, where.y, where.facing]);
+  await page.screenshot({ path: 'tests/e2e/screenshots/continue.png' });
+});
+
+test('Load from the in-game menu goes back to the saved moment', async ({ page }) => {
+  await startNewGame(page);
+  await saveInSlot(page, '1'); // at the start, nothing picked up
+  await say(page, 'take pebble');
+  await say(page, 'north');
+  expect(await page.evaluate(() => window.__adv.engine.state.location)).toBe('mountain');
+
+  await page.keyboard.press('Escape');
+  await clickMenu(page, 'Load');
+  expect(((await menu(page)).items as { label: string }[]).map((i) => i.label.split(':')[0])).toEqual(['1', '2', '3', 'Auto', 'Back']);
+  await clickMenu(page, '1:');
+  await expect.poll(async () => (await page.evaluate(() => window.__adv.menu)) === undefined && (await sceneName(page)) === 'RoomScene').toBe(true);
+
+  expect(await page.evaluate(() => window.__adv.engine.state.location)).toBe('plain');
+  expect(await page.evaluate(() => window.__adv.inventory)).not.toContain('pebble');
+  expect((await sprites(page)).map((s: { id: string }) => s.id)).toEqual(['pebble']); // drawn again: sprites follow the state
+  // and the game keeps working after a load (one scene object is reused: nothing may be doubled up)
+  await clickVerb(page, 'pick_up');
+  await clickAt(page, 66, 116);
+  await expect.poll(() => page.evaluate(() => window.__adv.inventory)).toContain('pebble');
+});
+
+test('what the puzzle changed is drawn again after loading (zombie down, door still shut)', async ({ page }) => {
+  await startNewGame(page);
+  await say(page, 'east');
+  await say(page, 'use rusty sword on zombie');
+  await saveInSlot(page, '3');
+
+  await gotoTitle(page);
+  await clickMenu(page, 'Load');
+  await clickMenu(page, '3:');
+  await expect.poll(() => sceneName(page)).toBe('RoomScene');
+  expect((await sprites(page)).map((s: { image: string }) => s.image)).toEqual(['sprites/zombie_down.png']);
+  await say(page, 'use rusty sword on zombie');
+  expect(await page.evaluate(() => window.__adv.answer)).toContain('already trapped'); // the engine remembered, too
+});
+
+test('Quit to title autosaves; Continue picks the newest save', async ({ page }) => {
+  await startNewGame(page);
+  await say(page, 'west');
+  await page.keyboard.press('Escape');
+  await clickMenu(page, 'Quit to title');
+  await expect.poll(() => sceneName(page)).toBe('TitleScene');
+  await clickMenu(page, 'Continue');
+  await expect.poll(() => sceneName(page)).toBe('RoomScene');
+  expect(await page.evaluate(() => window.__adv.engine.state.location)).toBe('swamp');
+});
+
+test('a damaged save is ignored instead of crashing', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => {
+    localStorage.clear();
+    localStorage.setItem('adventure:grelok:save:1', '{"version":1,"gameId":"grelok"');
+    localStorage.setItem('adventure:grelok:save:2', JSON.stringify({ version: 1, gameId: 'grelok', savedAt: 5, location: 'plain', player: { x: 1, y: 2, facing: 's' }, engine: 'garbage' }));
+  });
+  await page.reload();
+  await expect.poll(() => sceneName(page)).toBe('TitleScene');
+  await clickMenu(page, 'Load'); // slot 2 looks valid but its engine data is broken
+  await clickMenu(page, '2:');
+  expect(await sceneName(page)).toBe('TitleScene'); // stays put
+  expect(((await menu(page)).items as { label: string; enabled: boolean }[]).slice(0, 2).map((i) => [i.label, i.enabled])).toEqual([
+    ['1: Empty', false],
+    ['2: Plain  ' + (await page.evaluate(() => { const d = new Date(5); return `${d.getDate()}.${d.getMonth() + 1}. ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; })), true],
+  ]);
 });

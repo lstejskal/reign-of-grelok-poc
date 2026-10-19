@@ -1,0 +1,28 @@
+# Scene for location "orchard". Coordinates: x 0-319, y 0-143.
+
+background: backgrounds/orchard.png
+walkmask: walkmasks/orchard.png   # white = walkable
+scale: {top: 0.7, bottom: 1.0}
+
+hotspots:
+  - id: apple_tree
+    polygon: [[196, 16], [264, 16], [264, 100], [196, 100]]
+    walkTo: [230, 112]
+    facing: n
+  - id: goat
+    polygon: [[140, 76], [180, 76], [180, 104], [140, 104]]
+    walkTo: [128, 112]
+    facing: e
+
+exits:
+  - direction: w
+    polygon: [[0, 40], [24, 40], [24, 130], [0, 130]]
+    walkTo: [30, 116]
+    spawn: [36, 116]
+
+sprites:
+  - id: goat
+    thing: goat
+    x: 160
+    y: 104
+    image: sprites/goat.png

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { SCENE_HEIGHT, SCENE_WIDTH, Thing, iconPath } from '@grelok/engine';
-import type { Command, ExitData, Facing, Point, Verb } from '@grelok/engine';
+import { parseStep } from '@grelok/engine';
+import type { Command, CutsceneStep, ExitData, Facing, Point, Verb } from '@grelok/engine';
 import { GAME_WIDTH, GAME_HEIGHT } from '../config';
 import { PIXEL_FONT } from '../gfx/pixelFont';
 import { textureKey } from '../data/assets';
@@ -19,8 +20,14 @@ import { TextPager } from '../ui/textPages';
 import { DIALOG_MAX, DIALOG_PANEL, choiceAt, choiceRect, dialogChoices } from '../ui/dialog';
 import type { DialogChoice } from '../ui/dialog';
 import { SpeechQueue, interpretSay } from '../ui/speech';
-import { VERBS } from '../ui/verbs';
-import { SENTENCE_Y, TEXT_BOX, TEXT_BOX_CHARS, TEXT_BOX_LINES, TEXT_BOX_TEXT, inRect, verbAt, verbRect } from '../ui/layout';
+import { Sequencer } from '../cutscene/Sequencer';
+import { MenuPanel } from '../ui/MenuPanel';
+import { SLOTS as SAVE_SLOTS, makeSave, slotLabel } from '../save/saveGame';
+import type { SavedPlayer, Slot } from '../save/saveGame';
+import type { CutsceneActor } from '../cutscene/Sequencer';
+import { verbsOf } from '../ui/verbs';
+import type { VerbSpec } from '../ui/verbs';
+import { MENU_BUTTON, SENTENCE_Y, TEXT_BOX, TEXT_BOX_CHARS, TEXT_BOX_LINES, TEXT_BOX_TEXT, inRect, verbAt, verbRect } from '../ui/layout';
 import { SCROLL_LEFT, SCROLL_RIGHT, SLOTS, clampScroll, itemAt, maxScroll, slotRect, visibleItems } from '../ui/inventory';
 import type { GameSession } from '../session';
 
@@ -59,17 +66,35 @@ export class RoomScene extends Phaser.Scene {
   private player!: PlayerActor;
   /** A black rectangle over the scene (not the UI strip) that fades in and out between scenes. */
   private fade!: Phaser.GameObjects.Rectangle;
+  /** The same kind of black rectangle, for the `fade` step of cutscenes (kept apart so the two never fight over one alpha). */
+  private cutsceneFade!: Phaser.GameObjects.Rectangle;
   /** The location whose picture is on screen. It lags behind the engine's location during a fade. */
   private shownLocation = '';
   private transitioning = false;
   private hoveredExit: ExitData | undefined;
+  /** Plays cutscenes; while it runs the player's input is locked. */
+  private sequencer = this.makeSequencer();
+  /** The in-game menu (Esc or the disk icon): Save, Load, Quit to title. */
+  private menu!: MenuPanel;
+  /** Where to put Grognak when a saved game is loaded (otherwise he starts at game.yml's startPosition). */
+  private restore: SavedPlayer | undefined;
+  /** Things cutscene steps are waiting for ("the text has been read", "the speech is over"), checked every frame. */
+  private waiters: { done: () => boolean; resolve: () => void }[] = [];
+  /** What the inventory panel shows. It follows the engine, except during a cutscene, until its `sync` step. */
+  private inventoryView: string[] = [];
+  /** Sounds and music the cutscenes asked for (they are really played from Step 15 on). */
+  private readonly audioLog: string[] = [];
+  private ended = false;
+  private endObjects: Phaser.GameObjects.GameObject[] = [];
+  private endLines: string[] = [];
   private lastExitClick: { exit: ExitData; at: number } | undefined;
   /** One picture per sprite of the scene on screen (hidden when its state says "draw nothing"). */
   private spriteImages = new Map<string, Phaser.GameObjects.Image>();
   /** The walkable floor of each scene, built from its walkmask the first time it is needed. */
   private readonly areas = new Map<string, WalkArea>();
 
-  private readonly builder = new SentenceBuilder();
+  private verbs: readonly VerbSpec[] = [];
+  private builder = new SentenceBuilder();
   private readonly pager = new TextPager(TEXT_BOX_CHARS, TEXT_BOX_LINES);
   /** What people are saying, one page at a time, above their heads. */
   private readonly speech = new SpeechQueue();
@@ -106,7 +131,7 @@ export class RoomScene extends Phaser.Scene {
 
   /** Aliases of the things shown in the inventory slots right now. */
   get inventoryShown(): string[] {
-    return visibleItems(this.session.engine.state.inventory, this.inventoryScroll).filter((i): i is string => !!i);
+    return visibleItems(this.inventoryView, this.inventoryScroll).filter((i): i is string => !!i);
   }
 
   /** True while the screen fades between two scenes (clicks are ignored then). */
@@ -117,6 +142,11 @@ export class RoomScene extends Phaser.Scene {
   /** How black the fade rectangle is, 0..1 (for tests). */
   get fadeAlpha(): number {
     return this.fade.alpha;
+  }
+
+  /** The state of the cutscene machinery (for tests and debugging). */
+  get cutsceneState() {
+    return { running: this.sequencer.running, log: [...this.sequencer.log], audio: [...this.audioLog], ended: this.ended, endLines: this.endLines };
   }
 
   /** The sprites currently drawn in the scene: id, picture, feet position and depth (for tests). */
@@ -160,8 +190,45 @@ export class RoomScene extends Phaser.Scene {
     return this.overlay.visible;
   }
 
-  init(data: { session: GameSession }): void {
+  init(data: { session: GameSession; restore?: SavedPlayer }): void {
     this.session = data.session;
+    this.restore = data.restore;
+    // Phaser keeps ONE scene object and runs init/create again on every start (loading a game starts this scene
+    // again), so everything that lives in fields has to start from scratch here.
+    this.verbLabels = new Map();
+    this.slotImages = [];
+    this.choiceLabels = [];
+    this.spriteImages = new Map();
+    this.sequencer = this.makeSequencer();
+    this.waiters = [];
+    this.inventoryView = [];
+    this.audioLog.length = 0;
+    this.ended = false;
+    this.endObjects = [];
+    this.endLines = [];
+    this.lastExitClick = undefined;
+    this.dialog = undefined;
+    this.pointer = undefined;
+    this.hovered = undefined;
+    this.hoveredExit = undefined;
+    this.inventoryScroll = 0;
+    this.transitioning = false;
+    this.shownLocation = '';
+    this.pager.clear();
+    this.speech.clear();
+    this.verbs = verbsOf(this.session.bundle.config);
+    this.builder = new SentenceBuilder(this.verbs);
+  }
+
+  private makeSequencer(): Sequencer {
+    return new Sequencer((error) => {
+      debugState.error = `Cutscene failed: ${error instanceof Error ? error.message : String(error)}`;
+    });
+  }
+
+  /** The menu being shown, if any (for tests). */
+  get menuState() {
+    return this.menu?.visible ? this.menu.state : undefined;
   }
 
   create(): void {
@@ -179,6 +246,12 @@ export class RoomScene extends Phaser.Scene {
       .setTint(COLOR.verbSelected)
       .setDepth(501)
       .setVisible(false);
+    // the disk icon (opens the menu), and the menu itself above everything else
+    const { x: dx, y: dy } = MENU_BUTTON;
+    this.add.rectangle(dx + 1, dy + 1, 10, 9, 0x8a8aa8).setOrigin(0); // the disk
+    this.add.rectangle(dx + 3, dy + 1, 6, 3, 0xd8d8e8).setOrigin(0); // its metal shutter
+    this.add.rectangle(dx + 3, dy + 6, 6, 4, 0x30304a).setOrigin(0); // its label
+    this.menu = new MenuPanel(this, 950, { framed: true, areaHeight: SCENE_HEIGHT });
     // the talk menu covers the verbs and inventory while it is open
     this.dialogPanel = this.add
       .rectangle(DIALOG_PANEL.x, DIALOG_PANEL.y, DIALOG_PANEL.w, DIALOG_PANEL.h, 0x14141c)
@@ -192,7 +265,7 @@ export class RoomScene extends Phaser.Scene {
     // speech: coloured text with a black copy one pixel lower-right, so it reads on any background
     this.speechShadow = this.add.bitmapText(0, 0, PIXEL_FONT, '').setTint(0x000000).setDepth(450).setOrigin(0.5, 1).setCenterAlign();
     this.speechText = this.add.bitmapText(0, 0, PIXEL_FONT, '').setDepth(451).setOrigin(0.5, 1).setCenterAlign();
-    VERBS.forEach((spec, i) => {
+    this.verbs.forEach((spec, i) => {
       const r = verbRect(i);
       this.verbLabels.set(spec.verb, this.add.bitmapText(r.x, r.y + 1, PIXEL_FONT, spec.label));
     });
@@ -206,11 +279,14 @@ export class RoomScene extends Phaser.Scene {
     this.overlay = new HotspotOverlay(this);
     this.showLocation(this.session.engine.state.location);
     this.fade = this.add.rectangle(0, 0, SCENE_WIDTH, SCENE_HEIGHT, 0x000000).setOrigin(0).setDepth(400).setAlpha(0);
+    this.cutsceneFade = this.add.rectangle(0, 0, SCENE_WIDTH, SCENE_HEIGHT, 0x000000).setOrigin(0).setDepth(405).setAlpha(0);
 
     const { config } = this.session.bundle;
     const area = this.areaFor(this.session.engine.state.location);
     const start = area.snap(config.startPosition ?? [SCENE_WIDTH / 2, 112]);
     this.player = new PlayerActor(this, config.player, start, area, () => debugState.speedFactor ?? 1);
+    if (this.restore) this.player.enter(area, area.snap([this.restore.x, this.restore.y]), this.restore.facing); // a loaded game
+    this.inventoryView = this.session.engine.state.inventory;
     this.refreshUi();
 
     this.setUpInput();
@@ -221,8 +297,21 @@ export class RoomScene extends Phaser.Scene {
         this.endDialog();
         this.transition();
       }
-      this.refreshSprites(); // things appear, vanish and change under the engine's hands
-      this.show(events.flatMap((e) => (e.type === 'say' ? [interpretSay(this.session.bundle.speakers, e.text, e.key)] : [])));
+      // A message that announces a cutscene is not shown: the cutscene tells it (as one of its steps), and the picture
+      // keeps its old look until the cutscene says `sync`. Otherwise the world is drawn as the engine now has it.
+      // (Trying the same thing again says the same message key but changes nothing, so it needs a change as well.)
+      const changed = events.some((e) => e.type === 'thing_changed' || e.type === 'inventory_changed' || e.type === 'location_changed' || e.type === 'game_over');
+      const trigger = changed ? events.find((e) => e.type === 'say' && e.key !== undefined && e.key in this.session.bundle.cutscenes) : undefined;
+      if (trigger === undefined) {
+        this.refreshSprites(); // things appear, vanish and change under the engine's hands
+        this.inventoryView = this.session.engine.state.inventory;
+      }
+      if (trigger) {
+        this.pager.clear(); // whatever was on screen is old news now; the cutscene has the floor
+        this.speech.clear();
+      }
+      this.show(events.flatMap((e) => (e.type === 'say' && e !== trigger ? [interpretSay(this.session.bundle.speakers, e.text, e.key)] : [])));
+      if (trigger?.type === 'say' && trigger.key !== undefined) this.playCutscene(trigger.key);
       // Things can appear or vanish (the gemstone under the rubble), also under a motionless mouse.
       this.refreshHotspots();
       this.refreshUi();
@@ -235,6 +324,12 @@ export class RoomScene extends Phaser.Scene {
     this.player.update(delta);
     this.speech.update((delta / 1000) * (debugState.speedFactor ?? 1), this.pager.current !== '');
     this.drawSpeech();
+    this.waiters = this.waiters.filter((w) => !(w.done() && (w.resolve(), true)));
+    // the game is won (or lost) and everything has been read: show the end screen (a cutscene may have shown it already)
+    const { pager, speech } = this;
+    if (this.session.engine.state.over && !this.ended && !this.sequencer.running && !this.transitioning && pager.current === '' && !speech.busy) {
+      this.showEnd([]);
+    }
     if (this.overlay.visible) this.overlay.drawPath(this.player.follower.position, this.player.follower.remaining);
   }
 
@@ -256,6 +351,7 @@ export class RoomScene extends Phaser.Scene {
     this.input.mouse?.disableContextMenu(); // right-click is a game button, not a browser menu
     this.input.on(Phaser.Input.Events.POINTER_MOVE, (pointer: Phaser.Input.Pointer) => {
       this.pointer = [Math.floor(pointer.x), Math.floor(pointer.y)];
+      this.menu.pointerMove(...this.pointer);
       this.refreshHotspots(false);
       this.refreshUi();
     });
@@ -266,7 +362,9 @@ export class RoomScene extends Phaser.Scene {
     });
     this.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
       this.pointer = [Math.floor(pointer.x), Math.floor(pointer.y)];
-      if (!this.transitioning) this.onClick(this.pointer, pointer.rightButtonDown());
+      if (this.menu.visible) this.menu.click(...this.pointer); // a menu is modal: nothing else hears the click
+      else if (this.locked) this.onLockedClick(this.pointer);
+      else if (!this.transitioning) this.onClick(this.pointer, pointer.rightButtonDown());
       this.refreshHotspots();
       this.refreshUi();
     });
@@ -275,10 +373,27 @@ export class RoomScene extends Phaser.Scene {
     this.input.keyboard?.addCapture('F1');
     this.input.keyboard?.on('keydown-F1', () => this.overlay.toggle());
     this.input.keyboard?.on('keydown-ESC', () => {
-      this.builder.cancel();
-      this.endDialog();
+      if (document.activeElement instanceof HTMLInputElement) return; // Esc belongs to the debug console then
+      if (this.menu.visible) this.menu.hide();
+      else if (this.locked) return;
+      else if (!this.builder.idle || this.dialog) {
+        this.builder.cancel(); // Esc first cancels what is half done...
+        this.endDialog();
+      } else this.openMenu(); // ...and with nothing to cancel it opens the menu
       this.refreshUi();
     });
+  }
+
+  /** True while a cutscene plays or the game is over: the player cannot act. */
+  private get locked(): boolean {
+    return this.sequencer.running || this.ended;
+  }
+
+  /** During a cutscene the only thing a click does is move text along: read on, or skip the speech. */
+  private onLockedClick([x, y]: Point): void {
+    if (this.ended) return;
+    if (this.pager.current !== '' && y < this.answerBand.height) this.pager.next();
+    else if (this.speechNow && y < SCENE_HEIGHT) this.speech.skip();
   }
 
   private onClick([x, y]: Point, right: boolean): void {
@@ -302,6 +417,10 @@ export class RoomScene extends Phaser.Scene {
     }
     if (this.dialog) this.endDialog(); // any other click means the conversation is over
 
+    if (!right && inRect(MENU_BUTTON, x, y)) {
+      this.openMenu();
+      return;
+    }
     if (!right && inRect(SCROLL_LEFT, x, y)) this.inventoryScroll--;
     else if (!right && inRect(SCROLL_RIGHT, x, y)) this.inventoryScroll++;
 
@@ -342,7 +461,7 @@ export class RoomScene extends Phaser.Scene {
     }
 
     // not on the scene: right-click cancels, left-click may hit a verb
-    const verb = verbAt(x, y);
+    const verb = verbAt(this.verbs, x, y);
     if (right) this.builder.cancel();
     else if (verb) this.builder.selectVerb(verb);
   }
@@ -372,6 +491,157 @@ export class RoomScene extends Phaser.Scene {
     this.session.perform(command);
     const npc = command.verb === 'talk_to' ? command.objects[0] : undefined;
     if (npc !== undefined) this.startDialog(npc);
+  }
+
+  // --- the menu, saving and loading --------------------------------------------------------------
+
+  private openMenu(): void {
+    const hasSave = this.session.saves.newest() !== undefined;
+    this.menu.show('Menu', [
+      { label: 'Save', onChoose: () => this.showSlots('save') },
+      { label: 'Load', enabled: hasSave, onChoose: () => this.showSlots('load') },
+      { label: 'Quit to title', onChoose: () => this.quitToTitle() },
+      { label: 'Back', onChoose: () => this.menu.hide() },
+    ]);
+  }
+
+  /** A list of save slots to save into (the three of the player) or load from (those, plus the automatic one). */
+  private showSlots(mode: 'save' | 'load'): void {
+    const { saves, bundle } = this.session;
+    const slots = mode === 'save' ? SAVE_SLOTS.filter((s) => s !== 'auto') : SAVE_SLOTS;
+    const items = slots.map((slot) => {
+      const save = saves.read(slot);
+      return {
+        label: slotLabel(slot, save, (alias) => bundle.logic.locations[alias]?.name ?? alias),
+        enabled: mode === 'save' || save !== undefined,
+        onChoose: () => (mode === 'save' ? this.saveTo(slot) : this.loadFrom(slot)),
+      };
+    });
+    items.push({ label: 'Back', enabled: true, onChoose: () => this.openMenu() });
+    this.menu.show(mode === 'save' ? 'Save game' : 'Load game', items);
+  }
+
+  /** Everything a save needs from the scene: where Grognak stands, and which way he looks. */
+  private currentSave() {
+    const p = this.player.state;
+    return makeSave(this.session.bundle.id, this.session.engine, { x: Math.round(p.x), y: Math.round(p.y), facing: p.facing });
+  }
+
+  private saveTo(slot: Slot): void {
+    const ok = this.session.saves.write(slot, this.currentSave());
+    this.menu.hide();
+    this.pager.set(ok ? 'Game saved.' : 'Could not save: the browser blocks storage.');
+  }
+
+  /** Written without asking whenever the player enters a scene, and when he quits to the title. */
+  private autosave(): void {
+    if (this.session.engine.state.over || this.ended || this.sequencer.running) return;
+    this.session.saves.write('auto', this.currentSave());
+  }
+
+  private loadFrom(slot: Slot): void {
+    const save = this.session.saves.read(slot);
+    try {
+      if (!save) throw new Error('empty slot');
+      this.session.loadEngine(save.engine);
+    } catch {
+      this.menu.hide();
+      this.pager.set('Could not load that save.');
+      return;
+    }
+    this.scene.start('RoomScene', { session: this.session, restore: save.player }); // a fresh start, from the loaded engine
+  }
+
+  private quitToTitle(): void {
+    this.autosave();
+    this.scene.start('TitleScene', { session: this.session });
+  }
+
+  // --- cutscenes ----------------------------------------------------------------------------------
+
+  /** Play the cutscene announced by message `key`. */
+  private playCutscene(key: string): void {
+    const steps: CutsceneStep[] = [];
+    for (const raw of this.session.bundle.cutscenes[key] ?? []) {
+      const parsed = parseStep(raw);
+      if ('step' in parsed) steps.push(parsed.step);
+      else debugState.error = `Cutscene "${key}": ${parsed.error}`;
+    }
+    this.builder.cancel();
+    this.endDialog();
+    const messages = this.session.bundle.logic.messages;
+    void this.sequencer.play(steps, this.actor, (k) => messages[k] ?? '').then(() => {
+      // whatever the cutscene did or did not `sync`, afterwards the picture agrees with the engine again
+      this.refreshSprites();
+      this.inventoryView = this.session.engine.state.inventory;
+      this.refreshHotspots();
+      this.refreshUi();
+    });
+  }
+
+  /** Resolves once `done()` is true (checked every frame in update). */
+  private until(done: () => boolean): Promise<void> {
+    return new Promise((resolve) => this.waiters.push({ done, resolve }));
+  }
+
+  /** Resolves after `seconds` of game time (a faster speedFactor, as in tests, makes it shorter). */
+  private delay(seconds: number): Promise<void> {
+    return new Promise((resolve) => this.time.delayedCall((seconds * 1000) / (debugState.speedFactor ?? 1), resolve));
+  }
+
+  /** What each cutscene step does on screen. The Sequencer decides the order; this decides the looks. */
+  private readonly actor: CutsceneActor = {
+    walk: (to) => {
+      const [x, y] = this.player.follower.position;
+      if (Math.hypot(to[0] - x, to[1] - y) < 1) return Promise.resolve();
+      return new Promise((resolve) => this.player.walkTo(to, { then: resolve }));
+    },
+    face: (facing) => this.player.face(facing),
+    narrate: (text) => {
+      this.speech.clear();
+      this.pager.set(text);
+      this.refreshUi();
+      return this.until(() => this.pager.current === '');
+    },
+    say: (speaker, text) => {
+      this.speech.say(speaker, text);
+      return this.until(() => !this.speech.busy);
+    },
+    wait: (seconds) => this.delay(seconds),
+    fade: (to) =>
+      new Promise((resolve) =>
+        this.tweens.add({ targets: this.cutsceneFade, alpha: to === 'out' ? 1 : 0, duration: (FADE_MS * 2) / (debugState.speedFactor ?? 1), onComplete: () => resolve() }),
+      ),
+    shake: (seconds) => {
+      this.cameras.main.shake((seconds * 1000) / (debugState.speedFactor ?? 1), 0.008);
+      return this.delay(seconds);
+    },
+    sfx: (name) => void this.audioLog.push(`sfx ${name}`),
+    music: (name) => void this.audioLog.push(`music ${name}`),
+    sync: () => {
+      this.refreshSprites();
+      this.inventoryView = this.session.engine.state.inventory;
+      this.refreshHotspots();
+      this.refreshUi();
+    },
+    end: (lines) => this.showEnd(lines),
+  };
+
+  /** The end screen: black, THE END, and some credits. After it nothing can be done. */
+  private showEnd(lines: string[]): void {
+    if (this.ended) return;
+    this.ended = true;
+    this.endLines = lines;
+    this.pager.clear();
+    this.speech.clear();
+    this.endDialog();
+    const back = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000).setOrigin(0).setDepth(900).setAlpha(0);
+    const title = this.add.bitmapText(GAME_WIDTH / 2, 40, PIXEL_FONT, 'THE END').setOrigin(0.5, 0).setScale(3).setTint(0xffe040).setDepth(901).setAlpha(0);
+    const credits = lines.map((line, i) =>
+      this.add.bitmapText(GAME_WIDTH / 2, 90 + i * 10, PIXEL_FONT, line).setOrigin(0.5, 0).setTint(0xc8c8d8).setDepth(901).setAlpha(0),
+    );
+    this.endObjects = [back, title, ...credits];
+    this.tweens.add({ targets: this.endObjects, alpha: 1, duration: 1200 / (debugState.speedFactor ?? 1) });
   }
 
   // --- speech and talking -------------------------------------------------------------------------
@@ -500,6 +770,9 @@ export class RoomScene extends Phaser.Scene {
           duration: half,
           onComplete: () => {
             this.transitioning = false;
+            this.autosave();
+            // the engine may have moved on again while we were fading in (commands typed quickly): follow it
+            if (this.session.engine.state.location !== this.shownLocation) this.transition();
             this.refreshHotspots(false);
             this.refreshUi();
           },
@@ -581,7 +854,7 @@ export class RoomScene extends Phaser.Scene {
     // centre on whole pixels (half pixels would blur a pixel font)
     this.sentenceLine.setX(Math.round(GAME_WIDTH / 2 - this.sentenceLine.width / 2));
 
-    const overVerb = this.pointer && verbAt(...this.pointer);
+    const overVerb = this.pointer && verbAt(this.verbs, ...this.pointer);
     for (const [verb, label] of this.verbLabels) {
       label.setTint(
         verb === this.builder.selectedVerb ? COLOR.verbSelected : verb === overVerb ? COLOR.verbHover : COLOR.verb,
@@ -623,7 +896,7 @@ export class RoomScene extends Phaser.Scene {
   }
 
   private refreshInventory(): void {
-    const items = this.session.engine.state.inventory;
+    const items = this.inventoryView;
     this.inventoryScroll = clampScroll(this.inventoryScroll, items.length);
     visibleItems(items, this.inventoryScroll).forEach((alias, slot) => {
       const image = this.slotImages[slot]!;

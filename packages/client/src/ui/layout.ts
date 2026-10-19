@@ -1,6 +1,6 @@
 import { SCENE_HEIGHT } from '@grelok/engine';
 import type { Verb } from '@grelok/engine';
-import { VERBS } from './verbs';
+import type { VerbSpec } from './verbs';
 
 // Where things sit in the 320x200 picture. Pure numbers, so tests (and the scene) share one source of truth.
 
@@ -25,6 +25,9 @@ export const TEXT_BOX_TEXT = { x: 4, y: 3 };
 export const TEXT_BOX_LINES = 4;
 export const TEXT_BOX_CHARS = 52;
 
+/** The little disk icon that opens the game menu (same as pressing Esc). */
+export const MENU_BUTTON: Rect = { x: 306, y: SCENE_HEIGHT + 3, w: 12, h: 11 };
+
 export function verbRect(index: number): Rect {
   const col = Math.floor(index / VERB_ROWS);
   const row = index % VERB_ROWS;
@@ -37,6 +40,6 @@ export function inRect(rect: Rect, x: number, y: number): boolean {
 }
 
 /** Which verb button is under the point (game pixels)? */
-export function verbAt(x: number, y: number): Verb | undefined {
-  return VERBS.find((_, i) => inRect(verbRect(i), x, y))?.verb;
+export function verbAt(verbs: readonly VerbSpec[], x: number, y: number): Verb | undefined {
+  return verbs.find((_, i) => inRect(verbRect(i), x, y))?.verb;
 }

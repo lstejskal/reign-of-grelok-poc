@@ -1,0 +1,14 @@
+---
+lane:
+  alias: lane
+  name: Lane
+  description: "A muddy lane runs along a high stone wall. To the east, an iron gate leads into the old orchard. A haystack slumps by the wall on the left."
+  directions:
+    e: orchard
+
+orchard:
+  alias: orchard
+  name: Orchard
+  description: "An overgrown orchard. Your goat stands under an apple tree, chewing happily. The gate back to the lane is to the west."
+  directions:
+    w: lane

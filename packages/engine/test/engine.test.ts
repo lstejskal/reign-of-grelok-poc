@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { Engine } from '../src';
+import { DEFAULT_GIBBERISH, Engine } from '../src';
 import type { EngineEvent } from '../src';
 import { loadLogicData, GRELOK_LOGIC_DIR } from '../node/loadLogicData';
 
@@ -77,6 +77,15 @@ describe('text commands', () => {
     it('is deterministic when given a fake random source', () => {
         const engine = new Engine(data, { random: () => 0 });
         expect(says(engine.performText('xyzzy'))).toEqual([data.messages.gibberish1]);
+    });
+});
+
+describe('gibberish fallback', () => {
+    it('uses the engine default when the game defines no gibberish messages', () => {
+        const bare = structuredClone(data);
+        for (const key of ['gibberish1', 'gibberish2', 'gibberish3']) delete bare.messages[key];
+        const engine = new Engine(bare, { random: () => 0.99 });
+        expect(says(engine.performText('xyzzy'))).toEqual([DEFAULT_GIBBERISH[2]]);
     });
 });
 

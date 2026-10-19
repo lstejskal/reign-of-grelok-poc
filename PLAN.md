@@ -256,6 +256,14 @@ Verbs: Look at, Pick up, Use, Give, Talk to, Walk to. "Attack" = Use X on Y (sam
 - **Output:** the final blow plays a short animated finale ending on an end screen.
 - **Test:** sequencer unit test with fake actors (steps run in order, awaits finish, input lock released).
 - **Concept:** scripting, async sequencing, cutscenes.
+- **Status: done.** `games/<id>/cutscenes.yml` (optional, validated); step parser in `engine/src/cutscene.ts`; the pure,
+  unit-tested `client/src/cutscene/Sequencer.ts` (async steps, input lock released in a `finally`, queueing);
+  `RoomScene` implements the actor. Deviations: (1) cutscenes are keyed by the MESSAGE KEY the engine says (an action alias
+  also "runs" on failure) and play only when that command also changed the world, so repeating a move does not replay
+  them; (2) there is no `anim` step yet (no sprite animations until the art pass) and `sfx`/`music` are only logged
+  until Step 15; (3) credits are a static list on the end screen; (4) the view (sprites, inventory) keeps its old look
+  until the new `sync` step. Also fixed a race: a scene change that arrived while the fade was already fading in was lost.
+  See `docs/learn/12-cutscenes.md`.
 
 ### Step 13 — Title screen, save & load
 - Title scene: New game / Continue / Load. In-game menu (Esc or disk icon): Save (3 slots), Load, Quit to title.
@@ -263,6 +271,12 @@ Verbs: Look at, Pick up, Use, Give, Talk to, Walk to. "Attack" = Use X on Y (sam
 - **Output:** save, reload page, continue from same spot with same inventory.
 - **Test:** unit roundtrip of the save envelope; e2e save → reload → location restored.
 - **Concept:** game state serialization, scene flow.
+- **Status: done.** `TitleScene` (New game / Continue / Load), the in-game menu (Esc or the disk icon: Save, Load, Quit to title)
+  built on a reusable modal `ui/MenuPanel.ts`; pure, unit-tested `save/saveGame.ts` (envelope, slots, `SaveStore` that never
+  throws). Deviations: (1) a fourth `auto` slot is written when entering a scene and on Quit to title, and Continue loads the
+  newest of all slots; (2) `?title=off` skips the title (used by the e2e tests); (3) Esc now opens the menu when nothing is
+  half-done (it still cancels a half-built sentence or a conversation first); (4) `GameSession.engine` is now swappable, so the
+  debug console keeps working after a load. See `docs/learn/13-title-save-load.md`.
 
 ### Step 14 — Prove engine/data separation: second mini game
 - `games/demo/`: 2 rooms, 1 item, 1 puzzle, placeholder assets. Loaded via `?game=demo`. Zero changes in
@@ -270,6 +284,11 @@ Verbs: Look at, Pick up, Use, Give, Talk to, Walk to. "Attack" = Use X on Y (sam
 - **Output:** `?game=demo` plays a different tiny game.
 - **Test:** `npm run validate -- demo`; e2e: demo boots and its puzzle completes.
 - **Concept:** reusable engine.
+- **Status: done.** `games/demo/` is "The Rusty Gate": 2 screens (lane, orchard), haystack/key/oil can/gate/goat, a rusty-lock
+  puzzle, a blocked exit, a state-driven sprite (open gate) and a short ending cutscene. Zero changes in `packages/`; the only
+  game-specific additions are data (demo's `commands.yml` adds "push"). e2e `tests/e2e/demo.spec.ts` solves it with the mouse
+  and from the console. Soft contracts found (documented in `docs/learn/14-second-game.md`): `gibberish1..3` message keys,
+  the talk/ask key conventions, and the verb list being a client constant.
 
 ### Step 15 — Audio system (placeholder sound)
 - `AudioManager`: per-scene music (from scene yml) with crossfade, SFX hooks on events (pickup, door, sword hit,

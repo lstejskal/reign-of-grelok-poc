@@ -19,6 +19,10 @@ export type {
 } from './types';
 export { assembleBundle } from './bundle';
 export { validateGame } from './validateGame';
+export { parseStep } from './cutscene';
+export type { CutsceneStep } from './cutscene';
 export { SCENE_WIDTH, SCENE_HEIGHT, ICON_WIDTH, ICON_HEIGHT, iconPath } from './sceneTypes';
-export { PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS } from './sceneTypes';
+export { PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS, DEFAULT_VERBS, MAX_VERBS, MAX_VERB_LABEL } from './sceneTypes';
+export { DEFAULT_GIBBERISH } from './Engine';
+export type { VerbSpec } from './sceneTypes';
 export type { ExitData, Facing, GameBundle, GameConfig, HotspotData, PlayerConfig, Point, SceneData, SceneScale, SceneSpriteData, SpeakerData, SpeakersConfig, SpriteState } from './sceneTypes';

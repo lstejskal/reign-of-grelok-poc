@@ -1,0 +1,8 @@
+look at haystack
+take key
+take oil can
+use key on gate
+use oil can on gate
+use key on gate
+east
+push goat

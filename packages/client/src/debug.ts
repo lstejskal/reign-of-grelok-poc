@@ -29,7 +29,7 @@ export function installDebugHook(game: Phaser.Game): void {
       return debugState.bundle;
     },
     get engine() {
-      return debugState.engine;
+      return debugState.session?.engine; // the session swaps engines when a game is loaded
     },
     get session() {
       return debugState.session;
@@ -64,9 +64,29 @@ export function installDebugHook(game: Phaser.Game): void {
     get player() {
       return (game.scene.getScene('RoomScene') as RoomScene | null)?.playerState;
     },
+    /** Cutscene machinery: { running, log, audio, ended, endLines }. */
+    get cutscene() {
+      return (game.scene.getScene('RoomScene') as RoomScene | null)?.cutsceneState;
+    },
     /** The scene sprites currently drawn: { id, image, x, y, depth }. */
     get sprites() {
       return (game.scene.getScene('RoomScene') as RoomScene | null)?.spritesShown;
+    },
+    /** The menu being shown (title screen or in-game): { title, items: [{label, enabled, x, y, w, h}] }, or undefined. */
+    get menu() {
+      for (const key of ['TitleScene', 'RoomScene']) {
+        const scene = game.scene.getScene(key) as unknown as { menuState?: unknown } | null;
+        if (game.scene.isActive(key) && scene?.menuState) return scene.menuState;
+      }
+      return undefined;
+    },
+    /** What the save slots hold: [{ slot, location, savedAt, player }] (empty slots are left out). */
+    get saves() {
+      const session = debugState.session;
+      return session && ['1', '2', '3', 'auto'].flatMap((slot, i) => {
+        const save = session.saves.all()[i];
+        return save ? [{ slot, location: save.location, savedAt: save.savedAt, player: save.player }] : [];
+      });
     },
     /** The speech on screen: { speaker, text, color }, or undefined. */
     get speech() {
