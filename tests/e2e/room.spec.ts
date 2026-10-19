@@ -503,11 +503,15 @@ const sprites = (page: Page) => page.evaluate(() => window.__adv.sprites);
 const spriteIds = async (page: Page) => (await sprites(page)).map((s: { id: string }) => s.id);
 
 test('a sprite is drawn for a thing in the scene, at its feet position and sorted by y, and goes when it is picked up', async ({ page }) => {
-  expect(await sprites(page)).toEqual([{ id: 'pebble', image: 'sprites/pebble.png', x: 66, y: 120, depth: 120 }]);
+  // (the standing stone is a sprite too, imported in Step 16; it is sorted by its feet like everything else)
+  expect(await sprites(page)).toEqual([
+    { id: 'standing_stone', image: 'sprites/standing_stone.png', x: 160, y: 100, depth: 100 },
+    { id: 'pebble', image: 'sprites/pebble.png', x: 66, y: 120, depth: 120 },
+  ]);
   await page.screenshot({ path: 'tests/e2e/screenshots/sprite-pebble.png' });
 
   await say(page, 'take pebble');
-  expect(await sprites(page)).toEqual([]);
+  expect(await spriteIds(page)).toEqual(['standing_stone']);
 });
 
 test('a hidden thing gets its sprite only when the engine reveals it', async ({ page }) => {
@@ -538,11 +542,11 @@ test('the world changes visibly as the puzzle is solved: zombie falls, door open
 });
 
 test('leaving a scene swaps its sprites for the new scene\'s', async ({ page }) => {
-  expect(await spriteIds(page)).toEqual(['pebble']);
+  expect(await spriteIds(page)).toEqual(['standing_stone', 'pebble']);
   await say(page, 'east'); // the chapel
   expect(await spriteIds(page)).toEqual(['zombie']);
   await say(page, 'west');
-  expect(await spriteIds(page)).toEqual(['pebble']);
+  expect(await spriteIds(page)).toEqual(['standing_stone', 'pebble']);
 });
 
 test('double-clicking an exit goes through at once instead of walking there', async ({ page }) => {
@@ -791,7 +795,7 @@ test('Load from the in-game menu goes back to the saved moment', async ({ page }
 
   expect(await page.evaluate(() => window.__adv.engine.state.location)).toBe('plain');
   expect(await page.evaluate(() => window.__adv.inventory)).not.toContain('pebble');
-  expect((await sprites(page)).map((s: { id: string }) => s.id)).toEqual(['pebble']); // drawn again: sprites follow the state
+  expect((await sprites(page)).map((s: { id: string }) => s.id)).toEqual(['standing_stone', 'pebble']); // drawn again: sprites follow the state
   // and the game keeps working after a load (one scene object is reused: nothing may be doubled up)
   await clickVerb(page, 'pick_up');
   await clickAt(page, 66, 116);

@@ -1,0 +1,41 @@
+# Reusable prompt text. In art/assets.yml a prompt may contain {name}, which tools/gen-image.ts replaces with the
+# fragment of that name below. Change a character's look here once and every prompt that uses it follows.
+
+# Starts every prompt, so every picture shares one look. (See docs/art-style.md.)
+style: >-
+  16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours,
+  hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no
+  anti-aliasing, no text, crisp square pixels.
+
+# For things that must be cut out: a flat key colour that the importer removes.
+cutout: >-
+  The subject is alone on a flat solid magenta #FF00FF background, nothing else in the picture, whole subject visible,
+  standing on the bottom edge.
+
+# For full backgrounds: a stage-like scene with a walkable floor.
+scene: >-
+  Wide side-on game background, no characters, a clear flat walkable floor in the lower half, a distant horizon in the
+  upper half, saturated sunset-style sky bands.
+
+grognak: >-
+  Grognak, a heroic barbarian-dwarf hero: tall but stocky, broad torso, powerful legs, braided brown beard, horned
+  iron helmet, fur loincloth, big sword in hand.
+
+grelok: >-
+  Grelok the Gruesome, a gaunt evil wizard: tall, hooded, flowing cape and cloak in wine red, dark armour pieces,
+  a staff topped with a skull, glowing eyes.
+
+blacksmith: >-
+  A stout, sweaty blacksmith in a leather apron holding a hammer, strong forearms, tired but friendly face.
+
+priest: >-
+  A small chubby tipsy priest in a simple robe, rosy cheeks, sitting under a tree, holding a clay jug.
+
+wizard: >-
+  A tall bespectacled wizard in a purple robe and pointed hat, lost in thought, seen from the chest up.
+
+zombie: >-
+  A ragged green-grey zombie in torn clothes with arms stretched forward, hollow eyes.
+
+menhir: >-
+  A huge weathered standing stone (menhir), tapering monolith with faint carved runes and a little moss at the base.

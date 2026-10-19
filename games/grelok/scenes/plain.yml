@@ -15,6 +15,11 @@ hotspots:   # later entries are on top
     walkTo: [66, 124]
 
 sprites:
+  - id: standing_stone   # imported art (art/raw/standing_stone.png -> npm run import-art)
+    thing: standing_stone
+    x: 160
+    y: 100
+    image: sprites/standing_stone.png
   - id: pebble
     thing: pebble
     x: 66

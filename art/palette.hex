@@ -1,0 +1,35 @@
+; The game's palette: 32 colours, each channel one of the 8 levels a Sega Mega Drive could show (9-bit RGB).
+; One colour per line: #rrggbb, then an optional ; comment. Order does not matter.
+; Every imported picture is snapped to these colours (tools/import-art.ts).
+#000000 ; black
+#340034 ; outline plum (the dark outline of every sprite)
+#343457 ; night slate
+#575757 ; stone dark
+#747474 ; stone
+#909090 ; stone mid
+#acacac ; stone light
+#cecece ; silver
+#ffffff ; white
+#340000 ; blood brown
+#573400 ; earth dark
+#745734 ; leather
+#907434 ; wood
+#ac9057 ; sand
+#ce9074 ; skin
+#ffceac ; skin light
+#ac7457 ; skin shade
+#570034 ; wine dark
+#740034 ; wine red (Grelok's cloak)
+#ac3434 ; red
+#ff5700 ; orange
+#ff9000 ; amber
+#ffce34 ; gold
+#ffff90 ; pale yellow
+#005734 ; deep green
+#349034 ; green
+#74ac57 ; moss
+#90ce74 ; light green
+#0034ac ; blue
+#5790ce ; sky
+#90ceff ; pale sky
+#743490 ; purple
