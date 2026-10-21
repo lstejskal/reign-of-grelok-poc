@@ -13,7 +13,7 @@ game gets after `npm run import-art`.*
 | Path | What |
 |---|---|
 | `docs/art-style.md` | The rules: sizes, palette, outlines, shading, mood of each place. Read this first. |
-| `art/palette.hex` | The 32 colours the game may use (Mega Drive-style 9-bit values). |
+| `art/palette.hex` | A fixed 32-colour palette of Mega Drive colours. Not used by default any more (see "Choosing the palette"); an asset can ask for it with `palette: shared`. |
 | `art/prompts/fragments.yml` | Reusable prompt text: the shared style line and a brief per character. |
 | `art/assets.yml` | Every picture the game needs: its type, size, where it goes, and its prompt. |
 | `art/raw/` | The pictures you generate (input of the pipeline). |
@@ -40,28 +40,43 @@ rest). An asset can say `gen_size: "1024x1536"` in `art/assets.yml`, and `IMAGE_
    anything *leaning* magenta, and one more layer of pinkish fringe around the figure.
 2. **Crop to content.** One box around **all frames together** (not each frame alone): a walking frame with a leg stretched
    out must stay where it is relative to the standing frame, or the character would jitter.
-3. **Shrink.** By one common factor, so the box plus its outline fits the target size. Two methods (`method:` in
-   `assets.yml`): `nearest` copies one source pixel per new pixel (crisp, right for pixel art), `box` averages everything
-   it covers (smoother, better when the source is a detailed picture).
-4. **Remove specks.** Lonely single pixels left over from the cut-out.
-5. **Snap to the palette.** Every pixel becomes the *nearest* palette colour. "Nearest" counts green differences more than
-   blue ones, because that is how our eyes work. This is what makes pictures from different sources look like one game.
+3. **Choose the palette.** Each picture gets its own small palette, picked to suit it (see below), from **all frames of a
+   sheet together** so a character keeps the same colours in every frame.
+4. **Shrink and snap.** By one common factor, so the box plus its outline fits the target size. Three methods (`method:` in
+   `assets.yml`): `dominant` (the default) gives every new pixel the palette colour that most of its source pixels have,
+   so it never invents a blend, thin dark lines survive (dark pixels count a little extra) and colours stay clean.
+   `box` averages everything it covers and then snaps (smoother, but a red wound next to green skin turns into brown mud).
+   `nearest` copies one source pixel per new pixel (crisp, only right when the source is already tiny pixel art).
+5. **Remove specks.** Lonely single pixels left over from the cut-out.
 6. **Outline.** One pixel of dark plum around the figure. Outlines are the single biggest part of the arcade look.
 7. **Place.** Put it on a canvas of exactly the size the game expects, feet on the bottom edge (icons: centred).
 
-Backgrounds skip the cut-out and outline. They are shrunk and snapped, with **ordered dithering**: before choosing the
-nearest colour, each pixel is nudged up or down by a repeating pattern (a "Bayer matrix"). A smooth sky then becomes a fine
-checkerboard of two palette colours instead of hard bands, the classic way 16-bit games faked more colours.
+### Choosing the palette (`buildPalette`)
+The first version snapped everything to one fixed 32-colour palette. It looked bad on real generated art: a zombie wants
+five greens and the fixed palette had three, a sunset wants a dozen oranges and had five. Real Mega Drive pictures did not
+share one palette either; each used a few colours chosen for it. So now each picture gets its own, **16 colours for sprites
+and 32 for backgrounds** (`colors:` in `assets.yml` changes that), and every colour is still a real Mega Drive colour (each of
+red, green and blue is one of 8 levels), which keeps the whole game looking like one console.
+How: count the colours of the picture, split them into the wanted number of groups ("median cut": keep halving the group
+with the most variety), nudge each group's colour towards the average of what is nearest to it ("k-means"), snap to the Mega
+Drive levels. Counts are square-rooted first so a small but distinctive area (red wounds, a glowing gem) still gets a colour.
+
+### Backgrounds
+Backgrounds skip the cut-out and outline. Generators do not make 320x144 pictures (that is 20:9), so the picture is first
+**trimmed** to that shape (never stretched; `focus: 0` keeps the top, `1` the bottom, default the middle), then shrunk and
+snapped like a sprite. **Dithering** (nudging each pixel by a repeating pattern, so a smooth sky becomes a fine checkerboard
+of two colours) is available with `dither: true` but off by default: on a whole scene it showed as a screen-door pattern
+over everything.
 
 Sheets (the player) are cut into a grid first, processed as one set of frames, pasted back together, and a Phaser-style
 **atlas** file (`grognak.json`: where each frame is, plus named animations such as `walk_e`) is written next to the picture.
 The game does not read the atlas yet; Step 17 will use it for animation.
 
 ## The tests
-- `tools/art/pipeline.test.ts`: every step on tiny hand-drawn pictures (a known colour snaps to the expected palette colour,
+- `tools/art/pipeline.test.ts`: every step on tiny hand-drawn pictures (a known colour snaps to the expected palette colour, a palette keeps a tiny distinctive area, shrinking never blends,
   a grid slices into N frames and composes back identically, the outline touches only the edge...).
-- `tools/art/art.test.ts`: the **palette test**. Every asset that has a raw picture (so, was imported) must use only palette
-  colours, with no half-transparent pixels, and have the size the game expects. The prompt expansion and the image-service
+- `tools/art/art.test.ts`: the **palette test**. Every asset that has a raw picture (so, was imported) must stay within its
+  colour budget, use only Mega Drive colours, have no half-transparent pixels, and have the size the game expects. The prompt expansion and the image-service
   request are tested with a fake service. `npm run validate` still checks that the files exist and fit.
 - `tests/e2e/art.spec.ts`: the imported stone and Grognak sheet really load and show in the game.
 
@@ -77,3 +92,10 @@ The game does not read the atlas yet; Step 17 will use it for animation.
   the hard part of AI art, which is why Step 17 keeps frame counts low.
 - Placeholder pictures (backgrounds, other sprites, icons) are still the generated tiles; they are replaced scene by scene in Step 17.
 - `gen-image` has not been run against a real service (there is no key here); it is tested with a fake one.
+
+## Lessons from the first real pictures
+- **Pictures with a wide shape need a wide box.** A zombie lying down is about 6 times wider than tall; in a 40x30 box it
+  came out 8 pixels high. `zombie_down` is now 60x24 and `zombie_standing` 48x64 (arms stretched out make it wide too).
+  When a figure looks too small, the box in `assets.yml` is usually the reason, not the picture.
+- **Small is small.** At 40x60 a face is about 8 pixels wide. Ask the generator for big, simple shapes, and expect faces and
+  fine details to be suggestions rather than drawings.

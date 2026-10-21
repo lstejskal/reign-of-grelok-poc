@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import { PNG } from 'pngjs';
-import { expandPrompt, loadArtConfig, outputPath, projectPath, decodePng } from './config';
+import { colorsFor, expandPrompt, loadArtConfig, outputPath, projectPath, decodePng } from './config';
 import { buildRequest, extractImage, generate, readSettings, sizeFor } from './imageApi';
-import { hexOf } from './pipeline';
+import { MEGA_DRIVE_LEVELS, hexOf } from './pipeline';
+import type { Rgb } from './pipeline';
 
 describe('prompts', () => {
     it('replaces {name} with fragments, also inside fragments, and leaves unknown names alone', () => {
@@ -27,25 +28,33 @@ describe('art/assets.yml', () => {
         }
     });
 
-    it('palette has 32 distinct colours of Mega Drive levels', () => {
+    it('the shared palette (art/palette.hex) has 32 distinct colours of Mega Drive levels', () => {
         const levels = [0, 52, 87, 116, 144, 172, 206, 255];
         expect(new Set(palette.map(hexOf)).size).toBe(32);
         for (const color of palette) for (const c of color) expect(levels).toContain(c);
     });
 
-    // An asset with a picture in art/raw/ has been through the pipeline: its game file must use palette colours only.
-    it('every imported picture uses only palette colours (and full or no transparency)', () => {
-        const allowed = new Set(palette.map(hexOf));
+    // An asset with a picture in art/raw/ has been through the pipeline: its game file must stay within its colour budget,
+    // use only colours the Mega Drive could show, and have no half-transparent pixels. (`palette: shared` assets must
+    // use the colours of art/palette.hex.)
+    it('every imported picture has few colours, all Mega Drive colours, and full or no transparency', () => {
+        const levels: readonly number[] = MEGA_DRIVE_LEVELS;
+        const shared = new Set(palette.map(hexOf));
         let checked = 0;
         for (const asset of assets) {
             if (!fs.existsSync(projectPath(asset.rawPath))) continue;
             checked++;
             const img = decodePng(fs.readFileSync(outputPath(asset)));
+            const used = new Set<string>();
             for (let i = 0; i < img.data.length; i += 4) {
                 if (img.data[i + 3] === 0) continue;
                 expect(img.data[i + 3], `${asset.id} alpha`).toBe(255);
-                expect(allowed.has(hexOf([img.data[i]!, img.data[i + 1]!, img.data[i + 2]!])), `${asset.id} has an off-palette pixel`).toBe(true);
+                const color: Rgb = [img.data[i]!, img.data[i + 1]!, img.data[i + 2]!];
+                for (const c of color) expect(levels, `${asset.id} has the off-grid colour ${hexOf(color)}`).toContain(c);
+                if (asset.palette === 'shared') expect(shared.has(hexOf(color)), `${asset.id} has an off-palette pixel`).toBe(true);
+                used.add(hexOf(color));
             }
+            expect(used.size, `${asset.id} uses ${used.size} colours`).toBeLessThanOrEqual(colorsFor(asset, palette));
         }
         expect(checked).toBeGreaterThan(0); // the repository ships at least one imported asset
     });

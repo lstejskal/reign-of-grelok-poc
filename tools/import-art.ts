@@ -6,7 +6,7 @@
 // What happens to each picture is described in docs/learn/16-art-pipeline.md and coded in tools/art/pipeline.ts.
 import fs from 'node:fs';
 import path from 'node:path';
-import { loadArtConfig, decodePng, encodePng, outputPath, projectPath } from './art/config';
+import { colorsFor, loadArtConfig, decodePng, encodePng, outputPath, projectPath } from './art/config';
 import type { AssetSpec } from './art/config';
 import { composeGrid, makeAtlas, processBackground, processFrames, sliceGrid } from './art/pipeline';
 import type { Raster } from './art/pipeline';
@@ -37,12 +37,13 @@ function importAsset(asset: AssetSpec): string {
     const rawFile = projectPath(asset.rawPath);
     if (!fs.existsSync(rawFile)) throw new Error(`${asset.id}: missing ${asset.rawPath}`);
     const raw: Raster = decodePng(fs.readFileSync(rawFile));
-    const common = { palette: config.palette, outlineColor: config.outline, method: asset.method };
+    const palette = asset.palette === 'shared' ? config.palette : undefined; // otherwise each picture gets its own colours
+    const common = { palette, outlineColor: config.outline, method: asset.method, colors: colorsFor(asset, config.palette) };
     let result: Raster;
 
     if (asset.type === 'background') {
         const [w, h] = asset.size!;
-        result = processBackground(raw, w, h, config.palette, asset.method ?? 'box', asset.dither ?? true);
+        result = processBackground(raw, w, h, { palette, colors: colorsFor(asset, config.palette), method: asset.method, dither: asset.dither, focus: asset.focus });
     } else if (asset.type === 'sheet') {
         const [fw, fh] = asset.frame!;
         const [columns, rows] = asset.grid!;

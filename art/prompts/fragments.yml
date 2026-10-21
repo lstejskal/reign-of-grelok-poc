@@ -3,7 +3,7 @@
 
 # Starts every prompt, so every picture shares one look. (See docs/art-style.md.)
 style: >-
-  16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours,
+  16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of about 16 colours,
   hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no
   anti-aliasing, no text, crisp square pixels.
 
@@ -14,7 +14,7 @@ cutout: >-
 
 # For full backgrounds: a stage-like scene with a walkable floor.
 scene: >-
-  Wide side-on game background, no characters, a clear flat walkable floor in the lower half, a distant horizon in the
+  Wide panoramic side-on game background (the top and bottom edges will be trimmed, so keep important things away from them), no characters, a clear flat walkable floor in the lower half, a distant horizon in the
   upper half, saturated sunset-style sky bands.
 
 grognak: >-

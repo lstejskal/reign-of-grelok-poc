@@ -78,6 +78,112 @@ export function quantize(img: Raster, palette: readonly Rgb[], dither = false): 
     return out;
 }
 
+
+// --- choosing a palette for ONE picture ------------------------------------------------------------------------
+// Real Mega Drive pictures did not share one palette: each had a few colours picked to suit it (a zombie wants greens,
+// a sunset wants oranges). We do the same, but every colour must still be one the console could show (9-bit RGB:
+// each of red, green, blue is one of 8 levels), so everything keeps the same chunky look.
+
+/** How many colours a picture's own palette gets by default (the outline counts as one). */
+export const DEFAULT_SPRITE_COLORS = 16;
+export const DEFAULT_BACKGROUND_COLORS = 32;
+
+export const MEGA_DRIVE_LEVELS = [0, 52, 87, 116, 144, 172, 206, 255] as const;
+
+/** The nearest colour the Mega Drive could show. */
+export function snapToMegaDrive(color: Rgb): Rgb {
+    return color.map((c) => MEGA_DRIVE_LEVELS.reduce((best, level) => (Math.abs(level - c) < Math.abs(best - c) ? level : best))) as Rgb;
+}
+
+/**
+ * Picks the `count` colours that best describe the visible pixels of these pictures (all together, so the frames of a
+ * sheet get one shared palette). `reserved` colours (like the outline) are always included and use up part of `count`.
+ *
+ * How: 1. count the colours (grouped coarsely, 32 levels per channel).  2. median cut: keep splitting the group with
+ * the most variety in half, until there are enough groups.  3. a few rounds of k-means: move each colour to the average
+ * of the pixels nearest to it.  4. snap to Mega Drive colours.
+ * Counts are square-rooted first, so a small but distinctive area (red wounds, yellow teeth, a glowing gem) is not
+ * swallowed by the big areas around it.
+ */
+export function buildPalette(images: Raster[], count: number, reserved: readonly Rgb[] = []): Rgb[] {
+    const want = Math.max(1, count - reserved.length);
+    const bins = 32768; // 5 bits per channel
+    const [n, sr, sg, sb] = [new Float64Array(bins), new Float64Array(bins), new Float64Array(bins), new Float64Array(bins)];
+    for (const img of images) {
+        for (let i = 0; i < img.data.length; i += 4) {
+            if (img.data[i + 3]! < ALPHA_ON) continue;
+            const [r, g, b] = [img.data[i]!, img.data[i + 1]!, img.data[i + 2]!];
+            const key = ((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3);
+            n[key]!++;
+            sr[key]! += r;
+            sg[key]! += g;
+            sb[key]! += b;
+        }
+    }
+    interface Point { c: Rgb; w: number }
+    const points: Point[] = [];
+    for (let k = 0; k < bins; k++) if (n[k]! > 0) points.push({ c: [sr[k]! / n[k]!, sg[k]! / n[k]!, sb[k]! / n[k]!], w: Math.sqrt(n[k]!) });
+    if (points.length === 0) return [...reserved];
+
+    const mean = (group: Point[]): Rgb => {
+        const total = group.reduce((a, p) => a + p.w, 0);
+        return [0, 1, 2].map((ch) => group.reduce((a, p) => a + p.c[ch]! * p.w, 0) / total) as Rgb;
+    };
+    const spread = (group: Point[]): number => {
+        const m = mean(group);
+        return group.reduce((a, p) => a + p.w * (3 * (p.c[0] - m[0]) ** 2 + 4 * (p.c[1] - m[1]) ** 2 + 2 * (p.c[2] - m[2]) ** 2), 0);
+    };
+
+    const cluster = (k: number): Rgb[] => {
+        // median cut
+        const groups: Point[][] = [points];
+        while (groups.length < k) {
+            let [pick, most] = [-1, 0];
+            groups.forEach((g, i) => {
+                const s = g.length > 1 ? spread(g) : 0;
+                if (s > most) [pick, most] = [i, s];
+            });
+            if (pick < 0) break;
+            const group = groups[pick]!;
+            const ranges = [0, 1, 2].map((ch) => Math.max(...group.map((p) => p.c[ch]!)) - Math.min(...group.map((p) => p.c[ch]!)));
+            const weights = [3, 4, 2];
+            const axis = [0, 1, 2].reduce((best, ch) => (ranges[ch]! * weights[ch]! > ranges[best]! * weights[best]! ? ch : best), 0);
+            group.sort((a, b) => a.c[axis]! - b.c[axis]!);
+            const half = group.reduce((a, p) => a + p.w, 0) / 2;
+            let [run, cut] = [0, 0];
+            while (cut < group.length - 1 && run + group[cut]!.w < half) run += group[cut++]!.w;
+            cut = Math.min(group.length - 1, Math.max(1, cut));
+            groups.splice(pick, 1, group.slice(0, cut), group.slice(cut));
+        }
+        // k-means
+        let centers = groups.map(mean);
+        for (let round = 0; round < 6; round++) {
+            const members: Point[][] = centers.map(() => []);
+            for (const p of points) members[nearestIndex(p.c, centers)]!.push(p);
+            centers = centers.map((c, i) => (members[i]!.length > 0 ? mean(members[i]!) : c));
+        }
+        // snap, and drop duplicates (two centres can land on the same Mega Drive colour) and the reserved colours
+        const seen = new Set(reserved.map(hexOf));
+        const unique: Rgb[] = [];
+        for (const c of centers.map(snapToMegaDrive)) {
+            if (seen.has(hexOf(c))) continue;
+            seen.add(hexOf(c));
+            unique.push(c);
+        }
+        return unique;
+    };
+
+    // Duplicates leave slots empty, so ask for a few more centres until the palette is full (or can not grow).
+    let chosen = cluster(want);
+    for (let k = want + 1; chosen.length < want && k <= want * 2; k++) {
+        const more = cluster(k);
+        if (more.length > want) break;
+        if (more.length > chosen.length) chosen = more;
+    }
+    chosen.sort((a, b) => a[0] + 2 * a[1] + a[2] - (b[0] + 2 * b[1] + b[2]));
+    return [...reserved, ...chosen];
+}
+
 // --- cutting out ---------------------------------------------------------------------------------------------
 
 const isMagentaish = (r: number, g: number, b: number): boolean => r > 140 && b > 140 && g < Math.min(r, b) * 0.65;
@@ -151,7 +257,7 @@ export function crop(img: Raster, box: Box): Raster {
 
 // --- shrinking -----------------------------------------------------------------------------------------------
 
-export type ResizeMethod = 'nearest' | 'box';
+export type ResizeMethod = 'dominant' | 'nearest' | 'box';
 
 /**
  * Scales to exactly width x height.
@@ -190,6 +296,64 @@ export function resize(img: Raster, width: number, height: number, method: Resiz
         }
     }
     return out;
+}
+
+
+/**
+ * Shrinks to exactly width x height AND snaps to the palette in one go: every new pixel takes the palette colour that
+ * most of its source pixels have (the "dominant" colour), and is see-through when fewer than half of them are visible.
+ * Unlike 'box' it never invents in-between colours, so a thin dark line stays dark and a red wound stays red instead of
+ * both dissolving into a muddy average. Dark pixels count a little extra so outlines and eyes survive the shrinking.
+ */
+export function resizeDominant(img: Raster, width: number, height: number, palette: readonly Rgb[]): Raster {
+    const out = blank(width, height);
+    const cache = new Int16Array(32768).fill(-1);
+    const indexOf = (i: number): number => {
+        if (img.data[i + 3]! < ALPHA_ON) return -1;
+        const [r, g, b] = [img.data[i]!, img.data[i + 1]!, img.data[i + 2]!];
+        const key = ((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3);
+        if (cache[key]! < 0) cache[key] = nearestIndex([r, g, b], palette);
+        return cache[key]!;
+    };
+    const darkness = palette.map((c) => 1 + 0.6 * Math.max(0, 1 - (c[0] + 2 * c[1] + c[2]) / (4 * 110)));
+    const [sx, sy] = [img.width / width, img.height / height];
+    const votes = new Float64Array(palette.length);
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const [x0, y0] = [Math.floor(x * sx), Math.floor(y * sy)];
+            const [x1, y1] = [Math.min(img.width, Math.max(x0 + 1, Math.ceil((x + 1) * sx))), Math.min(img.height, Math.max(y0 + 1, Math.ceil((y + 1) * sy)))];
+            votes.fill(0);
+            let [visible, total] = [0, 0];
+            for (let yy = y0; yy < y1; yy++) {
+                for (let xx = x0; xx < x1; xx++) {
+                    total++;
+                    const k = indexOf(at(img, xx, yy));
+                    if (k < 0) continue;
+                    visible++;
+                    votes[k]! += darkness[k]!;
+                }
+            }
+            if (visible * 2 < total) continue;
+            let best = 0;
+            for (let k = 1; k < palette.length; k++) if (votes[k]! > votes[best]!) best = k;
+            const c = palette[best]!;
+            out.data.set([c[0], c[1], c[2], 255], at(out, x, y));
+        }
+    }
+    return out;
+}
+
+/** Scales a picture so it covers width x height, then trims the overhang: `focus` 0 keeps the top/left, 1 the bottom/right, 0.5 the middle. Never stretches. */
+export function coverCrop(img: Raster, width: number, height: number, focus = 0.5): Raster {
+    const wanted = width / height;
+    const have = img.width / img.height;
+    if (Math.abs(wanted - have) < 1e-6) return img;
+    if (have < wanted) {
+        const h = Math.round(img.width / wanted);
+        return crop(img, { x: 0, y: Math.round((img.height - h) * focus), w: img.width, h });
+    }
+    const w = Math.round(img.height * wanted);
+    return crop(img, { x: Math.round((img.width - w) * focus), y: 0, w, h: img.height });
 }
 
 // --- tidying -------------------------------------------------------------------------------------------------
@@ -291,8 +455,11 @@ export function makeAtlas(image: string, sheet: { width: number; height: number 
 export interface FrameOptions {
     frameW: number;
     frameH: number;
-    palette: readonly Rgb[];
     outlineColor: Rgb;
+    /** Snap to this fixed palette. Leave out to choose the best `colors` colours for the picture itself (the default). */
+    palette?: readonly Rgb[];
+    /** Colours in the picture's own palette, the outline included (default DEFAULT_SPRITE_COLORS). */
+    colors?: number;
     method?: ResizeMethod;
     anchor?: 'bottom' | 'center';
     key?: Rgb;
@@ -300,11 +467,12 @@ export interface FrameOptions {
 
 /**
  * Turns generated pictures into game frames. For a sprite there is one picture; for a sheet there is one per cell.
- * All frames get the SAME treatment, so a character does not change size or jump around between frames:
+ * All frames get the SAME treatment, so a character does not change size, colour or jump around between frames:
  *   1. cut out the key colour           2. find the box around ALL frames together and crop every frame to it
- *   3. shrink by one common factor so that box (plus the outline) fits the frame
- *   4. remove stray pixels              5. snap to the palette
- *   6. add the outline                  7. put it on a frame-sized canvas, feet at the bottom
+ *   3. choose the palette (from all frames together, unless a fixed one was given)
+ *   4. shrink by one common factor so that box (plus the outline) fits the frame, snapping to the palette
+ *   5. remove stray pixels              6. add the outline
+ *   7. put it on a frame-sized canvas, feet at the bottom
  * Returns undefined when a frame set is entirely empty (nothing was left after the cut-out).
  */
 export function processFrames(raws: Raster[], o: FrameOptions): Raster[] | undefined {
@@ -312,21 +480,40 @@ export function processFrames(raws: Raster[], o: FrameOptions): Raster[] | undef
     const boxes = keyed.map(contentBox).filter((b): b is Box => b !== undefined);
     if (boxes.length === 0) return undefined;
     const union = unionBox(boxes);
+    const cropped = keyed.map((frame) => crop(frame, union));
+    const palette = o.palette ?? buildPalette(cropped, o.colors ?? DEFAULT_SPRITE_COLORS, [o.outlineColor]);
 
     const scale = Math.min((o.frameW - 2) / union.w, (o.frameH - 2) / union.h);
     const [w, h] = [Math.max(1, Math.round(union.w * scale)), Math.max(1, Math.round(union.h * scale))];
 
-    return keyed.map((frame) => {
-        let img = resize(crop(frame, union), w, h, o.method ?? 'nearest');
-        img = quantize(despeckle(img), o.palette);
-        img = outline(pad(img), o.outlineColor);
+    return cropped.map((frame) => {
+        let img: Raster;
+        if ((o.method ?? 'dominant') === 'dominant') img = resizeDominant(frame, w, h, palette);
+        else img = quantize(resize(frame, w, h, o.method), palette);
+        img = outline(pad(despeckle(img)), o.outlineColor);
         return place(img, o.frameW, o.frameH, o.anchor ?? 'bottom');
     });
 }
 
-/** A full-screen picture: shrunk to size and snapped to the palette. No cut-out, no outline. */
-export function processBackground(raw: Raster, width: number, height: number, palette: readonly Rgb[], method: ResizeMethod = 'box', dither = true): Raster {
-    const small = resize(raw, width, height, method);
-    for (let i = 3; i < small.data.length; i += 4) small.data[i] = 255; // backgrounds are fully opaque
-    return quantize(small, palette, dither);
+export interface BackgroundOptions {
+    /** Snap to this fixed palette. Leave out to choose the best `colors` colours for the picture itself (the default). */
+    palette?: readonly Rgb[];
+    /** Colours in the picture's own palette (default DEFAULT_BACKGROUND_COLORS). */
+    colors?: number;
+    method?: ResizeMethod;
+    /** Ordered dithering (a fine checkerboard between two colours). Off by default: on a whole scene it shows as a screen-door pattern. */
+    dither?: boolean;
+    /** Where to trim when the picture is not the game's shape: 0 = keep the top, 1 = the bottom, 0.5 = the middle. */
+    focus?: number;
+}
+
+/** A full-screen picture: trimmed to the game's shape (not stretched), shrunk to size and snapped to a palette. No cut-out, no outline. */
+export function processBackground(raw: Raster, width: number, height: number, o: BackgroundOptions = {}): Raster {
+    const cover = coverCrop(raw, width, height, o.focus);
+    for (let i = 3; i < cover.data.length; i += 4) cover.data[i] = 255; // backgrounds are fully opaque
+    const palette = o.palette ?? buildPalette([cover], o.colors ?? DEFAULT_BACKGROUND_COLORS);
+    const method = o.method ?? 'dominant';
+    if (method === 'dominant' && !o.dither) return resizeDominant(cover, width, height, palette);
+    const small = resize(cover, width, height, method === 'dominant' ? 'box' : method);
+    return quantize(small, palette, o.dither ?? false);
 }

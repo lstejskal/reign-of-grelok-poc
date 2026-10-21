@@ -7,8 +7,9 @@ is deliberate. This page is the reference for anyone (human or AI image generato
 ## The rules
 1. **Size.** The screen is 320x200. The scene is 320x144; the bottom 56 px is the interface. Backgrounds are exactly 320x144.
    Grognak is 32x48, inventory icons 24x16, scene objects as big as their hotspot (see `scenes/*.yml`).
-2. **Palette.** 32 colours, listed in `art/palette.hex`, all with Mega Drive-style 9-bit values (each of R, G, B is one of
-   0, 52, 87, 116, 144, 172, 206, 255). Nothing outside the palette appears in a finished picture. The importer enforces it.
+2. **Palette.** Every picture has its own small palette chosen to suit it (sprites 16 colours including the outline,
+   backgrounds 32), and every colour is a Mega Drive colour: each of R, G, B is one of 0, 52, 87, 116, 144, 172, 206, 255
+   (9-bit). The importer chooses and enforces this. `art/palette.hex` is a fixed 32-colour alternative (`palette: shared`).
 3. **Outlines.** Every character and object has a hard 1 px dark outline in the palette's plum (`#340034`). Backgrounds do not.
 4. **Shading.** 2-3 tones per material (shadow, base, light), light from the upper left. No gradients, no blur, no
    anti-aliasing. Large areas of flat colour are good; texture comes from a few well-placed dither pixels.
@@ -18,8 +19,9 @@ is deliberate. This page is the reference for anyone (human or AI image generato
 8. **Original.** Inspired by the genre, never copying a specific character, logo or screenshot.
 
 ## Why these rules
-- A **small palette** is what makes things look like they belong together. Without it, a picture made by an AI (or by
-  three different artists) looks like three different games.
+- A **small palette of console colours** is what makes things look like they belong together. Without it, a picture made by an AI (or by
+  three different artists) looks like three different games. Each picture may pick its own colours, because that is how real
+  16-bit games did it; what they share is the chunky 9-bit colour grid.
 - **Nearest-neighbour scaling** and **hard outlines** keep pixels square and crisp. Smooth scaling blurs them and
   instantly looks "modern and cheap".
 - **Few frames** (see the plan for Step 17): AI generators cannot keep a character consistent over many frames, so we
@@ -51,8 +53,8 @@ The same briefs, as reusable prompt text, live in `art/prompts/fragments.yml`.
 1. Write or pick a prompt (`art/assets.yml` has one per asset; fragments are in `art/prompts/fragments.yml`).
 2. Generate the picture with any image tool, or run `npm run gen-image` if an API key is configured.
    Ask for a **flat magenta (#FF00FF) background** so code can cut the figure out. Save it in `art/raw/<asset>.png`.
-3. `npm run import-art -- <asset>` cleans it up (cut out, shrink, snap to the palette, outline) and writes the finished
+3. `npm run import-art -- <asset>` cleans it up (cut out, choose a palette, shrink, outline) and writes the finished
    file into `games/<game>/assets/` under the same name the placeholder had.
-4. `npm test` checks that every imported picture uses only palette colours.
+4. `npm test` checks that every imported picture stays within its colour budget and uses only Mega Drive colours.
 
 See `docs/learn/16-art-pipeline.md` for how each cleaning step works and why.

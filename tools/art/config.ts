@@ -4,7 +4,7 @@ import path from 'node:path';
 import { load as parseYaml } from 'js-yaml';
 import { PNG } from 'pngjs';
 import { GAMES_DIR } from '../../packages/engine/node/loadGameBundle';
-import { blank, parsePalette } from './pipeline';
+import { blank, parsePalette, DEFAULT_BACKGROUND_COLORS, DEFAULT_SPRITE_COLORS } from './pipeline';
 import type { Raster, ResizeMethod, Rgb } from './pipeline';
 
 export const ART_DIR = path.resolve(import.meta.dirname, '../../art');
@@ -23,6 +23,12 @@ export interface AssetSpec {
     grid?: [number, number];
     method?: ResizeMethod;
     dither?: boolean;
+    /** Colours in this picture's own palette (outline included). Defaults: 16 for sprites and icons, 32 for backgrounds. */
+    colors?: number;
+    /** `shared` = snap to art/palette.hex instead of choosing colours to suit the picture. */
+    palette?: 'own' | 'shared';
+    /** Backgrounds: which part to keep when the picture is not the game's shape, 0 = top .. 1 = bottom (default 0.5). */
+    focus?: number;
     /** Shape to ask the image service for ("1024x1536"); a default fits the type, see sizeFor(). */
     genSize?: string;
     /** Sheets: named animations as lists of frame numbers (row by row). */
@@ -58,6 +64,12 @@ export function loadArtConfig(): ArtConfig {
 export function expandPrompt(prompt: string, fragments: Record<string, string>, depth = 0): string {
     const text = prompt.replace(/\{(\w+)\}/g, (whole, name: string) => (fragments[name] !== undefined && depth < 5 ? expandPrompt(fragments[name]!.trim(), fragments, depth + 1) : whole));
     return text.replace(/\s+/g, ' ').trim();
+}
+
+/** How many colours this asset's picture may use (the shared palette's size when it uses that). */
+export function colorsFor(asset: AssetSpec, sharedPalette: readonly Rgb[]): number {
+    if (asset.palette === 'shared') return sharedPalette.length;
+    return asset.colors ?? (asset.type === 'background' ? DEFAULT_BACKGROUND_COLORS : DEFAULT_SPRITE_COLORS);
 }
 
 export const projectPath = (relative: string): string => path.resolve(ART_DIR, '..', relative);

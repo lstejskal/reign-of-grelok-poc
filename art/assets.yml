@@ -7,6 +7,9 @@
 #   raw:    the picture you generated, default art/raw/<asset id>.png
 #   gen_size: optional shape to ask the image service for, "1024x1536" (default: wide for backgrounds, the grid's shape
 #           for sheets, square otherwise; see sizeFor in tools/art/imageApi.ts)
+#   colors: optional; how many colours this picture's own palette may have, outline included (default 16, backgrounds 32)
+#   palette: optional; `shared` snaps to art/palette.hex instead of choosing colours to suit the picture
+#   focus:  backgrounds only; which part to keep when the picture is not 320x144-shaped: 0 = top, 0.5 = middle (default), 1 = bottom
 #   prompt: what to ask the image generator ({style}, {cutout}... come from art/prompts/fragments.yml)
 # An asset counts as "imported" once art/raw/<id>.png exists; the palette test then checks its output.
 palette: art/palette.hex
@@ -30,12 +33,12 @@ assets:
     type: sprite
     out: sprites/zombie_standing.png
     prompt: '{style} {cutout} {zombie} Standing.'
-    size: [40, 60]
+    size: [48, 64]
   zombie_down:
     type: sprite
     out: sprites/zombie_down.png
     prompt: '{style} {cutout} {zombie} Lying flat on the ground, defeated.'
-    size: [40, 30]
+    size: [60, 24]
   chapel_door_open:
     type: sprite
     out: sprites/chapel_door_open.png

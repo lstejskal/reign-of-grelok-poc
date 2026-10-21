@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-    blank, chromaKey, composeGrid, contentBox, crop, despeckle, makeAtlas, nearestIndex, outline, pad, parsePalette, place,
-    processBackground, processFrames, quantize, resize, sliceGrid,
+    blank, buildPalette, chromaKey, composeGrid, contentBox, coverCrop, crop, despeckle, hexOf, makeAtlas, MEGA_DRIVE_LEVELS, nearestIndex, outline, pad,
+    parsePalette, place, processBackground, processFrames, quantize, resize, resizeDominant, sliceGrid, snapToMegaDrive,
 } from './pipeline';
 import type { Raster, Rgb } from './pipeline';
 
@@ -204,11 +204,111 @@ describe('processBackground', () => {
     it('shrinks to size, is fully opaque and uses only palette colours', () => {
         const big = blank(64, 40);
         for (let i = 0; i < big.data.length; i += 4) big.data.set([(i * 7) % 256, (i * 3) % 256, (i * 11) % 256, 255], i);
-        const bg = processBackground(big, 16, 10, PALETTE);
+        const bg = processBackground(big, 16, 10, { palette: PALETTE });
         expect([bg.width, bg.height]).toEqual([16, 10]);
         for (let i = 0; i < bg.data.length; i += 4) {
             expect(bg.data[i + 3]).toBe(255);
             expect(PALETTE.some((p) => p[0] === bg.data[i] && p[1] === bg.data[i + 1] && p[2] === bg.data[i + 2])).toBe(true);
         }
+    });
+});
+
+describe('a palette chosen for one picture', () => {
+    const levels: readonly number[] = MEGA_DRIVE_LEVELS;
+    /** Left half green, right half red, plus a few small blue pixels. */
+    function greenRedBlue(): Raster {
+        const img = blank(40, 20);
+        for (let y = 0; y < 20; y++) for (let x = 0; x < 40; x++) img.data.set(x < 20 ? [60, 170, 60, 255] : [190, 40, 40, 255], (y * 40 + x) * 4);
+        for (let x = 0; x < 3; x++) img.data.set([30, 60, 220, 255], x * 4);
+        return img;
+    }
+
+    it('snaps any colour to one the Mega Drive could show', () => {
+        expect(snapToMegaDrive([0, 0, 0])).toEqual([0, 0, 0]);
+        expect(snapToMegaDrive([250, 130, 60])).toEqual([255, 116, 52]);
+        for (const c of snapToMegaDrive([13, 200, 99])) expect(levels).toContain(c);
+    });
+
+    it('has no more colours than asked for, all of them Mega Drive colours, with the reserved ones first', () => {
+        const outlineColor: Rgb = [52, 0, 52];
+        const palette = buildPalette([greenRedBlue()], 4, [outlineColor]);
+        expect(palette[0]).toEqual(outlineColor);
+        expect(palette.length).toBeLessThanOrEqual(4);
+        expect(new Set(palette.map(hexOf)).size).toBe(palette.length);
+        for (const color of palette) for (const c of color) expect(levels).toContain(c);
+    });
+
+    it('keeps a small but different area (three blue pixels among 800 green and red ones)', () => {
+        const palette = buildPalette([greenRedBlue()], 4);
+        expect(palette.some(([r, g, b]) => b > r && b > g)).toBe(true);
+    });
+
+    it('is empty-safe: a picture with nothing visible gives just the reserved colours', () => {
+        expect(buildPalette([blank(4, 4)], 8, [[1, 2, 3]])).toEqual([[1, 2, 3]]);
+    });
+});
+
+describe('resizeDominant', () => {
+    const [black, white]: Rgb[] = [[0, 0, 0], [255, 255, 255]];
+
+    /** A one-row picture from letters: 'w' white, 'b' black, '.' see-through. */
+    function row(letters: string): Raster {
+        const img = blank(letters.length, 1);
+        [...letters].forEach((ch, x) => {
+            if (ch === 'w') img.data.set([255, 255, 255, 255], x * 4);
+            if (ch === 'b') img.data.set([0, 0, 0, 255], x * 4);
+        });
+        return img;
+    }
+
+    it('gives each new pixel the colour most of its source pixels have, never a blend', () => {
+        const out = resizeDominant(row('wwwbbbbw'), 2, 1, [black, white]); // blocks of 4: www+b and bbb+w
+        expect(pixel(out, 0, 0)).toEqual([255, 255, 255, 255]);
+        expect(pixel(out, 1, 0)).toEqual([0, 0, 0, 255]);
+    });
+
+    it('is see-through where fewer than half of the source pixels are visible', () => {
+        const out = resizeDominant(row('wwww.w..'), 2, 1, [black, white]); // 4 of 4 visible, then 1 of 4
+        expect(pixel(out, 0, 0)[3]).toBe(255);
+        expect(pixel(out, 1, 0)[3]).toBe(0);
+    });
+
+    it('lets a thin dark line survive when it is a bit less than half of the area (dark pixels count extra)', () => {
+        const out = resizeDominant(row('wwwwwwbbww'), 2, 1, [black, white]); // blocks of 5: no black, then 2 black of 5
+        expect(pixel(out, 0, 0)).toEqual([255, 255, 255, 255]);
+        expect(pixel(out, 1, 0)).toEqual([0, 0, 0, 255]);
+    });
+});
+
+describe('coverCrop', () => {
+    it('trims instead of stretching: a 16:9 picture becomes 20:9 by losing rows, and focus picks which', () => {
+        const img = blank(160, 90);
+        for (let y = 0; y < 90; y++) for (let x = 0; x < 160; x++) img.data.set([y, 0, 0, 255], (y * 160 + x) * 4);
+        const middle = coverCrop(img, 20, 9);
+        expect([middle.width, middle.height]).toEqual([160, 72]);
+        expect(pixel(middle, 0, 0)[0]).toBe(9);
+        expect(pixel(coverCrop(img, 20, 9, 0), 0, 0)[0]).toBe(0);
+        expect(pixel(coverCrop(img, 20, 9, 1), 0, 0)[0]).toBe(18);
+    });
+
+    it('trims the sides of a picture that is too tall, and leaves a picture of the right shape alone', () => {
+        expect(coverCrop(blank(100, 100), 20, 10).height).toBe(50);
+        const same = blank(40, 20);
+        expect(coverCrop(same, 20, 10)).toBe(same);
+    });
+});
+
+describe('processFrames with a palette of its own', () => {
+    it('gives every frame of a sheet the same palette, and keeps to the colour budget', () => {
+        const frame = (color: Rgb): Raster => {
+            const img = blank(30, 30);
+            for (let i = 0; i < img.data.length; i += 4) img.data.set([255, 0, 255, 255], i);
+            for (let y = 5; y < 25; y++) for (let x = 5; x < 25; x++) img.data.set([color[0], color[1], color[2], 255], (y * 30 + x) * 4);
+            return img;
+        };
+        const frames = processFrames([frame([200, 40, 40]), frame([40, 200, 60])], { frameW: 12, frameH: 12, outlineColor: [52, 0, 52], colors: 3 })!;
+        const used = new Set(frames.flatMap((f) => Array.from({ length: f.width * f.height }, (_, i) => (f.data[i * 4 + 3] ? hexOf([f.data[i * 4]!, f.data[i * 4 + 1]!, f.data[i * 4 + 2]!]) : ''))).filter(Boolean));
+        expect(used.size).toBeLessThanOrEqual(3);
+        expect(used.has('#340034')).toBe(true); // the outline
     });
 });

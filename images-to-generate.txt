@@ -1,0 +1,85 @@
+
+== chapel_door_open  (sprite, 40x60 px target; ask for a 1024x1024 picture)
+   save as: art/raw/chapel_door_open.png
+   16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours, hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no anti-aliasing, no text, crisp square pixels. The subject is alone on a flat solid magenta #FF00FF background, nothing else in the picture, whole subject visible, standing on the bottom edge. An old wooden chapel door standing open, dark inside, pale stone frame.
+
+== pebble  (sprite, 12x8 px target; ask for a 1024x1024 picture)
+   save as: art/raw/pebble.png
+   16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours, hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no anti-aliasing, no text, crisp square pixels. The subject is alone on a flat solid magenta #FF00FF background, nothing else in the picture, whole subject visible, standing on the bottom edge. A single small grey pebble.
+
+== gemstone  (sprite, 10x8 px target; ask for a 1024x1024 picture)
+   save as: art/raw/gemstone.png
+   16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours, hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no anti-aliasing, no text, crisp square pixels. The subject is alone on a flat solid magenta #FF00FF background, nothing else in the picture, whole subject visible, standing on the bottom edge. A beautiful glowing gemstone, faceted, soft glow.
+
+== gemstone_shards  (sprite, 20x10 px target; ask for a 1024x1024 picture)
+   save as: art/raw/gemstone_shards.png
+   16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours, hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no anti-aliasing, no text, crisp square pixels. The subject is alone on a flat solid magenta #FF00FF background, nothing else in the picture, whole subject visible, standing on the bottom edge. Two glowing gemstone shards lying together.
+
+== grelok  (sprite, 40x64 px target; ask for a 1024x1024 picture)
+   save as: art/raw/grelok.png
+   16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours, hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no anti-aliasing, no text, crisp square pixels. The subject is alone on a flat solid magenta #FF00FF background, nothing else in the picture, whole subject visible, standing on the bottom edge. Grelok the Gruesome, a gaunt evil wizard: tall, hooded, flowing cape and cloak in wine red, dark armour pieces, a staff topped with a skull, glowing eyes. Standing, menacing, facing the viewer, laughing.
+
+== blacksmith  (sprite, 40x70 px target; ask for a 1024x1024 picture)
+   save as: art/raw/blacksmith.png
+   16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours, hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no anti-aliasing, no text, crisp square pixels. The subject is alone on a flat solid magenta #FF00FF background, nothing else in the picture, whole subject visible, standing on the bottom edge. A stout, sweaty blacksmith in a leather apron holding a hammer, strong forearms, tired but friendly face.
+
+== priest  (sprite, 30x40 px target; ask for a 1024x1024 picture)
+   save as: art/raw/priest.png
+   16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours, hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no anti-aliasing, no text, crisp square pixels. The subject is alone on a flat solid magenta #FF00FF background, nothing else in the picture, whole subject visible, standing on the bottom edge. A small chubby tipsy priest in a simple robe, rosy cheeks, sitting under a tree, holding a clay jug.
+
+== wizard  (sprite, 25x20 px target; ask for a 1024x1024 picture)
+   save as: art/raw/wizard.png
+   16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours, hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no anti-aliasing, no text, crisp square pixels. The subject is alone on a flat solid magenta #FF00FF background, nothing else in the picture, whole subject visible, standing on the bottom edge. A tall bespectacled wizard in a purple robe and pointed hat, lost in thought, seen from the chest up.
+
+== icon_chapel_key  (icon, 24x16 px target; ask for a 1024x1024 picture)
+   save as: art/raw/icon_chapel_key.png
+   16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours, hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no anti-aliasing, no text, crisp square pixels. The subject is alone on a flat solid magenta #FF00FF background, nothing else in the picture, whole subject visible, standing on the bottom edge. Inventory icon, big and simple so it reads when tiny: a large brass key with a paper tag.
+
+== icon_gemstone  (icon, 24x16 px target; ask for a 1024x1024 picture)
+   save as: art/raw/icon_gemstone.png
+   16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours, hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no anti-aliasing, no text, crisp square pixels. The subject is alone on a flat solid magenta #FF00FF background, nothing else in the picture, whole subject visible, standing on the bottom edge. Inventory icon, big and simple so it reads when tiny: a glowing gemstone.
+
+== icon_gemstone_shards  (icon, 24x16 px target; ask for a 1024x1024 picture)
+   save as: art/raw/icon_gemstone_shards.png
+   16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours, hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no anti-aliasing, no text, crisp square pixels. The subject is alone on a flat solid magenta #FF00FF background, nothing else in the picture, whole subject visible, standing on the bottom edge. Inventory icon, big and simple so it reads when tiny: two glowing gemstone shards.
+
+== icon_jug  (icon, 24x16 px target; ask for a 1024x1024 picture)
+   save as: art/raw/icon_jug.png
+   16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours, hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no anti-aliasing, no text, crisp square pixels. The subject is alone on a flat solid magenta #FF00FF background, nothing else in the picture, whole subject visible, standing on the bottom edge. Inventory icon, big and simple so it reads when tiny: an empty clay jug marked XXX.
+
+== icon_pebble  (icon, 24x16 px target; ask for a 1024x1024 picture)
+   save as: art/raw/icon_pebble.png
+   16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours, hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no anti-aliasing, no text, crisp square pixels. The subject is alone on a flat solid magenta #FF00FF background, nothing else in the picture, whole subject visible, standing on the bottom edge. Inventory icon, big and simple so it reads when tiny: a tiny grey pebble.
+
+== icon_rusty_sword  (icon, 24x16 px target; ask for a 1024x1024 picture)
+   save as: art/raw/icon_rusty_sword.png
+   16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours, hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no anti-aliasing, no text, crisp square pixels. The subject is alone on a flat solid magenta #FF00FF background, nothing else in the picture, whole subject visible, standing on the bottom edge. Inventory icon, big and simple so it reads when tiny: a rusty old sword, pointing up-right.
+
+== icon_shining_sword  (icon, 24x16 px target; ask for a 1024x1024 picture)
+   save as: art/raw/icon_shining_sword.png
+   16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours, hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no anti-aliasing, no text, crisp square pixels. The subject is alone on a flat solid magenta #FF00FF background, nothing else in the picture, whole subject visible, standing on the bottom edge. Inventory icon, big and simple so it reads when tiny: a shining sword with a glowing blade, pointing up-right.
+
+== bg_plain  (background, 320x144 px target; ask for a 1536x1024 picture)
+   save as: art/raw/bg_plain.png
+   16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours, hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no anti-aliasing, no text, crisp square pixels. Wide side-on game background, no characters, a clear flat walkable floor in the lower half, a distant horizon in the upper half, saturated sunset-style sky bands. a wide open crossroads at golden hour, long shadows, warm orange sky; leave space for a huge standing stone in the middle.
+
+== bg_mountain  (background, 320x144 px target; ask for a 1536x1024 picture)
+   save as: art/raw/bg_mountain.png
+   16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours, hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no anti-aliasing, no text, crisp square pixels. Wide side-on game background, no characters, a clear flat walkable floor in the lower half, a distant horizon in the upper half, saturated sunset-style sky bands. menacing red-lit rocky mountain path, dark cliffs, rubble, a cold wine-red sky.
+
+== bg_town  (background, 320x144 px target; ask for a 1536x1024 picture)
+   save as: art/raw/bg_town.png
+   16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours, hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no anti-aliasing, no text, crisp square pixels. Wide side-on game background, no characters, a clear flat walkable floor in the lower half, a distant horizon in the upper half, saturated sunset-style sky bands. a busy small medieval town street, wooden houses, a smithy with a glowing forge, dusty ground.
+
+== bg_swamp  (background, 320x144 px target; ask for a 1536x1024 picture)
+   save as: art/raw/bg_swamp.png
+   16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours, hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no anti-aliasing, no text, crisp square pixels. Wide side-on game background, no characters, a clear flat walkable floor in the lower half, a distant horizon in the upper half, saturated sunset-style sky bands. a gloomy green swamp with mist, sickly yellow light, a small island on the right for a wizard's tower.
+
+== bg_chapel  (background, 320x144 px target; ask for a 1536x1024 picture)
+   save as: art/raw/bg_chapel.png
+   16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours, hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no anti-aliasing, no text, crisp square pixels. Wide side-on game background, no characters, a clear flat walkable floor in the lower half, a distant horizon in the upper half, saturated sunset-style sky bands. an old pale-stone chapel at purple dusk, a graveyard path, a locked wooden door on the right.
+
+== bg_chapel_interior  (background, 320x144 px target; ask for a 1536x1024 picture)
+   save as: art/raw/bg_chapel_interior.png
+   16-bit Sega arcade pixel art in the style of classic beat-em-up games, side view, limited palette of 32 colours, hard 1 pixel dark plum outlines, 2-3 tone cel shading with light from the upper left, no gradients, no anti-aliasing, no text, crisp square pixels. Wide side-on game background, no characters, a clear flat walkable floor in the lower half, a distant horizon in the upper half, saturated sunset-style sky bands. a dark quiet chapel interior, candles, stone arches, a marble basin in the middle.
+
