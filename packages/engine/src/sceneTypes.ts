@@ -36,6 +36,12 @@ export interface HotspotData {
     walkTo: Point;
     /** Direction the player faces on arrival. */
     facing?: Facing;
+    /**
+     * Only active while these boolean constraints hold (like a sprite state's `when`). A thing whose picture moves,
+     * e.g. the zombie that falls into the grave, gets one hotspot per place, each with its own `when`; a door may stop
+     * being clickable once it is open, so the exit behind it can be clicked instead.
+     */
+    when?: Record<string, boolean>;
 }
 
 /** A way out of the scene. `direction` is a key of the location's `directions` (n/s/e/w). */
@@ -57,6 +63,8 @@ export interface SpriteState {
     /** Move the sprite for this look (default: the sprite's own x, y). */
     x?: number;
     y?: number;
+    /** Draw order for this look (default: the sprite's `depth`, else its feet's y). */
+    depth?: number;
 }
 
 /**

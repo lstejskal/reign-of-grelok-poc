@@ -1,0 +1,36 @@
+{
+  "standing": [
+    {
+      "id": "zombie",
+      "image": "sprites/zombie_standing.png",
+      "x": 220,
+      "y": 110,
+      "depth": 110
+    }
+  ],
+  "opened": [
+    {
+      "id": "zombie",
+      "image": "sprites/zombie_down.png",
+      "x": 220,
+      "y": 110,
+      "depth": 110
+    },
+    {
+      "id": "door_open",
+      "image": "sprites/chapel_door_open.png",
+      "x": 275,
+      "y": 100,
+      "depth": 100
+    }
+  ],
+  "inside": {
+    "background": "asset:backgrounds/chapel_interior.png",
+    "location": "chapel_interior",
+    "sprites": [],
+    "jugDescription": "a jug full of holy water. However, it still reeks of booze a little",
+    "backgroundWidth": 640
+  },
+  "returnToChapel": true,
+  "pageErrors": []
+}

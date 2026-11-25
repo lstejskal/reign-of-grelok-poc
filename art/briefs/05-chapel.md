@@ -20,11 +20,11 @@ The two zombie pictures already in `art/raw/` were early tests made before the s
 
 | # | Asset id | What | Save the raw picture as | Ask for | Ends up in game as (picture pixels, 2 per screen pixel) | Status |
 |---|---|---|---|---|---|---|
-| 1 | `bg_chapel` | The chapel and graveyard background | `art/raw/bg_chapel.png` | 1536x1024 | 640x288 | **to do** |
-| 2 | `zombie_standing` | The zombie, standing, arms forward | `art/raw/zombie_standing.png` | 1024x1536 | 96x128 | **to do** (replace) |
-| 3 | `zombie_down` | The same zombie, lying flat, defeated | `art/raw/zombie_down.png` | 1536x1024 | 120x48 | **to do** (replace) |
-| 4 | `open_grave` | The open grave by the path | `art/raw/open_grave.png` | 1536x1024 | 100x50 | **to do** |
-| 5 | `chapel_door_open` | The chapel door, standing open | `art/raw/chapel_door_open.png` | 1024x1536 | 80x120 | **to do** |
+| 1 | `bg_chapel` | The chapel and graveyard background | `art/raw/bg_chapel.png` | 1536x1024 | 640x288 | Generated/imported; Terra reviewed; pending user review |
+| 2 | `zombie_standing` | The zombie, standing, arms forward | `art/raw/zombie_standing.png` | 1024x1536 | 96x128 | Generated/imported; Terra reviewed; pending user review |
+| 3 | `zombie_down` | The same zombie, lying flat, defeated | `art/raw/zombie_down.png` | 1536x1024 | 120x48 | Generated/imported; Terra reviewed; pending user review |
+| 4 | `open_grave` | The open grave by the path | `art/raw/open_grave.png` | 1536x1024 | 100x50 | Generated/imported; Terra reviewed; pending user review |
+| 5 | `chapel_door_open` | The chapel door, standing open | `art/raw/chapel_door_open.png` | 1024x1536 | 80x120 | Generated/imported; Terra reviewed; pending user review |
 
 Order: 1 first (it fixes the door's look), then 2, then 3 (with 2 as reference), then 4, then 5 (with 1 as reference).
 

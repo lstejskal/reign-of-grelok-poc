@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { ART_SCALE, SCENE_HEIGHT, SCENE_WIDTH, Thing, iconPath, musicPath } from '@grelok/engine';
 import { parseStep } from '@grelok/engine';
-import type { Command, CutsceneStep, EngineEvent, ExitData, Facing, Point, Verb } from '@grelok/engine';
+import type { Command, CutsceneStep, EngineEvent, ExitData, Facing, Point, SceneData, Verb } from '@grelok/engine';
 import { GAME_WIDTH, GAME_HEIGHT, artScale, logicalPointer, useLogicalCamera } from '../config';
 import { PIXEL_FONT } from '../gfx/pixelFont';
 import { textureKey } from '../data/assets';
@@ -10,7 +10,7 @@ import { hitTest } from '../scene/hitTest';
 import { HotspotOverlay } from '../scene/hotspotOverlay';
 import { PlayerActor } from '../scene/PlayerActor';
 import { readMask } from '../scene/readMask';
-import { lookOf } from '../scene/spriteState';
+import { lookOf, withActiveHotspots } from '../scene/spriteState';
 import { gridFromMask, makeGrid } from '../walk/pathfinding';
 import { walkTargetFor, walkTargetForCommand } from '../walk/plan';
 import { arrivalAt } from '../walk/spawn';
@@ -490,7 +490,7 @@ export class RoomScene extends Phaser.Scene {
   }
 
   private walkToThing(id: string): void {
-    const target = walkTargetFor(this.session.bundle.scenes[this.shownLocation], id);
+    const target = walkTargetFor(this.activeScene(), id);
     if (target) this.player.walkTo(target.point, { facing: target.facing, toward: target.toward });
   }
 
@@ -498,7 +498,7 @@ export class RoomScene extends Phaser.Scene {
   private act(command: Command): void {
     this.pager.clear();
     this.speech.clear();
-    const target = walkTargetForCommand(this.session.bundle.scenes[this.shownLocation], command);
+    const target = walkTargetForCommand(this.activeScene(), command);
     if (target === undefined) this.perform(command);
     else {
       this.player.walkTo(target.point, {
@@ -698,7 +698,7 @@ export class RoomScene extends Phaser.Scene {
   private speechAnchor(speakerId: string): Point {
     const { bundle } = this.session;
     const thing = bundle.speakers.speakers[speakerId]?.thing;
-    const hotspot = thing === undefined ? undefined : bundle.scenes[this.shownLocation]?.hotspots.find((h) => h.id === thing);
+    const hotspot = thing === undefined ? undefined : this.activeScene()?.hotspots.find((h) => h.id === thing);
     if (hotspot) {
       const xs = hotspot.polygon.map((p) => p[0]);
       const top = Math.min(...hotspot.polygon.map((p) => p[1]));
@@ -861,9 +861,15 @@ export class RoomScene extends Phaser.Scene {
     return itemAt(this.session.engine.state.inventory, this.inventoryScroll, x, y);
   }
 
+  /** The scene with only the hotspots whose `when` holds now (see withActiveHotspots). */
+  private activeScene(location = this.shownLocation): SceneData | undefined {
+    const scene = this.session.bundle.scenes[location];
+    return scene && withActiveHotspots(scene, this.session.engine.state.constraints.boolean);
+  }
+
   /** The hotspot under a point (game pixels), if the engine currently shows its thing. */
   private hotspotAt(x: number, y: number): string | undefined {
-    const scene = this.session.bundle.scenes[this.shownLocation];
+    const scene = this.activeScene();
     if (!scene || y >= SCENE_HEIGHT) return undefined;
     // Test the pixel's centre, not its corner, so edges never sit exactly on a polygon edge.
     return hitTest(scene.hotspots, [x + 0.5, y + 0.5], (h) => this.isVisible(h.id))?.id;
@@ -880,7 +886,7 @@ export class RoomScene extends Phaser.Scene {
   private refreshHotspots(redraw = true): void {
     if (redraw) {
       const location = this.shownLocation;
-      this.overlay.draw(this.session.bundle.scenes[location], this.isVisible, this.areaFor(location));
+      this.overlay.draw(this.activeScene(location), this.isVisible, this.areaFor(location));
     }
     this.hovered = this.pointer && this.thingAt(...this.pointer);
     this.hoveredExit = this.pointer && this.hovered === undefined ? this.exitAt(...this.pointer) : undefined;

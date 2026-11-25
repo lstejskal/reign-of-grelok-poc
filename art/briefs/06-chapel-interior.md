@@ -16,8 +16,8 @@ What happens here: Grognak fills the priest's jug with holy water from the basin
 
 | # | Asset id | What | Save the raw picture as | Ask for | Ends up in game as (picture pixels, 2 per screen pixel) | Status |
 |---|---|---|---|---|---|---|
-| 1 | `bg_chapel_interior` | The chapel interior background | `art/raw/bg_chapel_interior.png` | 1536x1024 | 640x288 | **to do** |
-| 2 | `basin` | The holy water basin on its marble pillar | `art/raw/basin.png` | 1024x1536 | 60x100 | **to do** |
+| 1 | `bg_chapel_interior` | The chapel interior background | `art/raw/bg_chapel_interior.png` | 1536x1024 | 640x288 | Generated/imported; Terra reviewed; pending user review |
+| 2 | `basin` | The holy water basin on its marble pillar | `art/raw/basin.png` | 1024x1536 | 60x100 | Generated/imported; Terra reviewed; pending user review |
 
 Order: 1, then 2 (with 1 as the style and lighting reference).
 

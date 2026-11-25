@@ -41,10 +41,12 @@ describe('validateGame', () => {
     it('reports broken sprites: unknown thing, unknown constraint, missing image, no states, duplicate id', () => {
         const bundle = fresh();
         const sprites = bundle.scenes.chapel!.sprites!;
-        sprites[0]!.thing = 'no_such_thing';
-        sprites[0]!.states[0]!.when = { no_such_constraint: true };
-        sprites[1]!.states = [];
-        sprites[1]!.id = sprites[0]!.id;
+        const zombie = sprites.find((s) => s.id === 'zombie')!;
+        const door = sprites.find((s) => s.id === 'door_open')!;
+        zombie.thing = 'no_such_thing';
+        zombie.states[0]!.when = { no_such_constraint: true };
+        door.states = [];
+        door.id = zombie.id;
         const missing = (path: string) => path !== 'sprites/zombie_down.png';
 
         const errors = validateGame(bundle, missing);
@@ -143,6 +145,16 @@ describe('validateGame', () => {
         expect(errors).not.toContain('pixels wide');
         const narrow = validateGame(bundle, everythingExists, (a) => (a === sheet ? { width: 64 * 3, height: 96 * 2 } : undefined)).join('\n');
         expect(narrow).toContain('player sprite sheet must be 384 pixels wide (6 columns of 64)');
+    });
+    it('lets a thing have several hotspots only if each says when it applies, with known constraints', () => {
+        const bundle = fresh();
+        const chapel = bundle.scenes.chapel!;
+        const zombie = chapel.hotspots.find((h) => h.id === 'zombie')!;
+        chapel.hotspots.push({ ...zombie, when: undefined });
+        expect(validateGame(bundle, everythingExists).join('\n')).toContain('hotspot "zombie": defined twice (give every one of them a "when"');
+        chapel.hotspots.pop();
+        chapel.hotspots.push({ ...zombie, when: { no_such_flag: true } });
+        expect(validateGame(bundle, everythingExists).join('\n')).toContain('hotspot "zombie": "when" uses unknown constraint "no_such_flag"');
     });
     it('checks the player size sheets: order, existence, same dimensions as the main sheet', () => {
         const bundle = fresh();

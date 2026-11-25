@@ -1,0 +1,149 @@
+[
+  {
+    "id": "bg_chapel",
+    "rawPath": "art/raw/bg_chapel.png",
+    "rawSize": [
+      1536,
+      1024
+    ],
+    "runtimePath": "games/grelok/assets/backgrounds/chapel.png",
+    "pictureSize": [
+      640,
+      288
+    ],
+    "logicalSize": [
+      320,
+      144
+    ],
+    "opaqueColours": 32,
+    "partialAlpha": 0,
+    "offgridPixels": 0,
+    "opaquePixels": 184320
+  },
+  {
+    "id": "zombie_standing",
+    "rawPath": "art/raw/zombie_standing.png",
+    "rawSize": [
+      1024,
+      1536
+    ],
+    "runtimePath": "games/grelok/assets/sprites/zombie_standing.png",
+    "pictureSize": [
+      96,
+      128
+    ],
+    "logicalSize": [
+      48,
+      64
+    ],
+    "opaqueColours": 16,
+    "partialAlpha": 0,
+    "offgridPixels": 0,
+    "opaquePixels": 6091
+  },
+  {
+    "id": "zombie_down",
+    "rawPath": "art/raw/zombie_down.png",
+    "rawSize": [
+      1536,
+      1024
+    ],
+    "runtimePath": "games/grelok/assets/sprites/zombie_down.png",
+    "pictureSize": [
+      120,
+      48
+    ],
+    "logicalSize": [
+      60,
+      24
+    ],
+    "opaqueColours": 16,
+    "partialAlpha": 0,
+    "offgridPixels": 0,
+    "opaquePixels": 2604
+  },
+  {
+    "id": "open_grave",
+    "rawPath": "art/raw/open_grave.png",
+    "rawSize": [
+      1774,
+      887
+    ],
+    "runtimePath": "games/grelok/assets/sprites/open_grave.png",
+    "pictureSize": [
+      100,
+      50
+    ],
+    "logicalSize": [
+      50,
+      25
+    ],
+    "opaqueColours": 14,
+    "partialAlpha": 0,
+    "offgridPixels": 0,
+    "opaquePixels": 2408
+  },
+  {
+    "id": "chapel_door_open",
+    "rawPath": "art/raw/chapel_door_open.png",
+    "rawSize": [
+      1024,
+      1536
+    ],
+    "runtimePath": "games/grelok/assets/sprites/chapel_door_open.png",
+    "pictureSize": [
+      80,
+      120
+    ],
+    "logicalSize": [
+      40,
+      60
+    ],
+    "opaqueColours": 15,
+    "partialAlpha": 0,
+    "offgridPixels": 0,
+    "opaquePixels": 8141
+  },
+  {
+    "id": "bg_chapel_interior",
+    "rawPath": "art/raw/bg_chapel_interior.png",
+    "rawSize": [
+      1536,
+      1024
+    ],
+    "runtimePath": "games/grelok/assets/backgrounds/chapel_interior.png",
+    "pictureSize": [
+      640,
+      288
+    ],
+    "logicalSize": [
+      320,
+      144
+    ],
+    "opaqueColours": 32,
+    "partialAlpha": 0,
+    "offgridPixels": 0,
+    "opaquePixels": 184320
+  },
+  {
+    "id": "basin",
+    "rawPath": "art/raw/basin.png",
+    "rawSize": [
+      1024,
+      1536
+    ],
+    "runtimePath": "games/grelok/assets/sprites/basin.png",
+    "pictureSize": [
+      60,
+      100
+    ],
+    "logicalSize": [
+      30,
+      50
+    ],
+    "opaqueColours": 15,
+    "partialAlpha": 0,
+    "offgridPixels": 0,
+    "opaquePixels": 2862
+  }
+]

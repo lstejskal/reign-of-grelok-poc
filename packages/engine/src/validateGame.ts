@@ -207,10 +207,17 @@ export function validateGame(
         for (const hotspot of scene.hotspots) {
             const label = `hotspot "${hotspot.id}"`;
             if (!(hotspot.id in logic.things)) problem(where, `${label}: no such thing in logic/things.yml`);
-            if (seen.has(hotspot.id)) problem(where, `${label}: defined twice`);
+            // a thing may have several hotspots (one per place it can be), as long as each says when it applies
+            const twins = scene.hotspots.filter((h) => h.id === hotspot.id);
+            if (twins.length > 1 && seen.has(hotspot.id) && twins.some((h) => h.when === undefined)) {
+                problem(where, `${label}: defined twice (give every one of them a "when" if the thing moves)`);
+            }
             seen.add(hotspot.id);
             checkPolygon(hotspot.polygon, `${label} polygon`, where, problem);
             checkPoint(hotspot.walkTo, `${label} walkTo`, where, problem);
+            for (const name of Object.keys(hotspot.when ?? {})) {
+                if (!(name in logic.constraints.boolean)) problem(where, `${label}: "when" uses unknown constraint "${name}" (see logic/constraints.yml)`);
+            }
         }
 
         // things that start in this location need a hotspot, or the player could never interact with them

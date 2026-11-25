@@ -99,11 +99,11 @@ assets:
     prompt: '{style} {cutout} A small marble holy water basin on a slender carved marble pillar, the water glowing faintly
       pale blue.'
     size: [60, 100]
-  chapel_door_open:
+  chapel_door_open:   # sized to cover the closed doorway in bg_chapel exactly (its stone arch is about 68x92)
     type: sprite
     out: sprites/chapel_door_open.png
     prompt: '{style} {cutout} An old wooden chapel door standing open, dark inside, pale stone frame.'
-    size: [80, 120]
+    size: [68, 96]
   pebble:
     type: sprite
     out: sprites/pebble.png

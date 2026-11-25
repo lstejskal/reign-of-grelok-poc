@@ -477,15 +477,15 @@ test('the screen fades to black and back when the scene changes', async ({ page 
 
 test('a blocked exit shows the engine\'s message and he stays', async ({ page }) => {
   await say(page, 'east'); // the chapel
-  await clickAt(page, 310, 80);
+  await clickAt(page, 271, 90); // the doorway's stone frame, beside the zombie and the door leaf
   await expect.poll(() => page.evaluate(() => window.__adv.answer)).toBe('Chapel door is blocked by zombie.');
   expect(await page.evaluate(() => window.__adv.backgroundKey)).toBe('asset:backgrounds/chapel.png');
   const p = await player(page);
-  expect([p.x, p.y, p.facing]).toEqual([292, 110, 'e']);
+  expect([p.x, p.y, p.facing]).toEqual([257, 117, 'e']); // the doorway's walkTo
 
   await dismissAnswer(page);
   await say(page, 'use rusty sword on zombie'); // a cutscene: plays out while we keep reading
-  await clickAt(page, 310, 80);
+  await clickAt(page, 271, 90); // the doorway's stone frame, beside the zombie and the door leaf
   await expect.poll(() => page.evaluate(() => window.__adv.answer)).toBe('Chapel door is locked.');
 });
 
@@ -584,22 +584,26 @@ test('the world changes visibly as the puzzle is solved: zombie falls, door open
   await say(page, 'north');
   await say(page, 'east');
 
-  expect(await sprites(page)).toEqual([{ id: 'zombie', image: 'sprites/zombie_standing.png', x: 220, y: 110, depth: 110 }]);
+  expect(await sprites(page)).toEqual([
+    { id: 'open_grave', image: 'sprites/open_grave.png', x: 145, y: 125, depth: 125 },
+    { id: 'zombie', image: 'sprites/zombie_standing.png', x: 245, y: 120, depth: 120 },
+  ]);
   await page.screenshot({ path: 'tests/e2e/screenshots/sprite-zombie-standing.png' });
 
   await say(page, 'use rusty sword on zombie');
-  expect(await spriteIds(page)).toEqual(['zombie']);
-  expect((await sprites(page))[0].image).toBe('sprites/zombie_down.png');
+  expect(await spriteIds(page)).toEqual(['open_grave', 'zombie']);
+  // it fell into the grave: another picture, another place, drawn in front of the grave
+  expect((await sprites(page))[1]).toEqual({ id: 'zombie', image: 'sprites/zombie_down.png', x: 145, y: 123, depth: 126 });
 
   await say(page, 'use chapel key on chapel door');
-  expect(await spriteIds(page)).toEqual(['zombie', 'door_open']);
+  expect(await spriteIds(page)).toEqual(['open_grave', 'zombie', 'door_open']);
   await page.screenshot({ path: 'tests/e2e/screenshots/sprite-door-open.png' });
 });
 
 test('leaving a scene swaps its sprites for the new scene\'s', async ({ page }) => {
   expect(await spriteIds(page)).toEqual(['standing_stone', 'pebble']);
   await say(page, 'east'); // the chapel
-  expect(await spriteIds(page)).toEqual(['zombie']);
+  expect(await spriteIds(page)).toEqual(['open_grave', 'zombie']);
   await say(page, 'west');
   expect(await spriteIds(page)).toEqual(['standing_stone', 'pebble']);
 });
@@ -627,7 +631,7 @@ test('double-clicking a blocked exit shows the refusal at once', async ({ page }
   await walkSpeed(page, 0.05);
   const box = (await page.locator('canvas').boundingBox())!;
   const zoom: number = await page.evaluate(() => window.__adv.zoom);
-  await page.mouse.dblclick(box.x + 310.5 * zoom, box.y + 80.5 * zoom);
+  await page.mouse.dblclick(box.x + 271.5 * zoom, box.y + 90.5 * zoom);
   await expect.poll(() => page.evaluate(() => window.__adv.answer), { timeout: 3_000 }).toBe('Chapel door is blocked by zombie.');
 });
 
@@ -643,13 +647,13 @@ test('hitting the zombie plays a cutscene: input is locked, the picture changes 
   expect((await cutscene(page)).running).toBe(true);
   // the engine has already moved on, but the picture has not: the zombie still stands
   expect(await page.evaluate(() => window.__adv.engine.state.things.zombie.description)).toContain('trapped');
-  expect((await sprites(page))[0].image).toBe('sprites/zombie_standing.png');
+  expect((await sprites(page)).find((s) => s.id === 'zombie')?.image).toBe('sprites/zombie_standing.png');
 
   // locked: a click on the floor does not walk
   await clickAt(page, 100, 120);
   expect((await player(page)).walking).toBe(false);
 
-  await expect.poll(async () => (await sprites(page))[0].image, { timeout: 15_000 }).toBe('sprites/zombie_down.png');
+  await expect.poll(async () => (await sprites(page)).find((s) => s.id === 'zombie')?.image, { timeout: 15_000 }).toBe('sprites/zombie_down.png');
   await expect.poll(() => page.evaluate(() => window.__adv.answer), { timeout: 15_000 }).toContain('stumbles and falls');
   expect((await cutscene(page)).running).toBe(true); // still waiting for the player to read
 
@@ -867,7 +871,7 @@ test('what the puzzle changed is drawn again after loading (zombie down, door st
   await clickMenu(page, 'Load');
   await clickMenu(page, '3:');
   await expect.poll(() => sceneName(page)).toBe('RoomScene');
-  expect((await sprites(page)).map((s: { image: string }) => s.image)).toEqual(['sprites/zombie_down.png']);
+  expect((await sprites(page)).map((s: { image: string }) => s.image)).toEqual(['sprites/open_grave.png', 'sprites/zombie_down.png']);
   await say(page, 'use rusty sword on zombie');
   expect(await page.evaluate(() => window.__adv.answer)).toContain('already trapped'); // the engine remembered, too
 });

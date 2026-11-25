@@ -1,46 +1,71 @@
-# Scene for location "chapel". Coordinates: x 0-319, y 0-143. Music is added in Step 15.
+# Scene for location "chapel" (outside: the graveyard). Coordinates: x 0-319, y 0-143.
+# Layout follows the approved previews in art/briefs/05-chapel-generation-log.md: the zombie in front of the chapel
+# door on the right; hit, it falls into the open grave in the middle of the path; the door, once unlocked, stands open.
 
 background: backgrounds/chapel.png
-walkmask: walkmasks/chapel.png   # white = walkable
+walkmask: walkmasks/chapel.png   # white = walkable; painted from walkArea below (npm run walkmask -- grelok chapel)
 music: music/chapel.mp3   # loops while the player is here; changing scene crossfades to the next tune
 scale: {top: 0.6, bottom: 1.0}   # Grognak is drawn at 60% on the farthest floor row, 100% on the nearest
 
-hotspots:   # later entries are on top
+# The floor, traced from the background: the dirt path and the grass strip in front of the wall and the chapel
+# (the doorway's threshold is at y 116), but not the open grave's hole.
+walkArea:
+  floor:
+    - [[0, 112], [320, 112], [320, 144], [0, 144]]
+  blocked:
+    - [[124, 117], [166, 117], [168, 126], [122, 126]]   # the hole of the open grave
+
+hotspots:   # later entries are on top; a hotspot with `when` is only there while its conditions hold
   - id: open_grave
-    polygon: [[120, 100], [170, 100], [170, 125], [120, 125]]
-    walkTo: [145, 128]
-  - id: zombie
-    polygon: [[200, 50], [240, 50], [240, 110], [200, 110]]
-    walkTo: [190, 114]
+    polygon: [[121, 106], [169, 106], [169, 125], [121, 125]]
+    walkTo: [145, 130]
+  - id: chapel_door   # the door leaf, while it is shut; once unlocked the doorway is the way in (exit e)
+    when: {chapel_door_locked: true}
+    polygon: [[248, 77], [267, 77], [267, 114], [248, 114]]
+    walkTo: [257, 122]
+    facing: n
+  - id: zombie   # standing in front of the door
+    when: {zombie_blocks_chapel_door: true}
+    polygon: [[225, 58], [265, 58], [265, 120], [225, 120]]
+    walkTo: [205, 124]
     facing: e
-  - id: chapel_door
-    polygon: [[255, 40], [295, 40], [295, 100], [255, 100]]
-    walkTo: [285, 110]
+  - id: zombie   # fallen into the grave
+    when: {zombie_blocks_chapel_door: false}
+    polygon: [[118, 110], [172, 110], [172, 124], [118, 124]]
+    walkTo: [145, 130]
     facing: n
 
 sprites:   # follow the game state; the first state whose "when" holds is drawn
+  - id: open_grave
+    thing: open_grave
+    x: 145
+    y: 125
+    image: sprites/open_grave.png
   - id: zombie
     thing: zombie              # only drawn while the zombie is visible here
-    x: 220
-    y: 110
+    x: 245
+    y: 120
     states:
       - when: {zombie_blocks_chapel_door: true}
         image: sprites/zombie_standing.png
-      - image: sprites/zombie_down.png
+      - image: sprites/zombie_down.png   # lying in the grave: drawn in front of it
+        x: 145
+        y: 123
+        depth: 126
   - id: door_open
     thing: chapel_door
-    x: 275
-    y: 100
+    x: 257
+    y: 117
     states:
       - when: {chapel_door_locked: false}   # no other state: drawn only once the door is unlocked
         image: sprites/chapel_door_open.png
 
 exits:
-  - direction: e
-    polygon: [[300, 40], [320, 40], [320, 130], [300, 130]]
-    walkTo: [292, 110]
-    spawn: [286, 110]
-  - direction: w
-    polygon: [[0, 40], [20, 40], [20, 130], [0, 130]]
-    walkTo: [28, 110]
-    spawn: [34, 110]
+  - direction: e   # the doorway (its stone arch); while the door is shut, the door leaf in it is the chapel door
+    polygon: [[241, 70], [274, 70], [274, 116], [241, 116]]
+    walkTo: [257, 117]
+    spawn: [257, 122]
+  - direction: w   # the path back to the plain
+    polygon: [[0, 60], [16, 60], [16, 144], [0, 144]]
+    walkTo: [6, 124]
+    spawn: [20, 124]

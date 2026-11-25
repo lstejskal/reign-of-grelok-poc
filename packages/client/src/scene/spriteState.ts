@@ -1,4 +1,4 @@
-import type { Point, SceneSpriteData } from '@grelok/engine';
+import type { Point, SceneData, SceneSpriteData } from '@grelok/engine';
 
 /** What the world looks like right now, as far as sprites care. */
 export interface WorldView {
@@ -25,8 +25,18 @@ export interface SpriteLook {
  */
 export function lookOf(sprite: SceneSpriteData, world: WorldView): SpriteLook | undefined {
   if (sprite.thing !== undefined && !world.visibleThings.includes(sprite.thing)) return undefined;
-  const state = sprite.states.find((s) => Object.entries(s.when ?? {}).every(([name, wanted]) => world.booleans[name] === wanted));
+  const state = sprite.states.find((s) => conditionsHold(s.when, world.booleans));
   if (!state) return undefined;
   const at: Point = [state.x ?? sprite.x, state.y ?? sprite.y];
-  return { image: state.image, at, depth: sprite.depth ?? at[1] };
+  return { image: state.image, at, depth: state.depth ?? sprite.depth ?? at[1] };
+}
+
+/** Do all these conditions on boolean constraints hold? (No conditions = always.) */
+export function conditionsHold(when: Readonly<Record<string, boolean>> | undefined, booleans: Readonly<Record<string, boolean>>): boolean {
+  return Object.entries(when ?? {}).every(([name, wanted]) => booleans[name] === wanted);
+}
+
+/** The scene with only the hotspots whose `when` holds right now (a moved thing's old place stops being clickable). */
+export function withActiveHotspots(scene: SceneData, booleans: Readonly<Record<string, boolean>>): SceneData {
+  return { ...scene, hotspots: scene.hotspots.filter((h) => conditionsHold(h.when, booleans)) };
 }

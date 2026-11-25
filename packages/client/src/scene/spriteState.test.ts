@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { SceneSpriteData } from '@grelok/engine';
-import { lookOf } from './spriteState';
+import type { SceneData, SceneSpriteData } from '@grelok/engine';
+import { conditionsHold, lookOf, withActiveHotspots } from './spriteState';
 
 const zombie: SceneSpriteData = {
   id: 'zombie',
@@ -26,6 +26,24 @@ describe('lookOf', () => {
 
   it('sorts by its own depth when it has one (a gem lying on a heap is drawn in front of it)', () => {
     expect(lookOf({ ...zombie, depth: 125 }, world({ blocks: true }))?.depth).toBe(125);
+  });
+
+  it('a state may set its own depth (the fallen zombie lies in front of the grave)', () => {
+    const moved = { ...zombie, states: [{ image: 'down.png', x: 145, y: 123, depth: 126 }] };
+    expect(lookOf(moved, world({}))).toEqual({ image: 'down.png', at: [145, 123], depth: 126 });
+  });
+
+  it('only the hotspots whose `when` holds are active (a moved thing is clicked where it is now)', () => {
+    const scene = {
+      hotspots: [
+        { id: 'zombie', polygon: [], walkTo: [0, 0], when: { blocks: true } },
+        { id: 'zombie', polygon: [], walkTo: [1, 1], when: { blocks: false } },
+        { id: 'grave', polygon: [], walkTo: [2, 2] },
+      ],
+      exits: [],
+    } as unknown as SceneData;
+    expect(withActiveHotspots(scene, { blocks: false }).hotspots.map((h) => h.walkTo)).toEqual([[1, 1], [2, 2]]);
+    expect(conditionsHold(undefined, {})).toBe(true);
   });
 
   it('draws nothing while its thing is not visible here (picked up, hidden, elsewhere)', () => {
