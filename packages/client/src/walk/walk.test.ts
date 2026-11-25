@@ -5,6 +5,7 @@ import { PathFollower, facingOf } from './PathFollower';
 import { WalkArea } from './WalkArea';
 import { walkTargetFor, walkTargetForCommand } from './plan';
 import { arrivalAt } from './spawn';
+import { walkPose } from './walkCycle';
 
 /** A grid from ASCII art, one cell = 1 pixel: '.' walkable, '#' blocked. */
 const gridOf = (...rows: string[]) => makeGrid(rows[0]!.length, rows.length, 1, (c, r) => rows[r]![c] === '.');
@@ -209,5 +210,17 @@ describe('arrivalAt', () => {
   it('gives nothing when the rooms are not neighbours or the exit has no data', () => {
     expect(arrivalAt(bundle, 'mountain', 'plain')).toBeUndefined();
     expect(arrivalAt(bundle, 'plain', 'swamp')).toBeUndefined();
+  });
+});
+
+describe('walkPose', () => {
+  it('stands still on column 0, without a lift', () => {
+    expect(walkPose(false, 37)).toEqual({ column: 0, lift: 0 });
+  });
+
+  it('walks stride, legs together (lifted), other stride, legs together', () => {
+    const poses = [0, 6, 12, 18, 24].map((walked) => walkPose(true, walked));
+    expect(poses.map((p) => p.column)).toEqual([1, 0, 2, 0, 1]);
+    expect(poses.map((p) => p.lift)).toEqual([0, 1, 0, 1, 0]);
   });
 });

@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { Engine, iconPath } from '@grelok/engine';
 import type { GameBundle } from '@grelok/engine';
-import { GAME_WIDTH, GAME_HEIGHT } from '../config';
+import { GAME_WIDTH, GAME_HEIGHT, useLogicalCamera } from '../config';
 import { registerPixelFont, PIXEL_FONT } from '../gfx/pixelFont';
 import { loadGame, requestedGameId, titleRequested } from '../data/loadGame';
 import { SaveStore, browserStore } from '../save/saveGame';
@@ -18,6 +18,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
+    useLogicalCamera(this);
     registerPixelFont(this);
     this.add.rectangle(0.5, 0.5, GAME_WIDTH - 1, GAME_HEIGHT - 1).setOrigin(0).setStrokeStyle(1, 0x7a1f2b);
 

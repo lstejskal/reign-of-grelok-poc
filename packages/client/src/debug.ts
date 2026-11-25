@@ -1,4 +1,5 @@
 import type Phaser from 'phaser';
+import { ART_SCALE } from '@grelok/engine';
 import type { Engine, GameBundle } from '@grelok/engine';
 import type { GameSession } from './session';
 import type { RoomScene } from './scenes/RoomScene';
@@ -23,7 +24,7 @@ export function installDebugHook(game: Phaser.Game): void {
       return game.scene.getScenes(true)[0]?.scene.key ?? '';
     },
     get zoom(): number {
-      return game.scale.zoom;
+      return game.scale.zoom * ART_SCALE; // screen pixels per game (320x200) pixel
     },
     get bundle() {
       return debugState.bundle;

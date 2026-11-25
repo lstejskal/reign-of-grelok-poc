@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
-import { SCENE_HEIGHT, SCENE_WIDTH, Thing, iconPath, musicPath } from '@grelok/engine';
+import { ART_SCALE, SCENE_HEIGHT, SCENE_WIDTH, Thing, iconPath, musicPath } from '@grelok/engine';
 import { parseStep } from '@grelok/engine';
 import type { Command, CutsceneStep, EngineEvent, ExitData, Facing, Point, Verb } from '@grelok/engine';
-import { GAME_WIDTH, GAME_HEIGHT } from '../config';
+import { GAME_WIDTH, GAME_HEIGHT, artScale, logicalPointer, useLogicalCamera } from '../config';
 import { PIXEL_FONT } from '../gfx/pixelFont';
 import { textureKey } from '../data/assets';
 import { debugState } from '../debug';
@@ -236,6 +236,7 @@ export class RoomScene extends Phaser.Scene {
   }
 
   create(): void {
+    useLogicalCamera(this);
     // bottom strip: the UI area
     this.add.rectangle(0, SCENE_HEIGHT, GAME_WIDTH, GAME_HEIGHT - SCENE_HEIGHT, 0x14141c).setOrigin(0);
     this.add.rectangle(0, SCENE_HEIGHT, GAME_WIDTH, 1, 0x7a1f2b).setOrigin(0);
@@ -279,7 +280,7 @@ export class RoomScene extends Phaser.Scene {
       .setOrigin(1, 0)
       .setTint(COLOR.hint);
 
-    this.background = this.add.image(0, 0, '__DEFAULT').setOrigin(0);
+    this.background = this.add.image(0, 0, '__DEFAULT').setOrigin(0).setScale(artScale);
     this.overlay = new HotspotOverlay(this);
     this.showLocation(this.session.engine.state.location);
     this.fade = this.add.rectangle(0, 0, SCENE_WIDTH, SCENE_HEIGHT, 0x000000).setOrigin(0).setDepth(400).setAlpha(0);
@@ -351,7 +352,7 @@ export class RoomScene extends Phaser.Scene {
     for (let slot = 0; slot < SLOTS; slot++) {
       const r = slotRect(slot);
       this.add.rectangle(r.x, r.y, r.w - 1, r.h, 0x1e1e2a).setOrigin(0);
-      this.slotImages.push(this.add.image(r.x + 1, r.y, '__DEFAULT').setOrigin(0).setVisible(false));
+      this.slotImages.push(this.add.image(r.x + 1, r.y, '__DEFAULT').setOrigin(0).setScale(artScale).setVisible(false));
     }
     const arrow = (rect: typeof SCROLL_LEFT, glyph: string) =>
       this.add.bitmapText(rect.x + 2, rect.y + rect.h / 2 - 3, PIXEL_FONT, glyph).setTint(COLOR.verb);
@@ -361,10 +362,10 @@ export class RoomScene extends Phaser.Scene {
   // --- input: we only turn mouse and keys into builder calls ------------------------------------
 
   private setUpInput(): void {
-    // Phaser has already converted browser pixels to game pixels (it divides by the zoom).
+    // Phaser has already converted browser pixels to canvas pixels (it divides by the zoom); logicalPointer goes on to game units.
     this.input.mouse?.disableContextMenu(); // right-click is a game button, not a browser menu
     this.input.on(Phaser.Input.Events.POINTER_MOVE, (pointer: Phaser.Input.Pointer) => {
-      this.pointer = [Math.floor(pointer.x), Math.floor(pointer.y)];
+      this.pointer = logicalPointer(pointer);
       this.menu.pointerMove(...this.pointer);
       this.refreshHotspots(false);
       this.refreshUi();
@@ -375,7 +376,7 @@ export class RoomScene extends Phaser.Scene {
       this.refreshUi();
     });
     this.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
-      this.pointer = [Math.floor(pointer.x), Math.floor(pointer.y)];
+      this.pointer = logicalPointer(pointer);
       if (this.menu.visible || this.pointer[1] >= SCENE_HEIGHT) this.session.audio.playSfx('click');
       if (this.menu.visible) this.menu.click(...this.pointer); // a menu is modal: nothing else hears the click
       else if (this.locked) this.onLockedClick(this.pointer);
@@ -694,7 +695,7 @@ export class RoomScene extends Phaser.Scene {
       return [Math.round((Math.min(...xs) + Math.max(...xs)) / 2), top - 2];
     }
     const p = this.player.state;
-    return [Math.round(p.x), Math.round(p.y - bundle.config.player.frameHeight * p.scale) - 2];
+    return [Math.round(p.x), Math.round(p.y - (bundle.config.player.frameHeight / ART_SCALE) * p.scale) - 2];
   }
 
   private drawSpeech(): void {
@@ -814,7 +815,7 @@ export class RoomScene extends Phaser.Scene {
     for (const image of this.spriteImages.values()) image.destroy();
     this.spriteImages.clear();
     for (const sprite of this.session.bundle.scenes[location]?.sprites ?? []) {
-      this.spriteImages.set(sprite.id, this.add.image(0, 0, '__DEFAULT').setOrigin(0.5, 1).setVisible(false));
+      this.spriteImages.set(sprite.id, this.add.image(0, 0, '__DEFAULT').setOrigin(0.5, 1).setScale(artScale).setVisible(false));
     }
     this.refreshSprites();
   }

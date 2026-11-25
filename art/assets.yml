@@ -1,5 +1,6 @@
 # Every picture the game needs from the art pipeline (npm run import-art / gen-image).
-#   type:   sprite      one picture, cut out and outlined          (size: [w, h] = the box it must fit)
+#   type:   sprite      one picture, cut out and outlined          (size: [w, h] = the box it must fit, in PICTURE pixels:
+#                                                                   art has 2 per scene pixel, so a 40x70 thing on screen is [80, 140])
 #           sheet       a grid of equal frames, one cut-out each   (frame: [w, h], grid: [columns, rows])
 #           icon        like sprite, but centred in the box
 #           background  a full scene picture: shrunk and snapped to the palette, no cut-out, no outline
@@ -21,129 +22,134 @@ assets:
     out: sprites/grognak.png
     prompt: '{style} {cutout} Character sheet of {grognak} 4 rows (facing front, back, right, left) by 3 columns (standing,
       walking step one, walking step two). Same size in every cell.'
-    frame: [32, 48]
+    frame: [64, 96]
     grid: [3, 4]
     animations: {idle_s: [0], walk_s: [0, 1, 0, 2], idle_n: [3], walk_n: [3, 4, 3, 5], idle_e: [6], walk_e: [6, 7, 6, 8], idle_w: [9], walk_w: [9, 10, 9, 11]}
   standing_stone:
     type: sprite
     out: sprites/standing_stone.png
     prompt: '{style} {cutout} {menhir}'
-    size: [40, 70]
+    size: [80, 140]
   zombie_standing:
     type: sprite
     out: sprites/zombie_standing.png
     prompt: '{style} {cutout} {zombie} Standing.'
-    size: [48, 64]
+    size: [96, 128]
   zombie_down:
     type: sprite
     out: sprites/zombie_down.png
     prompt: '{style} {cutout} {zombie} Lying flat on the ground, defeated.'
-    size: [60, 24]
+    size: [120, 48]
   chapel_door_open:
     type: sprite
     out: sprites/chapel_door_open.png
     prompt: '{style} {cutout} An old wooden chapel door standing open, dark inside, pale stone frame.'
-    size: [40, 60]
+    size: [80, 120]
   pebble:
     type: sprite
     out: sprites/pebble.png
     prompt: '{style} {cutout} A single small grey pebble.'
-    size: [12, 8]
+    size: [24, 16]
+  rubble:   # a separate sprite (not part of the background), so it sits exactly under its hotspot and the gemstone
+    type: sprite
+    out: sprites/rubble.png
+    prompt: '{style} {cutout} A low, wide heap of rubble: big and small dark grey rocks and stones, much wider than tall.'
+    size: [144, 56]
   gemstone:
     type: sprite
     out: sprites/gemstone.png
     prompt: '{style} {cutout} A beautiful glowing gemstone, faceted, soft glow.'
-    size: [10, 8]
+    size: [20, 16]
   gemstone_shards:
     type: sprite
     out: sprites/gemstone_shards.png
     prompt: '{style} {cutout} Two glowing gemstone shards lying together.'
-    size: [20, 10]
+    size: [40, 20]
   grelok:
     type: sprite
     out: sprites/grelok.png
     prompt: '{style} {cutout} {grelok} Standing, menacing, facing the viewer, laughing.'
-    size: [40, 64]
+    size: [80, 128]
   blacksmith:
     type: sprite
     out: sprites/blacksmith.png
     prompt: '{style} {cutout} {blacksmith}'
-    size: [40, 70]
+    size: [80, 140]
   priest:
     type: sprite
     out: sprites/priest.png
     prompt: '{style} {cutout} {priest}'
-    size: [30, 40]
+    size: [60, 80]
   wizard:
     type: sprite
     out: sprites/wizard.png
     prompt: '{style} {cutout} {wizard}'
-    size: [25, 20]
+    size: [50, 40]
   icon_chapel_key:
     type: icon
     out: icons/chapel_key.png
     prompt: '{style} {cutout} Inventory icon, big and simple so it reads when tiny: a large brass key with a paper tag.'
-    size: [24, 16]
+    size: [48, 32]
   icon_gemstone:
     type: icon
     out: icons/gemstone.png
     prompt: '{style} {cutout} Inventory icon, big and simple so it reads when tiny: a glowing gemstone.'
-    size: [24, 16]
+    size: [48, 32]
   icon_gemstone_shards:
     type: icon
     out: icons/gemstone_shards.png
     prompt: '{style} {cutout} Inventory icon, big and simple so it reads when tiny: two glowing gemstone shards.'
-    size: [24, 16]
+    size: [48, 32]
   icon_jug:
     type: icon
     out: icons/jug.png
     prompt: '{style} {cutout} Inventory icon, big and simple so it reads when tiny: an empty clay jug marked XXX.'
-    size: [24, 16]
+    size: [48, 32]
   icon_pebble:
     type: icon
     out: icons/pebble.png
     prompt: '{style} {cutout} Inventory icon, big and simple so it reads when tiny: a tiny grey pebble.'
-    size: [24, 16]
+    size: [48, 32]
   icon_rusty_sword:
     type: icon
     out: icons/rusty_sword.png
     prompt: '{style} {cutout} Inventory icon, big and simple so it reads when tiny: a rusty old sword, pointing up-right.'
-    size: [24, 16]
+    size: [48, 32]
   icon_shining_sword:
     type: icon
     out: icons/shining_sword.png
     prompt: '{style} {cutout} Inventory icon, big and simple so it reads when tiny: a shining sword with a glowing blade,
       pointing up-right.'
-    size: [24, 16]
+    size: [48, 32]
   bg_plain:
     type: background
     out: backgrounds/plain.png
     prompt: '{style} {scene} a wide open crossroads at golden hour, long shadows, warm orange sky; leave space for a huge
       standing stone in the middle.'
-    size: [320, 144]
+    size: [640, 288]
   bg_mountain:
     type: background
     out: backgrounds/mountain.png
     prompt: '{style} {scene} menacing red-lit rocky mountain path, dark cliffs, rubble, a cold wine-red sky.'
-    size: [320, 144]
+    size: [640, 288]
   bg_town:
     type: background
     out: backgrounds/town.png
     prompt: '{style} {scene} a busy small medieval town street, wooden houses, a smithy with a glowing forge, dusty ground.'
-    size: [320, 144]
+    size: [640, 288]
   bg_swamp:
     type: background
     out: backgrounds/swamp.png
     prompt: '{style} {scene} a gloomy green swamp with mist, sickly yellow light, a small island on the right for a wizard''s
       tower.'
-    size: [320, 144]
+    size: [640, 288]
   bg_chapel:
     type: background
     out: backgrounds/chapel.png
     prompt: '{style} {scene} an old pale-stone chapel at purple dusk, a graveyard path, a locked wooden door on the right.'
-    size: [320, 144]
+    size: [640, 288]
   bg_chapel_interior:
     type: background
     out: backgrounds/chapel_interior.png
     prompt: '{style} {scene} a dark quiet chapel interior, candles, stone arches, a marble basin in the middle.'
-    size: [320, 144]
+    size: [640, 288]

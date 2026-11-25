@@ -5,8 +5,10 @@ characters and places. Everything in the game is drawn small and then shown at a
 is deliberate. This page is the reference for anyone (human or AI image generator) who makes pictures for the game.
 
 ## The rules
-1. **Size.** The screen is 320x200. The scene is 320x144; the bottom 56 px is the interface. Backgrounds are exactly 320x144.
-   Grognak is 32x48, inventory icons 24x16, scene objects as big as their hotspot (see `scenes/*.yml`).
+1. **Size.** The game thinks in a 320x200 screen: the scene is 320x144, the bottom 56 px is the interface. Pictures have
+   **2 pixels per screen pixel** (ART_SCALE), so they keep more detail: backgrounds are exactly 640x288, Grognak's frames
+   64x96 (he stands 48 screen pixels tall), inventory icons 48x32, scene objects twice the size of their hotspot
+   (see `scenes/*.yml`). Exact sizes are in `art/assets.yml`.
 2. **Palette.** Every picture has its own small palette chosen to suit it (sprites 16 colours including the outline,
    backgrounds 32), and every colour is a Mega Drive colour: each of R, G, B is one of 0, 52, 87, 116, 144, 172, 206, 255
    (9-bit). The importer chooses and enforces this. `art/palette.hex` is a fixed 32-colour alternative (`palette: shared`).
@@ -30,9 +32,9 @@ is deliberate. This page is the reference for anyone (human or AI image generato
 ## Characters
 | Who | Brief |
 |---|---|
-| **Grognak** (player, 32x48) | A tall barbarian crossed with a stocky dwarf warrior: broad torso, powerful legs, braided brown beard, horned helmet, fur loincloth, big sword. |
-| **Grelok** (villain, ~40x64) | Gaunt, hooded evil wizard. Flowing cape and cloak in **wine red**, dark armour pieces, skull-topped staff, glowing eyes. |
-| Blacksmith (~40x70) | Stout, sweaty, leather apron, hammer. |
+| **Grognak** (player, 64x96) | A tall barbarian crossed with a stocky dwarf warrior: broad torso, powerful legs, braided brown beard, horned helmet, fur loincloth, big sword. |
+| **Grelok** (villain, ~80x128) | Gaunt, hooded evil wizard. Flowing cape and cloak in **wine red**, dark armour pieces, skull-topped staff, glowing eyes. |
+| Blacksmith (~80x140) | Stout, sweaty, leather apron, hammer. |
 | Priest (~30x40) | Small and chubby, tipsy, sits under a tree with a jug. |
 | Wizard (~25x20 in a window) | Tall and bespectacled, lost in thought; we only see him in the tower window. |
 | Zombie (~40x60) | Ragged, green-grey, arms forward; a second picture lying down. |

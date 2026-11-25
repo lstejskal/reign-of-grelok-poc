@@ -7,8 +7,8 @@ startPosition: [120, 116]
 # The goat herder. (The placeholder generator draws its usual figure on this sheet until real art exists.)
 player:
   sprite: sprites/herder.png
-  frameWidth: 32
-  frameHeight: 48
+  frameWidth: 64
+  frameHeight: 96
 
 # Only four buttons: there is nobody to talk to or give things to. Column-major, so the first three are the
 # left column. Leave this out and the engine shows its default six (see DEFAULT_VERBS in sceneTypes.ts).

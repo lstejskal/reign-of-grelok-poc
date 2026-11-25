@@ -1,14 +1,13 @@
 import Phaser from 'phaser';
-import { PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS } from '@grelok/engine';
+import { ART_SCALE, PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS } from '@grelok/engine';
 import type { Facing, PlayerConfig, Point } from '@grelok/engine';
 import { textureKey } from '../data/assets';
 import { PathFollower } from '../walk/PathFollower';
 import type { WalkArea } from '../walk/WalkArea';
+import { walkPose } from '../walk/walkCycle';
 
 /** Walking speed in scene pixels per second at full size; far away (smaller) he walks proportionally slower. */
 export const WALK_SPEED = 64;
-/** The legs swap every this many pixels walked. */
-const STRIDE = 6;
 /** A frame that took longer than this (tab in the background...) is treated as this long, so he never jumps. */
 const MAX_FRAME_MS = 100;
 
@@ -43,7 +42,7 @@ export class PlayerActor {
 
   get state() {
     const [x, y] = this.follower.position;
-    return { x, y, facing: this.follower.facing, walking: this.follower.walking, scale: this.sprite.scaleX, depth: this.sprite.depth };
+    return { x, y, facing: this.follower.facing, walking: this.follower.walking, scale: this.sprite.scaleX * ART_SCALE, depth: this.sprite.depth };
   }
 
   /** Move into another scene's floor and stand at `point`, looking `facing`. */
@@ -95,11 +94,14 @@ export class PlayerActor {
   private sync(): void {
     const [x, y] = this.follower.position;
     const row = PLAYER_FACING_ROWS.indexOf(this.follower.facing);
-    const column = this.follower.walking ? 1 + (Math.floor(this.follower.walked / STRIDE) % 2) : 0;
+    const pose = walkPose(this.follower.walking, this.follower.walked);
+    // Snap to whole PICTURE pixels (half a scene pixel at ART_SCALE 2), like everything in a pixel-art game. The sheet
+    // has ART_SCALE times the detail, so it is drawn at 1/ART_SCALE of its size (times the perspective).
+    const snap = (v: number) => Math.round(v * ART_SCALE) / ART_SCALE;
     this.sprite
-      .setPosition(Math.round(x), Math.round(y)) // whole pixels, like everything in a pixel-art game
-      .setScale(this.area.scaleAt(y))
-      .setFrame(row * PLAYER_SHEET_COLUMNS + column)
+      .setPosition(snap(x), snap(y) - pose.lift / ART_SCALE)
+      .setScale(this.area.scaleAt(y) / ART_SCALE)
+      .setFrame(row * PLAYER_SHEET_COLUMNS + pose.column)
       .setDepth(y);
   }
 }

@@ -1,4 +1,4 @@
-import { ICON_HEIGHT, ICON_WIDTH, MAX_VERBS, MAX_VERB_LABEL, PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS, SCENE_HEIGHT, SCENE_WIDTH, iconPath, musicPath, sfxPath } from './sceneTypes';
+import { ART_SCALE, ICON_HEIGHT, ICON_WIDTH, MAX_VERBS, MAX_VERB_LABEL, PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS, SCENE_HEIGHT, SCENE_WIDTH, iconPath, musicPath, sfxPath } from './sceneTypes';
 import type { GameBundle, VerbSpec } from './sceneTypes';
 import { parseStep } from './cutscene';
 
@@ -50,8 +50,8 @@ export function validateGame(
             continue;
         }
         const size = imageSize?.(icon);
-        if (size !== undefined && (size.width !== ICON_WIDTH || size.height !== ICON_HEIGHT)) {
-            problem(`things.yml`, `icon must be ${ICON_WIDTH}x${ICON_HEIGHT} pixels, but assets/${icon} is ${size.width}x${size.height}`);
+        if (size !== undefined && (size.width !== ICON_WIDTH * ART_SCALE || size.height !== ICON_HEIGHT * ART_SCALE)) {
+            problem(`things.yml`, `icon must be ${ICON_WIDTH * ART_SCALE}x${ICON_HEIGHT * ART_SCALE} pixels, but assets/${icon} is ${size.width}x${size.height}`);
         }
     }
 
@@ -119,11 +119,13 @@ export function validateGame(
         for (const [field, path] of [['background', scene.background], ['walkmask', scene.walkmask], ['music', scene.music]] as const) {
             if (path !== undefined && !assetExists(path)) problem(where, `${field} asset not found: assets/${path}`);
         }
-        // a background and its walkmask cover exactly the scene area, one image pixel per game pixel
-        for (const [field, path] of [['background', scene.background], ['walkmask', scene.walkmask]] as const) {
+        // a background and its walkmask cover exactly the scene area: the background is art (ART_SCALE picture pixels
+        // per scene pixel), the walkmask is not (one mask pixel per scene pixel)
+        for (const [field, path, k] of [['background', scene.background, ART_SCALE], ['walkmask', scene.walkmask, 1]] as const) {
             const size = path !== undefined && assetExists(path) ? imageSize?.(path) : undefined;
-            if (size !== undefined && (size.width !== SCENE_WIDTH || size.height !== SCENE_HEIGHT)) {
-                problem(where, `${field} must be ${SCENE_WIDTH}x${SCENE_HEIGHT} pixels, but assets/${path} is ${size.width}x${size.height}`);
+            const [w, h] = [SCENE_WIDTH * k, SCENE_HEIGHT * k];
+            if (size !== undefined && (size.width !== w || size.height !== h)) {
+                problem(where, `${field} must be ${w}x${h} pixels, but assets/${path} is ${size.width}x${size.height}`);
             }
         }
         if (scene.walkArea !== undefined) {

@@ -33,8 +33,8 @@ Keep the successful prompt, attached reference names, generation settings when a
 | Element | Required treatment |
 |---|---|
 | Overall look | Original 16-bit Sega Mega Drive fantasy arcade art, adapted to a point-and-click adventure. Chunky, bold shapes and readable silhouettes. |
-| Screen | 320x200 logical pixels: 320x144 scene plus 56 px interface. |
-| Asset sizes | Follow `art/assets.yml`. Grognak uses 32x48 frames; inventory icons are 24x16; backgrounds are 320x144. Props and NPCs have individual sizes. |
+| Screen | 320x200 logical pixels: 320x144 scene plus 56 px interface. Art has 2 picture pixels per logical pixel (ART_SCALE), so all picture sizes below are twice the logical size. |
+| Asset sizes | Follow `art/assets.yml`. Grognak uses 64x96 frames; inventory icons are 48x32; backgrounds are 640x288. Props and NPCs have individual sizes. |
 | Pixel treatment | Crisp square pixels; no blur, anti-aliasing, smooth gradients, or painterly rendering. Use whole-number nearest-neighbour enlargement for inspection. |
 | Outlines | Characters and objects have a hard 1 px dark plum outline (`#340034`) at final resolution. Backgrounds have no added silhouette outline. |
 | Shading | Two or three tones per material, upper-left light, large flat areas. Sparse deliberate dithering only; avoid noisy surface texture. |
@@ -53,7 +53,7 @@ The final 1 px outline is a target-resolution requirement. A one-source-pixel li
 - **Grelok:** gaunt hooded wizard, wine-red cloak, dark armour pieces, skull-topped staff, glowing eyes. Preserve the same silhouette and costume between appearances.
 - **Other characters:** use their descriptions in the shared fragments and the art style guide; establish a reference before generating variants.
 - **Object states:** intact/broken, closed/open, rusty/shining, and standing/defeated variants must visibly belong to the same original object or character. Preserve unchanged features.
-- **Scene object and inventory icon:** preserve identity, material, main colour, and distinguishing marks. Simplify the icon for readability at 24x16 rather than redesigning it.
+- **Scene object and inventory icon:** preserve identity, material, main colour, and distinguishing marks. Simplify the icon for readability at 48x32 rather than redesigning it.
 - **Animation:** preserve size, palette, baseline, face, outfit, and equipment across frames. Movement changes the pose, not the anatomy or costume. Follow the manifest's frame order exactly; do not add frames or substitute mirroring without checking the specification.
 
 ## Raw images and composition
@@ -66,7 +66,7 @@ For sprites, sheets, and icons, follow the current **solid magenta cutout workfl
 - Add no labels, grid lines, borders, signatures, watermarks, or incidental text. Any required markings must be explicitly specified in the asset brief.
 - Save raw PNGs to the manifest's `raw` path, normally `art/raw/<asset-id>.png`. Preserve approved reference images separately; the plain brief specifies `art/reference/grognak_ref.png`.
 
-For backgrounds, fill the canvas; omit the magenta cutout instructions and the sprite outline requirement. Follow the requested generation size and keep essential content inside the final 320x144 crop. The importer crops rather than stretches, so composition must survive that crop. Leave the walkable floor and exits readable. Do not bake separately rendered characters or interactive props into the background: the plain's standing stone, for example, is a separate sprite.
+For backgrounds, fill the canvas; omit the magenta cutout instructions and the sprite outline requirement. Follow the requested generation size and keep essential content inside the final 640x288 crop. The importer crops rather than stretches, so composition must survive that crop. Leave the walkable floor and exits readable. Do not bake separately rendered characters or interactive props into the background: the plain's standing stone, for example, is a separate sprite.
 
 For sheets, check the exact grid and cell count. Grognak currently needs **3 columns by 4 rows**: front, back, right, left; each row contains standing, walking step one, walking step two. Keep every figure fully inside its cell, at the same scale and baseline, with no grid lines.
 
@@ -136,7 +136,7 @@ ASSET-TYPE RULES:
 #340034 outline at final resolution; flat solid #FF00FF background;
 whole subject visible; no magenta on subject; no floor or background shadow.
 OR background: about 32 colours unless overridden; no added sprite outline;
-full scene with no magenta; preserve the 320x144 crop and walkable area.]
+full scene with no magenta; preserve the 640x288 crop and walkable area.]
 
 LAYOUT: [framing, safe margins, foot baseline, exact grid/frame order if applicable]
 CONTINUITY: [specific colours, costume, geometry, and features that must remain fixed]

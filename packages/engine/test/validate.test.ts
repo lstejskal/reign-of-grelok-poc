@@ -102,8 +102,8 @@ describe('validateGame', () => {
         const bundle = fresh();
         bundle.scenes.plain!.background = 'backgrounds/plain.png';
 
-        const errors = validateGame(bundle, everythingExists, () => ({ width: 640, height: 288 }));
-        expect(errors).toContain('scenes/plain.yml: background must be 320x144 pixels, but assets/backgrounds/plain.png is 640x288');
+        const errors = validateGame(bundle, everythingExists, () => ({ width: 320, height: 144 }));
+        expect(errors).toContain('scenes/plain.yml: background must be 640x288 pixels, but assets/backgrounds/plain.png is 320x144');
     });
 
     it('reports a pickable thing without an icon, and an icon of the wrong size', () => {
@@ -114,7 +114,7 @@ describe('validateGame', () => {
         const sized = validateGame(bundle, everythingExists, (asset) =>
             asset === 'icons/jug.png' ? { width: 32, height: 32 } : undefined,
         ).join('\n');
-        expect(sized).toContain('icon must be 24x16 pixels, but assets/icons/jug.png is 32x32');
+        expect(sized).toContain('icon must be 48x32 pixels, but assets/icons/jug.png is 32x32');
     });
 
     it('reports a missing player, a sprite sheet of the wrong size and a bad scale', () => {
@@ -125,7 +125,7 @@ describe('validateGame', () => {
         const wrong = fresh();
         const sheet = wrong.config.player.sprite;
         const sized = validateGame(wrong, everythingExists, (a) => (a === sheet ? { width: 10, height: 10 } : undefined)).join('\n');
-        expect(sized).toContain('player sprite sheet must be 96x192 pixels');
+        expect(sized).toContain('player sprite sheet must be 192x384 pixels');
 
         const scaled = fresh();
         scaled.scenes.plain!.scale = { top: 0, bottom: 5 };

@@ -1,19 +1,28 @@
 // Generates placeholder pictures for every scene of a game, so the engine can be built and tested before
 // any real art exists:  npm run placeholders [-- <game-id>] [--force]
 //
-//   assets/backgrounds/<location>.png   320x144, a colour per location + a 16px grid
+//   assets/backgrounds/<location>.png   640x288 (art is ART_SCALE x the scene), a colour per location + a 16px grid
 //   assets/walkmasks/<location>.png     320x144, grayscale: white = the player may walk here, black = blocked
 //   assets/sprites/<player>.png         the player's sheet (see GameConfig.player): a stocky horned-helmet figure, 4 facings x 3 frames
 //   assets/sprites/<name>.png           every picture a scene sprite uses: a coloured figure the size of its thing's hotspot
-//   assets/icons/<thing>.png            24x16, one per pickable thing: a coloured tile with a little symmetric pattern
+//   assets/icons/<thing>.png            48x32, one per pickable thing: a coloured tile with a little symmetric pattern
 //
+// Pictures are drawn at scene size and then doubled (ART_SCALE), so placeholders stay blocky on purpose.
 // Existing files are never overwritten (real art will replace these under the same names) unless --force.
 import fs from 'node:fs';
 import path from 'node:path';
 import { PNG } from 'pngjs';
-import { ICON_HEIGHT, ICON_WIDTH, PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS, SCENE_HEIGHT as H, SCENE_WIDTH as W, iconPath } from '../packages/engine/src';
+import { ART_SCALE, ICON_HEIGHT, ICON_WIDTH, PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS, SCENE_HEIGHT as H, SCENE_WIDTH as W, iconPath } from '../packages/engine/src';
 import type { Facing } from '../packages/engine/src';
 import { GAMES_DIR, loadGameBundle } from '../packages/engine/node/loadGameBundle';
+import { decodePng, encodePng } from './art/config';
+import { resize } from './art/pipeline';
+
+/** Art has ART_SCALE picture pixels per scene pixel: blow a scene-sized placeholder up to that (nearest neighbour). */
+function artUp(png: Buffer): Buffer {
+    const img = decodePng(png);
+    return encodePng(resize(img, img.width * ART_SCALE, img.height * ART_SCALE, 'nearest'));
+}
 
 const HORIZON_Y = 40; // sky above, ground below
 const WALK_TOP = 30; // the walkable floor starts here
@@ -268,15 +277,15 @@ const force = args.includes('--force');
 const gameId = args.find((a) => !a.startsWith('--')) ?? 'grelok';
 
 for (const location of Object.keys(loadGameBundle(gameId).logic.locations)) {
-    console.log(writeAsset(gameId, `backgrounds/${location}.png`, makeBackground(location), force));
+    console.log(writeAsset(gameId, `backgrounds/${location}.png`, artUp(makeBackground(location)), force));
     console.log(writeAsset(gameId, `walkmasks/${location}.png`, makeWalkmask(location), force));
 }
 for (const thing of Object.values(loadGameBundle(gameId).logic.things)) {
-    if (thing.pickable) console.log(writeAsset(gameId, iconPath(thing.alias), makeIcon(thing.alias), force));
+    if (thing.pickable) console.log(writeAsset(gameId, iconPath(thing.alias), artUp(makeIcon(thing.alias)), force));
 }
 {
     const { sprite, frameWidth, frameHeight } = loadGameBundle(gameId).config.player;
-    console.log(writeAsset(gameId, sprite, makePlayerSheet(frameWidth, frameHeight), force));
+    console.log(writeAsset(gameId, sprite, artUp(makePlayerSheet(frameWidth / ART_SCALE, frameHeight / ART_SCALE)), force));
 }
 {
     // scene sprites: as big as the hotspot of their thing (or 24x32 when they have none)
@@ -287,7 +296,7 @@ for (const thing of Object.values(loadGameBundle(gameId).logic.things)) {
             const xs = hotspot?.polygon.map((p) => p[0]) ?? [0, 24];
             const ys = hotspot?.polygon.map((p) => p[1]) ?? [0, 32];
             const [w, h] = [Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)];
-            for (const state of sprite.states) console.log(writeAsset(gameId, state.image, makeSprite(state.image, w, h), force));
+            for (const state of sprite.states) console.log(writeAsset(gameId, state.image, artUp(makeSprite(state.image, w, h)), force));
         }
     }
 }

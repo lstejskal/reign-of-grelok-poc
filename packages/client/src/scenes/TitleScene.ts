@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_HEIGHT, GAME_WIDTH } from '../config';
+import { GAME_HEIGHT, GAME_WIDTH, artScale, logicalPointer, useLogicalCamera } from '../config';
 import { PIXEL_FONT } from '../gfx/pixelFont';
 import { textureKey } from '../data/assets';
 import { MenuPanel } from '../ui/MenuPanel';
@@ -30,9 +30,10 @@ export class TitleScene extends Phaser.Scene {
   }
 
   create(): void {
+    useLogicalCamera(this);
     const { bundle } = this.session;
     const backdrop = bundle.scenes[bundle.config.start]?.background;
-    if (backdrop !== undefined) this.add.image(0, 0, textureKey(backdrop)).setOrigin(0);
+    if (backdrop !== undefined) this.add.image(0, 0, textureKey(backdrop)).setOrigin(0).setScale(artScale);
     this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.6).setOrigin(0);
 
     // the title is drawn at 3x: bitmap fonts scale like any picture, and nearest-neighbour keeps the pixels sharp
@@ -45,8 +46,8 @@ export class TitleScene extends Phaser.Scene {
     this.menu = new MenuPanel(this, 10, { framed: false, areaHeight: GAME_HEIGHT + 40 });
     this.showMain();
 
-    this.input.on(Phaser.Input.Events.POINTER_MOVE, (p: Phaser.Input.Pointer) => this.menu.pointerMove(Math.floor(p.x), Math.floor(p.y)));
-    this.input.on(Phaser.Input.Events.POINTER_DOWN, (p: Phaser.Input.Pointer) => this.menu.click(Math.floor(p.x), Math.floor(p.y)));
+    this.input.on(Phaser.Input.Events.POINTER_MOVE, (p: Phaser.Input.Pointer) => this.menu.pointerMove(...logicalPointer(p)));
+    this.input.on(Phaser.Input.Events.POINTER_DOWN, (p: Phaser.Input.Pointer) => this.menu.click(...logicalPointer(p)));
   }
 
   private showMain(): void {

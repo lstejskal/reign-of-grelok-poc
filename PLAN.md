@@ -341,8 +341,13 @@ mirror left↔right, walk bob via tween, talk = 2-frame mouth swap, idle = slow 
   sprite positions), checks it in game and writes the next brief.
 - **Progress:** screen 1 (plain) done: Grognak sheet, standing stone, pebble + icon, background (brief 01), and the
   walkmask from polygons: `walkArea:` in the scene file → `npm run walkmask` (`tools/make-walkmask.ts`). The north exit
-  is now the mountains on the horizon. Open: Grognak's colours are too close to the dirt road (needs an art revision);
-  the client does not play the atlas animations yet. See `docs/learn/17-walkmasks.md`.
+  is now the mountains on the horizon. Open: Grognak's colours are too close to the dirt road (needs an art revision).
+  See `docs/learn/17-walkmasks.md`.
+- **Art resolution:** 32x48 was too small for AI-generated art (grainy). Art now has 2 picture pixels per game pixel
+  (`ART_SCALE`): canvas 640x400, every camera zooms 2x, so positions, scene files, walkmasks and the interface stayed in
+  320x200 units. Backgrounds 640x288, Grognak 64x96 frames, icons 48x32; all assets re-imported or doubled. The walk
+  cycle now passes through "legs together" with a small bob (`client/src/walk/walkCycle.ts`; the client uses the sheet
+  columns directly, not the atlas). See `docs/learn/18-art-resolution.md`.
 
 ### Step 18 — Music & SFX pass (AI-generated)
 - `audio/prompts.md`: one prompt per track with a shared prefix ("instrumental, 16-bit Sega Mega Drive FM synth,

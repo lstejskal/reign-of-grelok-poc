@@ -5,7 +5,15 @@ import type { LogicData } from './types';
 export const SCENE_WIDTH = 320;
 export const SCENE_HEIGHT = 144;
 
-/** Inventory icons are 24x16 pictures, one per pickable thing, at `assets/icons/<thing alias>.png`. */
+/**
+ * Pictures have ART_SCALE pixels per scene pixel. Positions, hotspots, walkmasks and the interface stay in scene
+ * pixels (320x200), but backgrounds, sprites, icons and the player sheet are drawn with twice the detail: a background
+ * is 640x288, an icon 48x32. The game shows them at 1/ART_SCALE through a camera that zooms by ART_SCALE, so the art
+ * keeps all its pixels while the rest of the game keeps its coordinates. Walkmasks are NOT art: they stay 320x144.
+ */
+export const ART_SCALE = 2;
+
+/** Inventory icons are 24x16 scene pixels (48x32 picture pixels), one per pickable thing, at `assets/icons/<thing alias>.png`. */
 export const ICON_WIDTH = 24;
 export const ICON_HEIGHT = 16;
 export const iconPath = (thingAlias: string): string => `icons/${thingAlias}.png`;

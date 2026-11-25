@@ -15,9 +15,9 @@ test('the imported standing stone is drawn in the plain, with Grognak (imported 
   const sprites: { id: string; image: string; y: number }[] = await page.evaluate(() => window.__adv.sprites);
   const stone = sprites.find((s) => s.id === 'standing_stone');
   expect(stone?.image).toBe('sprites/standing_stone.png');
-  expect(await page.evaluate(() => window.__adv.game.textures.get('asset:sprites/standing_stone.png').getSourceImage().height)).toBe(70);
-  // the player sheet keeps the size the engine expects (3 columns x 4 rows of 32x48)
-  expect(await page.evaluate(() => window.__adv.game.textures.get('asset:sprites/grognak.png').getSourceImage().width)).toBe(96);
+  expect(await page.evaluate(() => window.__adv.game.textures.get('asset:sprites/standing_stone.png').getSourceImage().height)).toBe(140); // 40x70 on screen, art at 2 picture pixels per scene pixel
+  // the player sheet keeps the size the engine expects (3 columns x 4 rows of 64x96)
+  expect(await page.evaluate(() => window.__adv.game.textures.get('asset:sprites/grognak.png').getSourceImage().width)).toBe(192);
 
   await page.screenshot({ path: 'tests/e2e/screenshots/art-imported.png' });
 });

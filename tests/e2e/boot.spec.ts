@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('boots into the title screen with a 320x200 canvas and no errors', async ({ page }) => {
+test('boots into the title screen with a 640x400 canvas (320x200 game, art at 2x) and no errors', async ({ page }) => {
   const problems: string[] = [];
   page.on('console', (msg) => msg.type() === 'error' && problems.push(msg.text()));
   page.on('pageerror', (err) => problems.push(err.message));
@@ -9,8 +9,8 @@ test('boots into the title screen with a 320x200 canvas and no errors', async ({
   const canvas = page.locator('#game canvas');
   await expect(canvas).toHaveCount(1);
 
-  // Logical resolution is fixed; the on-screen size is an integer multiple of it.
-  expect(await canvas.evaluate((c: HTMLCanvasElement) => [c.width, c.height])).toEqual([320, 200]);
+  // The game is 320x200; the canvas has 2 pixels per game pixel (art detail); the on-screen size is an integer multiple of that.
+  expect(await canvas.evaluate((c: HTMLCanvasElement) => [c.width, c.height])).toEqual([640, 400]);
   // BootScene loads the data and pictures, then hands over to the title screen
   await expect.poll(() => page.evaluate(() => (window as any).__adv.scene)).toBe('TitleScene');
   const zoom: number = await page.evaluate(() => (window as any).__adv.zoom);
