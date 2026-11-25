@@ -126,6 +126,18 @@ export function validateGame(
                 problem(where, `${field} must be ${SCENE_WIDTH}x${SCENE_HEIGHT} pixels, but assets/${path} is ${size.width}x${size.height}`);
             }
         }
+        if (scene.walkArea !== undefined) {
+            if (scene.walkmask === undefined) problem(where, 'walkArea needs a "walkmask:" path to be rendered into');
+            const { floor, blocked = [] } = scene.walkArea;
+            if (!Array.isArray(floor) || floor.length === 0) problem(where, 'walkArea: "floor" needs at least one polygon');
+            const inScene = ([x, y]: [number, number]) => x >= 0 && x <= SCENE_WIDTH && y >= 0 && y <= SCENE_HEIGHT;
+            for (const [kind, polygons] of [['floor', floor ?? []], ['blocked', blocked]] as const) {
+                polygons.forEach((polygon, i) => {
+                    if (!Array.isArray(polygon) || polygon.length < 3) return problem(where, `walkArea ${kind} polygon ${i + 1} needs at least 3 points`);
+                    if (!polygon.every(inScene)) problem(where, `walkArea ${kind} polygon ${i + 1} has points outside the scene (0-${SCENE_WIDTH}, 0-${SCENE_HEIGHT})`);
+                });
+            }
+        }
         if (scene.scale !== undefined) {
             const { top, bottom } = scene.scale;
             if (![top, bottom].every((n) => typeof n === 'number' && n > 0 && n <= 2)) {

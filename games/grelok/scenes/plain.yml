@@ -5,6 +5,16 @@ walkmask: walkmasks/plain.png   # white = walkable
 music: music/plain.mp3   # loops while the player is here; changing scene crossfades to the next tune
 scale: {top: 0.6, bottom: 1.0}   # Grognak is drawn at 60% on the farthest floor row, 100% on the nearest
 
+# The floor, traced from the background: the crossroads clearing, the north road up to where it meets the fields, and
+# the grass in the front corners. Not the far fields, the swamp or the hills. `npm run walkmask -- grelok plain` paints
+# it into walkmask/plain.png; F1 in the game shows the result.
+walkArea:
+  floor:
+    - [[0, 98], [60, 97], [96, 92], [124, 84], [140, 79], [150, 74], [170, 74], [182, 79], [200, 86], [225, 92],
+       [260, 96], [320, 98], [320, 144], [0, 144]]
+  blocked:
+    - [[138, 88], [182, 88], [182, 100], [138, 100]]   # the base of the standing stone
+
 hotspots:   # later entries are on top
   - id: standing_stone
     polygon: [[140, 30], [180, 30], [180, 100], [140, 100]]
@@ -26,11 +36,11 @@ sprites:
     y: 120
     image: sprites/pebble.png
 
-exits:
-  - direction: n
-    polygon: [[120, 0], [200, 0], [200, 28], [120, 28]]
-    walkTo: [160, 34]
-    spawn: [160, 40]
+exits:   # a thing wins where it overlaps an exit: the stone stands in front of the mountains
+  - direction: n   # the mountains on the horizon; he walks up the road behind the stone
+    polygon: [[90, 30], [232, 30], [232, 76], [90, 76]]
+    walkTo: [160, 77]
+    spawn: [188, 90]
   - direction: s
     polygon: [[120, 128], [200, 128], [200, 144], [120, 144]]
     walkTo: [160, 124]

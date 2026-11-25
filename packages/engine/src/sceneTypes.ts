@@ -75,10 +75,22 @@ export interface SceneScale {
     bottom: number;
 }
 
+/**
+ * The walkable floor drawn as polygons: the source of the walkmask picture. `npm run walkmask` paints it into the PNG
+ * that `walkmask:` names; the game itself reads only the PNG. A pixel is floor when it is inside a `floor` polygon and
+ * not inside a `blocked` one (e.g. the base of a big object standing on the floor).
+ */
+export interface WalkAreaData {
+    floor: Point[][];
+    blocked?: Point[][];
+}
+
 export interface SceneData {
     /** Asset paths are relative to the game's `assets/` folder. Added in Step 4. */
     background?: string;
     walkmask?: string;
+    /** Optional: polygons the walkmask picture is generated from (Step 17). */
+    walkArea?: WalkAreaData;
     scale?: SceneScale;
     music?: string;
     hotspots: HotspotData[];

@@ -336,6 +336,13 @@ mirror left↔right, walk bob via tween, talk = 2-frame mouth swap, idle = slow 
   cursor, UI panel frame, title screen art.
 - **Output:** placeholders replaced scene by scene; game looks finished.
 - **Test:** validate + palette test + existing e2e still green; `npm run screenshots` saves one PNG per scene for review.
+- **Workflow:** art is made in Codex/ChatGPT from one brief per screen (`art/briefs/NN-<screen>.md`, see
+  `docs/pixel-art-generation.md`), which also imports it; Claude then does the scene side (walkmask, hotspots, exits,
+  sprite positions), checks it in game and writes the next brief.
+- **Progress:** screen 1 (plain) done: Grognak sheet, standing stone, pebble + icon, background (brief 01), and the
+  walkmask from polygons: `walkArea:` in the scene file → `npm run walkmask` (`tools/make-walkmask.ts`). The north exit
+  is now the mountains on the horizon. Open: Grognak's colours are too close to the dirt road (needs an art revision);
+  the client does not play the atlas animations yet. See `docs/learn/17-walkmasks.md`.
 
 ### Step 18 — Music & SFX pass (AI-generated)
 - `audio/prompts.md`: one prompt per track with a shared prefix ("instrumental, 16-bit Sega Mega Drive FM synth,

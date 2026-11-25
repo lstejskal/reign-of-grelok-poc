@@ -291,7 +291,7 @@ test('he is drawn smaller in the distance (perspective) and always in front of w
   await clickAt(page, 200, 130);
   await waitUntilStopped(page);
   const near = await player(page);
-  await clickAt(page, 200, 40);
+  await clickAt(page, 196, 92); // the far end of the clearing
   await waitUntilStopped(page);
   const far = await player(page);
   expect(far.scale).toBeLessThan(near.scale);
@@ -312,14 +312,14 @@ test('he walks around the base of the standing stone instead of through it', asy
     };
     tick();
   });
-  await clickAt(page, 200, 60); // behind the stone's base (x 136-183, y 88-99 is blocked), beside the stone's hotspot
+  await clickAt(page, 190, 86); // behind the stone's base (x 138-181, y 88-99 is blocked), beside the stone's hotspot
   await waitUntilStopped(page);
 
   const trail: [number, number][] = await page.evaluate(() => (window as any).__trail);
-  expect(trail.some(([x, y]) => x >= 136 && x < 184 && y >= 88 && y < 100)).toBe(false);
-  expect(trail.some(([x]) => x < 136 || x >= 184)).toBe(true); // he really went round the side
+  expect(trail.some(([x, y]) => x >= 138 && x < 182 && y >= 88 && y < 100)).toBe(false);
+  expect(trail.some(([x]) => x < 138 || x >= 182)).toBe(true); // he really went round the side
   const end = await player(page);
-  expect([end.x, end.y]).toEqual([200, 60]);
+  expect([end.x, end.y]).toEqual([190, 86]);
 });
 
 test('he walks up to a thing before using it: the engine hears nothing until he arrives', async ({ page }) => {
@@ -372,7 +372,7 @@ test('arriving in a new location places him at the matching exit', async ({ page
 test('F1 also shows the walk grid and the route', async ({ page }) => {
   await walkSpeed(page, 0.5);
   await page.keyboard.press('F1');
-  await clickAt(page, 250, 50);
+  await clickAt(page, 250, 110);
   await expect.poll(async () => (await player(page)).x, { timeout: 15_000 }).toBeGreaterThan(190);
   await page.screenshot({ path: 'tests/e2e/screenshots/room-walking.png' });
 });
@@ -382,14 +382,14 @@ test('F1 also shows the walk grid and the route', async ({ page }) => {
 const sentenceLine = (page: Page) => page.evaluate(() => window.__adv.sentence);
 
 test('pointing at an exit says where it leads', async ({ page }) => {
-  await moveMouseTo(page, 160, 10);
+  await moveMouseTo(page, 110, 50); // the mountains on the horizon
   await expect.poll(() => sentenceLine(page)).toBe('Go to Mountain');
   await moveMouseTo(page, 60, 120); // empty ground again
   await expect.poll(() => sentenceLine(page)).toBe('');
 });
 
 test('clicking an exit walks there and then through it; the way back works too', async ({ page }) => {
-  await clickAt(page, 160, 10);
+  await clickAt(page, 110, 50); // the mountains on the horizon
   await expect.poll(() => page.evaluate(() => window.__adv.backgroundKey), { timeout: 15_000 }).toBe('asset:backgrounds/mountain.png');
   await expect.poll(() => page.evaluate(() => window.__adv.transitioning)).toBe(false);
   let p = await player(page);
@@ -400,7 +400,7 @@ test('clicking an exit walks there and then through it; the way back works too',
   await expect.poll(() => page.evaluate(() => window.__adv.backgroundKey), { timeout: 15_000 }).toBe('asset:backgrounds/plain.png');
   await expect.poll(() => page.evaluate(() => window.__adv.transitioning)).toBe(false);
   p = await player(page);
-  expect([p.x, p.y, p.facing]).toEqual([160, 40, 's']);
+  expect([p.x, p.y, p.facing]).toEqual([188, 90, 's']);
 });
 
 test('the screen fades to black and back when the scene changes', async ({ page }) => {
@@ -551,7 +551,7 @@ test('leaving a scene swaps its sprites for the new scene\'s', async ({ page }) 
 
 test('double-clicking an exit goes through at once instead of walking there', async ({ page }) => {
   await walkSpeed(page, 0.05); // so slow that walking to the exit would take minutes
-  const [x, y] = [160, 10];
+  const [x, y] = [110, 50]; // the mountains on the horizon
   const box = (await page.locator('canvas').boundingBox())!;
   const zoom: number = await page.evaluate(() => window.__adv.zoom);
   await page.mouse.dblclick(box.x + (x + 0.5) * zoom, box.y + (y + 0.5) * zoom);
@@ -561,7 +561,7 @@ test('double-clicking an exit goes through at once instead of walking there', as
 
 test('a single click on a far exit still walks', async ({ page }) => {
   await walkSpeed(page, 0.05);
-  await clickAt(page, 160, 10);
+  await clickAt(page, 110, 50); // the mountains on the horizon
   await page.waitForTimeout(500);
   expect(await page.evaluate(() => window.__adv.backgroundKey)).toBe('asset:backgrounds/plain.png');
   expect((await player(page)).walking).toBe(true);
