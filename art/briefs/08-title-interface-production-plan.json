@@ -1,0 +1,82 @@
+[
+  {
+    "id": "title_background",
+    "rawPath": "art/raw/title_background.png",
+    "outputPath": "games/grelok/assets/backgrounds/title.png",
+    "rawSize": [
+      1536,
+      1024
+    ],
+    "size": [
+      640,
+      400
+    ],
+    "transparentBackground": false,
+    "colors": 32,
+    "prompt": "Generate a new title-screen panorama for Reign of Grelok, opaque 1536×1024 landscape PNG, final 640×400 picture pixels (320×200 logical). The importer centre-crops to 8:5, retaining raw rows approximately y32–991. Keep important scenery in that band and away from its edges. Opaque and about 32 console colours.\n\nImage 1 (Plain) controls the world’s open crossroads, distant skyline and strong grass banks. Image 2 (Mountain) controls recognizable jagged purple-grey peaks and large cool shadow planes. Image 3 (Swamp) supplies distant tangled trees and olive water at left. Image 4 (Chapel) supplies a small pale chapel silhouette, raised bell and stone cross at right. Use those places for a bespoke cohesive wide view.\n\nOriginal Reign of Grelok 16-bit Sega Mega Drive fantasy arcade art: crisp square pixel steps, decisive silhouettes, large flat colour blocks, 2–3 tones per material, upper-left light. Keep details bold enough to read in a 320×200 logical canvas. No modern gradients, painterly texture, blur, anti-aliasing or watermark.\n\nWide introductory view of the same fantasy realm from a low rise: a small weathered standing stone at the far left among dim green grass, old mauve mountains across the horizon, dark swamp earth and green water peeking through twisted trees at the left, and a pale stone chapel on a far-right low hill. A low flat twilight sky with discrete cool plum and navy areas and a sparse muted amber horizon. Keep the centre subdued and quiet for live UI: y≈20–70 logical for the independently layered logo, including its dark upper-centre sky, and y≈80–160 logical for live title menu and load-slot labels. Keep the bright horizon streak and tall contrast edges to the sides. A quiet centre should feel like open screen space in the landscape, without a visible panel or spotlight. No text, title, buttons, labels, hero, villain or figure.",
+    "references": [
+      "C:/Users/lukas/Documents/projects/reign-of-grelok-poc/art/raw/bg_plain.png",
+      "C:/Users/lukas/Documents/projects/reign-of-grelok-poc/art/raw/bg_mountain.png",
+      "C:/Users/lukas/Documents/projects/reign-of-grelok-poc/art/raw/bg_swamp.png",
+      "C:/Users/lukas/Documents/projects/reign-of-grelok-poc/art/raw/bg_chapel.png"
+    ]
+  },
+  {
+    "id": "title_logo",
+    "rawPath": "art/raw/title_logo.png",
+    "outputPath": "games/grelok/assets/ui/title_logo.png",
+    "rawSize": [
+      1536,
+      1024
+    ],
+    "size": [
+      512,
+      96
+    ],
+    "transparentBackground": true,
+    "colors": 16,
+    "prompt": "Generate a transparent title-logo PNG with the exact text “REIGN OF GRELOK” in ONE line, all capitals. Nominal landscape 1536×1024 canvas, one very wide wordmark with a combined silhouette approximately 5.33:1 to fit a 512×96 picture-pixel box (256×48 logical). Leave clean transparent margin around the whole logo. All spaces around and inside the letter counters must be genuinely transparent. About 16 colours.\n\nImage 1 (rusty sword inventory icon) shows the simple angular steel bevel treatment. Image 2 (chapel) shows the warm ivory, charcoal and plum contrast relationships. These are material/rendering references; copy no subject into logo.\n\nOriginal Reign of Grelok 16-bit Sega Mega Drive fantasy arcade art: crisp square pixel steps, decisive silhouettes, large flat colour blocks, 2–3 tones per material, upper-left light. Keep details bold enough to read in a 320×200 logical canvas. No modern gradients, painterly texture, blur, anti-aliasing or watermark.\n\nLettering should feel like original chunky forged fantasy lettering: readable distinct glyphs, softened ivory-silver faces with crisp stepped cool steel shadows, restrained tiny brass edge accents, and slim dark plum outline. Strong shapes, consistently spaced, legible even across a small menu screen. Three words on a common baseline exactly as supplied. No line break, taglines, scenery, shields, sword overlays, oversized ornaments, extra symbols, box or shadow behind the words.",
+    "references": [
+      "C:/Users/lukas/Documents/projects/reign-of-grelok-poc/art/raw/icon_rusty_sword.png",
+      "C:/Users/lukas/Documents/projects/reign-of-grelok-poc/art/raw/bg_chapel.png"
+    ]
+  },
+  {
+    "id": "cursor",
+    "rawPath": "art/raw/cursor.png",
+    "outputPath": "games/grelok/assets/ui/cursor.png",
+    "rawSize": [
+      1024,
+      1024
+    ],
+    "size": [
+      32,
+      32
+    ],
+    "transparentBackground": true,
+    "colors": 16,
+    "prompt": "Generate a single normal arrow cursor on true transparent square 1024×1024 canvas, to fit a 32×32 picture-pixel game texture (16×16 logical). Image 1 (pebble icon) is a reference for simple hard-plum pixel edges only. Use a six-colour-or-fewer compact palette.\n\nOriginal Reign of Grelok 16-bit Sega Mega Drive fantasy arcade art: crisp square pixel steps, decisive silhouettes, large flat colour blocks, 2–3 tones per material, upper-left light. Keep details bold enough to read in a 320×200 logical canvas. No modern gradients, painterly texture, blur, anti-aliasing or watermark.\n\nA plain recognisable mouse pointer arrow angled toward upper left, narrow triangular head and a short tapered lower-right tail. The tip is the extreme upper-left point of the silhouette and stays easy to assign as the pointer hotspot on the fitted texture. Off-white bone fill, hard dark plum 1-picture-pixel silhouette outline at output size, light cool grey lower-right shade and a tiny amber inset accent near the shaft. No detached dots, cast shadow, outer glow, ring, sword, hand, ornamental border or text. Avoid any half-transparent edge. Leave room to capture the complete tip, outer edges and tail.",
+    "references": [
+      "C:/Users/lukas/Documents/projects/reign-of-grelok-poc/art/raw/icon_pebble.png"
+    ]
+  },
+  {
+    "id": "ui_frame",
+    "rawPath": "art/raw/ui_frame.png",
+    "outputPath": "games/grelok/assets/ui/interface_frame.png",
+    "rawSize": [
+      1536,
+      1024
+    ],
+    "size": [
+      640,
+      112
+    ],
+    "transparentBackground": true,
+    "colors": 16,
+    "prompt": "Generate a transparent in-game interface frame, a single very wide rectangle on a 1536×1024 PNG canvas. Its frame silhouette is 5.714:1, roughly 1400×245 at source scale, to fit 640×112 picture pixels (320×56 logical). Its interior and exterior are transparent. Image 1 (rusty sword icon) is a small reference for cool-grey bevel and restrained plum edging only. Limit to 16 colours.\n\nOriginal Reign of Grelok 16-bit Sega Mega Drive fantasy arcade art: crisp square pixel steps, decisive silhouettes, large flat colour blocks, 2–3 tones per material, upper-left light. Keep details bold enough to read in a 320×200 logical canvas. No modern gradients, painterly texture, blur, anti-aliasing or watermark.\n\nThe frame is a thin restrained dark-plum rim with cool charcoal iron bevels and small muted brass rivets at the corners. Edge weight roughly 1–3 picture pixels at output, corners visually compact, straight clean square-pixel lines. Open transparent interior: no backing panel, lettering, buttons, icons, slot grid, ornamental bars, or diagonals. Only one short vertical separator for verbs and inventory, at logical x=109..111 (roughly 34.4% width; picture x=218..223), from relative logical y=14 to y=45 inclusive (picture y=28..91). Do not extend the divider into the sentence or footer area. In the generated silhouette, size that divider proportionally and keep it disconnected from the outer rim if necessary.\n\nRoom UI is drawn over this art: sentence at relY4, verbs at x4 relY14 with 52×9 cells, inventory x112 relY14 with seven columns of 26×16 and two rows, menu at x306 relY3, inventory scroll at x296 and x308 relY14 for 32 px, footer relY48. Keep art clear of all live controls and labels. Transparent interior is mandatory, including the full area behind every runtime verb and slot.",
+    "references": [
+      "C:/Users/lukas/Documents/projects/reign-of-grelok-poc/art/raw/icon_rusty_sword.png"
+    ]
+  }
+]
