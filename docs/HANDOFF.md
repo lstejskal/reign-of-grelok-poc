@@ -67,7 +67,12 @@ tests don't treat them as ready); the side walk `grognak_walk_e.png` still needs
    don't slide (bigger = slower legs). Check talk (`talk to blacksmith`... his own lines) and reach (pick up pebble).
 7. Update `PLAN.md` step 17 progress, `docs/learn/19` if something changed; commit raws + sheet + sizes + game.yml.
 
-### Task 3 - Use the title and interface art (brief "08"; code; Claude or Codex)
+### Task 3 - DONE (Claude): `game.yml` has `titleScreen: {background, logo}` and `ui: {frame, cursor: {image,
+hotspot}}` (types in `sceneTypes.ts`, checks in `validateGame.ts`, loaded in `BootScene.ts`, used by `TitleScene.ts`
+and `RoomScene.ts`; the cursor via Phaser's `input.setDefaultCursor`). All optional: the demo looks as before. The four
+pictures are Codex's hand-fitted files and have no `art/assets.yml` entries (regenerate them by hand, see the 08 log).
+
+Original description, kept for reference:
 Codex's instructions: `art/briefs/08-ui-handoff.md` (positions, scales, cursor hotspot). Summary:
 - `TitleScene.ts`: draw `backgrounds/title.png` at (0,0) scale `artScale` instead of the start scene's background,
   a 50% black dimmer above it, `ui/title_logo.png` at logical (32,4) scale `artScale` instead of the bitmap title

@@ -204,6 +204,8 @@ export const DEFAULT_VERBS: readonly VerbSpec[] = [
 /** games/<id>/game.yml */
 export interface GameConfig {
     title: string;
+    /** The line under the title on the title screen (default "A point-and-click adventure"). */
+    subtitle?: string;
     /** The verb buttons, in column-major order (up to MAX_VERBS). Default: DEFAULT_VERBS. */
     verbs?: VerbSpec[];
     /** Location alias where the player starts. */
@@ -211,7 +213,31 @@ export interface GameConfig {
     /** Where the player stands at the start, in scene pixels (default: the middle of the floor). */
     startPosition?: Point;
     player: PlayerConfig;
+    /** Optional art for the title screen (without it: the start scene's background and the title in the pixel font). */
+    titleScreen?: TitleScreenConfig;
+    /** Optional art for the interface (without it: a plain dark strip and the system cursor). */
+    ui?: UiConfig;
 }
+
+export interface TitleScreenConfig {
+    /** A full-screen picture, TITLE_WIDTH x TITLE_HEIGHT picture pixels (the whole 320x200 screen at ART_SCALE). */
+    background?: string;
+    /** The game's name as a picture (transparent around it), drawn centred at the top instead of the text title. */
+    logo?: string;
+}
+
+export interface UiConfig {
+    /** A frame over the interface strip, (320 x 56) * ART_SCALE picture pixels, transparent where the controls are. */
+    frame?: string;
+    /** The mouse pointer: a small picture shown at its own size, and the pixel in it that points (its "hotspot"). */
+    cursor?: { image: string; hotspot: Point };
+}
+
+/** Sizes the title background and the interface frame must have (picture pixels). */
+export const TITLE_WIDTH = 320 * ART_SCALE;
+export const TITLE_HEIGHT = 200 * ART_SCALE;
+export const UI_FRAME_WIDTH = 320 * ART_SCALE;
+export const UI_FRAME_HEIGHT = (200 - SCENE_HEIGHT) * ART_SCALE;
 
 /** One person who can speak: Grognak, the blacksmith... (games/<id>/speakers.yml). */
 export interface SpeakerData {

@@ -249,6 +249,9 @@ export class RoomScene extends Phaser.Scene {
     // bottom strip: the UI area
     this.add.rectangle(0, SCENE_HEIGHT, GAME_WIDTH, GAME_HEIGHT - SCENE_HEIGHT, 0x14141c).setOrigin(0);
     this.add.rectangle(0, SCENE_HEIGHT, GAME_WIDTH, 1, 0x7a1f2b).setOrigin(0);
+    // the game's frame picture over the strip, if it has one: above the dark backing, below every control drawn next
+    const frame = this.session.bundle.config.ui?.frame;
+    if (frame !== undefined) this.add.image(0, SCENE_HEIGHT, textureKey(frame)).setOrigin(0).setScale(artScale);
     this.sentenceLine = this.add.bitmapText(0, SENTENCE_Y, PIXEL_FONT, '').setTint(COLOR.sentence);
     this.createInventoryPanel();
     // the answer band lies over the top of the scene, above everything except the debug outlines

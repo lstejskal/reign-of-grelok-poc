@@ -79,6 +79,22 @@ export class BootScene extends Phaser.Scene {
       this.load.image(textureKey(picture), url);
     }
 
+    // title screen and interface art, if the game has any (game.yml titleScreen / ui)
+    const { titleScreen, ui } = bundle.config;
+    for (const picture of [titleScreen?.background, titleScreen?.logo, ui?.frame]) {
+      if (picture === undefined) continue;
+      const url = assetUrl(bundle.id, picture);
+      if (url === undefined) throw new Error(`Missing picture: ${picture}`);
+      this.load.image(textureKey(picture), url);
+    }
+    // the mouse pointer is the browser's own cursor over the canvas: a picture plus the pixel that points
+    if (ui?.cursor) {
+      const url = assetUrl(bundle.id, ui.cursor.image);
+      if (url === undefined) throw new Error(`Missing picture: ${ui.cursor.image}`);
+      // (through Phaser's input manager: it owns the canvas cursor and would reset a style set directly)
+      this.game.input.setDefaultCursor(`url("${url}") ${ui.cursor.hotspot[0]} ${ui.cursor.hotspot[1]}, auto`);
+    }
+
     // inventory icons: one per thing the player can carry
     for (const thing of Object.values(bundle.logic.things)) {
       if (!thing.pickable) continue;

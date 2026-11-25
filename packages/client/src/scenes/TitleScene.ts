@@ -32,14 +32,22 @@ export class TitleScene extends Phaser.Scene {
   create(): void {
     useLogicalCamera(this);
     const { bundle } = this.session;
-    const backdrop = bundle.scenes[bundle.config.start]?.background;
+    const art = bundle.config.titleScreen;
+    // the game's own title picture if it has one, otherwise the start scene; dimmed so the menu reads on top
+    const backdrop = art?.background ?? bundle.scenes[bundle.config.start]?.background;
     if (backdrop !== undefined) this.add.image(0, 0, textureKey(backdrop)).setOrigin(0).setScale(artScale);
-    this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.6).setOrigin(0);
+    this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000, art?.background ? 0.5 : 0.6).setOrigin(0);
 
-    // the title is drawn at 3x: bitmap fonts scale like any picture, and nearest-neighbour keeps the pixels sharp
-    this.add.bitmapText(GAME_WIDTH / 2 + 1, 25, PIXEL_FONT, bundle.config.title).setOrigin(0.5, 0).setScale(3).setTint(0x000000);
-    this.add.bitmapText(GAME_WIDTH / 2, 24, PIXEL_FONT, bundle.config.title).setOrigin(0.5, 0).setScale(3).setTint(0xd8325a);
-    this.add.bitmapText(GAME_WIDTH / 2, 56, PIXEL_FONT, 'A POINT-AND-CLICK ADVENTURE').setOrigin(0.5, 0).setTint(0xc8c8d8);
+    if (art?.logo) {
+      // the title lettering as a picture, centred at the top
+      this.add.image(GAME_WIDTH / 2, 4, textureKey(art.logo)).setOrigin(0.5, 0).setScale(artScale);
+    } else {
+      // the title is drawn at 3x: bitmap fonts scale like any picture, and nearest-neighbour keeps the pixels sharp
+      this.add.bitmapText(GAME_WIDTH / 2 + 1, 25, PIXEL_FONT, bundle.config.title).setOrigin(0.5, 0).setScale(3).setTint(0x000000);
+      this.add.bitmapText(GAME_WIDTH / 2, 24, PIXEL_FONT, bundle.config.title).setOrigin(0.5, 0).setScale(3).setTint(0xd8325a);
+    }
+    const subtitle = bundle.config.subtitle ?? 'A POINT-AND-CLICK ADVENTURE';
+    this.add.bitmapText(GAME_WIDTH / 2, 56, PIXEL_FONT, subtitle.toUpperCase()).setOrigin(0.5, 0).setTint(0xc8c8d8);
 
     this.add.bitmapText(GAME_WIDTH / 2, GAME_HEIGHT - 10, PIXEL_FONT, 'CLICK TO CHOOSE').setOrigin(0.5, 0).setTint(0x707080);
 

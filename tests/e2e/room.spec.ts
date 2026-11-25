@@ -778,6 +778,19 @@ async function saveInSlot(page: Page, slot: string): Promise<void> {
   await expect.poll(() => page.evaluate(() => window.__adv.answer)).toBe('Game saved.');
 }
 
+test('the game\'s title and interface art is used: title picture and logo, interface frame, cursor (game.yml)', async ({ page }) => {
+  await gotoTitle(page);
+  const shown = (scene: string) => page.evaluate((key) => (window.__adv.game.scene.getScene(key) as any).children.list
+    .filter((c: any) => c.type === 'Image').map((c: any) => c.texture.key), scene);
+  expect(await shown('TitleScene')).toEqual(['asset:backgrounds/title.png', 'asset:ui/title_logo.png']);
+  expect(await page.evaluate(() => (window.__adv.game.canvas as HTMLCanvasElement).style.cursor)).toMatch(/^url\(.*cursor.*\) 5 3, auto$/);
+  await page.screenshot({ path: 'tests/e2e/screenshots/title.png' });
+
+  await page.goto('/?title=off');
+  await expect.poll(() => sceneName(page)).toBe('RoomScene');
+  expect(await shown('RoomScene')).toContain('asset:ui/interface_frame.png');
+});
+
 test('the title screen offers New game, and Continue / Load only when there is something to load', async ({ page }) => {
   await page.goto('/');
   await page.evaluate(() => localStorage.clear());

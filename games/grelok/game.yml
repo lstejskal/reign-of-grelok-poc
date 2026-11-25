@@ -1,5 +1,6 @@
 # Game-level settings. Everything else lives in logic/ (rules, text) and scenes/ (what things look like where).
 title: Reign of Grelok
+subtitle: From the adventures of Grognak the Barbarian   # the line under the title on the title screen
 start: plain
 startPosition: [160, 112]   # where Grognak stands when the game begins
 
@@ -11,3 +12,14 @@ player:
   frameHeight: 96
   # smaller copies for perspective (grognak_94.png ..), drawn 1:1 instead of scaling him; npm run import-art prints this
   sizes: [94, 92, 90, 88, 86, 84, 82, 80, 78, 76, 74, 72, 70, 68, 66, 64, 62, 60, 58]
+
+# Title screen and interface art (brief 08). All optional: without them the title uses the start scene's picture and
+# the pixel font, the interface strip is plain, and the system cursor shows.
+titleScreen:
+  background: backgrounds/title.png   # the whole screen, 640x400
+  logo: ui/title_logo.png             # drawn centred at the top instead of the text title
+ui:
+  frame: ui/interface_frame.png       # over the interface strip, 640x112, see-through where the controls are
+  cursor:
+    image: ui/cursor.png              # shown at its own size (32x32)
+    hotspot: [5, 3]                   # the pixel that points

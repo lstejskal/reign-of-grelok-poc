@@ -1,4 +1,4 @@
-import { ART_SCALE, ICON_HEIGHT, ICON_WIDTH, MAX_VERBS, MAX_VERB_LABEL, PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS, REQUIRED_PLAYER_ANIMATIONS, playerSizeSheet, SCENE_HEIGHT, SCENE_WIDTH, iconPath, musicPath, sfxPath } from './sceneTypes';
+import { ART_SCALE, TITLE_HEIGHT, TITLE_WIDTH, UI_FRAME_HEIGHT, UI_FRAME_WIDTH, ICON_HEIGHT, ICON_WIDTH, MAX_VERBS, MAX_VERB_LABEL, PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS, REQUIRED_PLAYER_ANIMATIONS, playerSizeSheet, SCENE_HEIGHT, SCENE_WIDTH, iconPath, musicPath, sfxPath } from './sceneTypes';
 import type { GameBundle, VerbSpec } from './sceneTypes';
 import { parseStep } from './cutscene';
 
@@ -78,6 +78,28 @@ export function validateGame(
         }
     }
     if (config?.startPosition !== undefined) checkPoint(config.startPosition, 'startPosition', 'game.yml', problem);
+
+    // optional title and interface art: the files exist, and full-screen / full-strip pictures have exactly that size
+    const picture = (label: string, path: string | undefined, size?: [number, number]) => {
+        if (path === undefined) return;
+        if (!assetExists(path)) return problem('game.yml', `${label} not found: assets/${path}`);
+        const actual = size && imageSize?.(path);
+        if (size && actual && (actual.width !== size[0] || actual.height !== size[1])) {
+            problem('game.yml', `${label} must be ${size[0]}x${size[1]} pixels, but assets/${path} is ${actual.width}x${actual.height}`);
+        }
+    };
+    picture('titleScreen background', config?.titleScreen?.background, [TITLE_WIDTH, TITLE_HEIGHT]);
+    picture('titleScreen logo', config?.titleScreen?.logo);
+    picture('ui frame', config?.ui?.frame, [UI_FRAME_WIDTH, UI_FRAME_HEIGHT]);
+    const cursor = config?.ui?.cursor;
+    if (cursor !== undefined) {
+        picture('ui cursor', cursor.image);
+        const [hx, hy] = Array.isArray(cursor.hotspot) ? cursor.hotspot : [NaN, NaN];
+        const size = assetExists(cursor.image) ? imageSize?.(cursor.image) : undefined;
+        if (!Number.isInteger(hx) || !Number.isInteger(hy) || hx < 0 || hy < 0 || (size && (hx >= size.width || hy >= size.height))) {
+            problem('game.yml', `ui cursor hotspot must be [x, y] inside the cursor picture, got ${JSON.stringify(cursor.hotspot)}`);
+        }
+    }
 
     // everything the player can carry is shown in the inventory, so it needs an icon
     for (const thing of Object.values(logic.things)) {

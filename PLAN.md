@@ -377,7 +377,8 @@ mirror left↔right, walk bob via tween, talk = 2-frame mouth swap, idle = slow 
 - **Status 2026-11-25 / next (details and step-by-step instructions in `docs/HANDOFF.md`):**
   1. Importer fix for sheet parts with different cell sizes (Codex found it; bottom-align cells before cropping).
   2. Import Grognak's brief 07 sheet once its six pictures exist; wire `game.yml`; tune `walkStride`; drop `grognak_v1`.
-  3. Use Codex's title and interface art ("08": title background and logo, interface frame, cursor).
+  3. DONE: Codex's title and interface art ("08") is used: title panorama and logo, interface frame, cursor
+     (`titleScreen:` / `ui:` in game.yml, optional).
   Then step 17 is done; steps 18 (music), 19 (polish) and 20 (builds) remain.
 
 ### Step 18 — Music & SFX pass (AI-generated)

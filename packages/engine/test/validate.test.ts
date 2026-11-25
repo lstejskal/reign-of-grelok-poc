@@ -156,6 +156,21 @@ describe('validateGame', () => {
         chapel.hotspots.push({ ...zombie, when: { no_such_flag: true } });
         expect(validateGame(bundle, everythingExists).join('\n')).toContain('hotspot "zombie": "when" uses unknown constraint "no_such_flag"');
     });
+    it('checks the title and interface art: files exist, full-screen pictures have the right size, cursor hotspot inside', () => {
+        const bundle = fresh();
+        bundle.config.titleScreen = { background: 'backgrounds/title.png', logo: 'ui/missing.png' };
+        bundle.config.ui = { frame: 'ui/interface_frame.png', cursor: { image: 'ui/cursor.png', hotspot: [40, 3] } };
+        const sizes: Record<string, { width: number; height: number }> = {
+            'backgrounds/title.png': { width: 320, height: 200 },
+            'ui/interface_frame.png': { width: 640, height: 112 },
+            'ui/cursor.png': { width: 32, height: 32 },
+        };
+        const errors = validateGame(bundle, (a) => a !== 'ui/missing.png', (a) => sizes[a]).join('\n');
+        expect(errors).toContain('titleScreen background must be 640x400 pixels');
+        expect(errors).toContain('titleScreen logo not found: assets/ui/missing.png');
+        expect(errors).not.toContain('ui frame');
+        expect(errors).toContain('ui cursor hotspot must be [x, y] inside the cursor picture');
+    });
     it('checks the player size sheets: order, existence, same dimensions as the main sheet', () => {
         const bundle = fresh();
         const sheet = bundle.config.player.sprite;
