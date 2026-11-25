@@ -1,0 +1,23 @@
+{
+  "priest": {
+    "inventory": [
+      "rusty_sword",
+      "jug",
+      "chapel_key"
+    ],
+    "sprites": [],
+    "jugWidth": 48,
+    "keyWidth": 48
+  },
+  "forged": {
+    "inventory": [
+      "shining_sword",
+      "jug",
+      "chapel_key"
+    ],
+    "background": "asset:backgrounds/town.png",
+    "iconWidth": 48
+  },
+  "returnToPlain": true,
+  "pageErrors": []
+}

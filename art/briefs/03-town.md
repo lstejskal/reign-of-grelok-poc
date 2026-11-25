@@ -17,14 +17,16 @@ the blacksmith forges the gemstone shards into Grognak's sword, which becomes th
 
 | # | Asset id | What | Save the raw picture as | Ask for | Ends up in game as (picture pixels, 2 per screen pixel) | Status |
 |---|---|---|---|---|---|---|
-| 1 | `bg_town` | The town square background | `art/raw/bg_town.png` | 1536x1024 | 640x288 | **to do** |
-| 2 | `blacksmith` | The blacksmith, standing | `art/raw/blacksmith.png` | 1024x1536 | 80x140 | **to do** |
-| 3 | `priest` | The priest, sitting | `art/raw/priest.png` | 1024x1024 | 60x80 | **to do** |
-| 4 | `icon_jug` | Inventory icon: the priest's clay jug | `art/raw/icon_jug.png` | 1024x1024 | 48x32 | **to do** |
-| 5 | `icon_chapel_key` | Inventory icon: the chapel key | `art/raw/icon_chapel_key.png` | 1024x1024 | 48x32 | **to do** |
-| 6 | `icon_shining_sword` | Inventory icon: the reforged, glowing sword | `art/raw/icon_shining_sword.png` | 1024x1024 | 48x32 | **to do** |
+| 1 | `bg_town` | The town square background | `art/raw/bg_town.png` | 1536x1024 | 640x288 | Generated/imported; Terra reviewed; pending user review |
+| 2 | `blacksmith` | The blacksmith, standing | `art/raw/blacksmith.png` | 1024x1536 | 80x140 | Generated/imported; Terra reviewed; pending user review |
+| 3 | `priest` | The priest, sitting | `art/raw/priest.png` | 1024x1024 | 60x80 | Generated/imported; Terra reviewed; pending user review |
+| 4 | `icon_jug` | Inventory icon: the priest's clay jug | `art/raw/icon_jug.png` | 1024x1024 | 48x32 | Generated/imported; Terra reviewed; pending user review |
+| 5 | `icon_chapel_key` | Inventory icon: the chapel key | `art/raw/icon_chapel_key.png` | 1024x1024 | 48x32 | Generated/imported; Terra reviewed; pending user review |
+| 6 | `icon_shining_sword` | Inventory icon: the reforged, glowing sword | `art/raw/icon_shining_sword.png` | 1024x1024 | 48x32 | Generated/imported; Terra reviewed; pending user review |
 
 Order: 1 first (it sets the place), then 2-3 with 1 and screen 1-2 characters as style references, then 4-6.
+
+Completed files, prompts, visual review, previews, verification, asset coverage and Claude placement notes are in [the generation record](03-town-generation-log.md).
 
 The game shrinks every picture a lot (the blacksmith becomes 80x140 pixels, an icon 48x32). So: **big, simple, bold
 shapes**, strong silhouettes, few details.

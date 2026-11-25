@@ -346,6 +346,9 @@ mirror left↔right, walk bob via tween, talk = 2-frame mouth swap, idle = slow 
 - **Screen 2 (mountain):** brief 02 art in place: Grelok on his ledge, the rubble with the gemstone on it (scene
   sprites may set `depth:` to be drawn in front of what they lie on), floor traced as `walkArea:` (not up onto the
   ledge, not through the rubble).
+- **Screen 3 (town):** brief 03 art in place: the blacksmith in front of his smithy, the priest against the tree; the
+  floor is the square plus the street up to the town gate, which is the north exit. All six screens now have their
+  final art; only Grognak's new animation sheet (brief 07) is still to come.
 - **Screen 4 (swamp):** brief 04 art in place: the tower is part of the background, the wizard a sprite in its window
   (at x 108.5: half scene pixels are fine, art has 2 pixels per scene pixel), the shards drop onto the shore in front;
   floor = the shore plus the path to the east exit.

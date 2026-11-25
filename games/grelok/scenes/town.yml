@@ -1,22 +1,45 @@
-# Scene for location "town". Coordinates: x 0-319, y 0-143. Music is added in Step 15.
+# Scene for location "town" (Homeburg's square). Coordinates: x 0-319, y 0-143.
+# Layout follows the approved preview in art/briefs/03-town-generation-log.md: the blacksmith in front of his smithy
+# on the left, the priest sitting against the tree on the right, the street to the town gate (north) in the middle.
 
 background: backgrounds/town.png
-walkmask: walkmasks/town.png   # white = walkable
+walkmask: walkmasks/town.png   # white = walkable; painted from walkArea below (npm run walkmask -- grelok town)
 music: music/town.mp3   # loops while the player is here; changing scene crossfades to the next tune
 scale: {top: 0.6, bottom: 1.0}   # Grognak is drawn at 60% on the farthest floor row, 100% on the nearest
 
+# The floor, traced from the background: the open square in front, and the street that recedes up the middle to the
+# town gate. Not the houses, not through the blacksmith or the sitting priest.
+walkArea:
+  floor:
+    - [[0, 120], [150, 118], [166, 106], [176, 92], [186, 92], [198, 106], [212, 116], [320, 118], [320, 144], [0, 144]]
+  blocked:
+    - [[66, 120], [92, 120], [92, 126], [66, 126]]     # where the blacksmith stands
+    - [[274, 118], [302, 118], [302, 126], [274, 126]] # where the priest sits
+
 hotspots:   # later entries are on top
   - id: blacksmith
-    polygon: [[60, 40], [100, 40], [100, 110], [60, 110]]
-    walkTo: [105, 114]
+    polygon: [[60, 67], [98, 67], [98, 125], [60, 125]]
+    walkTo: [108, 128]
     facing: w
   - id: priest
-    polygon: [[220, 70], [250, 70], [250, 110], [220, 110]]
-    walkTo: [215, 116]
+    polygon: [[272, 95], [302, 95], [302, 125], [272, 125]]
+    walkTo: [262, 128]
     facing: e
 
+sprites:
+  - id: blacksmith
+    thing: blacksmith
+    x: 79
+    y: 125
+    image: sprites/blacksmith.png
+  - id: priest
+    thing: priest
+    x: 287
+    y: 125
+    image: sprites/priest.png
+
 exits:
-  - direction: n
-    polygon: [[120, 0], [200, 0], [200, 28], [120, 28]]
-    walkTo: [160, 34]
-    spawn: [160, 40]
+  - direction: n   # up the street, through the town gate, back to the plain
+    polygon: [[168, 82], [196, 82], [196, 100], [168, 100]]
+    walkTo: [181, 95]
+    spawn: [181, 102]

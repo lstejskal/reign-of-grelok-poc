@@ -1,0 +1,246 @@
+[
+  {
+    "id": "grognak",
+    "sources": [
+      "art/raw/grognak_walk_e.png",
+      "art/raw/grognak_walk_s.png",
+      "art/raw/grognak_walk_n.png",
+      "art/raw/grognak_idle.png",
+      "art/raw/grognak_talk.png",
+      "art/raw/grognak_reach.png"
+    ],
+    "missingSources": [
+      "art/raw/grognak_walk_e.png",
+      "art/raw/grognak_walk_s.png",
+      "art/raw/grognak_walk_n.png",
+      "art/raw/grognak_idle.png",
+      "art/raw/grognak_talk.png",
+      "art/raw/grognak_reach.png"
+    ],
+    "runtimeExists": true
+  },
+  {
+    "id": "grognak_v1",
+    "sources": [
+      "art/raw/grognak.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "standing_stone",
+    "sources": [
+      "art/raw/standing_stone.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "zombie_standing",
+    "sources": [
+      "art/raw/zombie_standing.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "zombie_down",
+    "sources": [
+      "art/raw/zombie_down.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "open_grave",
+    "sources": [
+      "art/raw/open_grave.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "basin",
+    "sources": [
+      "art/raw/basin.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "chapel_door_open",
+    "sources": [
+      "art/raw/chapel_door_open.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "pebble",
+    "sources": [
+      "art/raw/pebble.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "rubble",
+    "sources": [
+      "art/raw/rubble.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "gemstone",
+    "sources": [
+      "art/raw/gemstone.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "gemstone_shards",
+    "sources": [
+      "art/raw/gemstone_shards.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "grelok",
+    "sources": [
+      "art/raw/grelok.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "blacksmith",
+    "sources": [
+      "art/raw/blacksmith.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "priest",
+    "sources": [
+      "art/raw/priest.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "wizard",
+    "sources": [
+      "art/raw/wizard.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "icon_chapel_key",
+    "sources": [
+      "art/raw/icon_chapel_key.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "icon_gemstone",
+    "sources": [
+      "art/raw/icon_gemstone.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "icon_gemstone_shards",
+    "sources": [
+      "art/raw/icon_gemstone_shards.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "icon_jug",
+    "sources": [
+      "art/raw/icon_jug.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "icon_pebble",
+    "sources": [
+      "art/raw/icon_pebble.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "icon_rusty_sword",
+    "sources": [
+      "art/raw/icon_rusty_sword.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "icon_shining_sword",
+    "sources": [
+      "art/raw/icon_shining_sword.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "bg_plain",
+    "sources": [
+      "art/raw/bg_plain.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "bg_mountain",
+    "sources": [
+      "art/raw/bg_mountain.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "bg_town",
+    "sources": [
+      "art/raw/bg_town.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "bg_swamp",
+    "sources": [
+      "art/raw/bg_swamp.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "bg_chapel",
+    "sources": [
+      "art/raw/bg_chapel.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  },
+  {
+    "id": "bg_chapel_interior",
+    "sources": [
+      "art/raw/bg_chapel_interior.png"
+    ],
+    "missingSources": [],
+    "runtimeExists": true
+  }
+]

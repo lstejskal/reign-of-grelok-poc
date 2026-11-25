@@ -1,0 +1,122 @@
+[
+  {
+    "id": "bg_town",
+    "rawPath": "art/raw/bg_town.png",
+    "rawSize": [
+      1536,
+      1024
+    ],
+    "runtimePath": "games/grelok/assets/backgrounds/town.png",
+    "pictureSize": [
+      640,
+      288
+    ],
+    "logicalSize": [
+      320,
+      144
+    ],
+    "opaqueColours": 32,
+    "partialAlpha": 0,
+    "offgridPixels": 0
+  },
+  {
+    "id": "blacksmith",
+    "rawPath": "art/raw/blacksmith.png",
+    "rawSize": [
+      1024,
+      1536
+    ],
+    "runtimePath": "games/grelok/assets/sprites/blacksmith.png",
+    "pictureSize": [
+      80,
+      140
+    ],
+    "logicalSize": [
+      40,
+      70
+    ],
+    "opaqueColours": 15,
+    "partialAlpha": 0,
+    "offgridPixels": 0
+  },
+  {
+    "id": "priest",
+    "rawPath": "art/raw/priest.png",
+    "rawSize": [
+      1254,
+      1254
+    ],
+    "runtimePath": "games/grelok/assets/sprites/priest.png",
+    "pictureSize": [
+      60,
+      80
+    ],
+    "logicalSize": [
+      30,
+      40
+    ],
+    "opaqueColours": 15,
+    "partialAlpha": 0,
+    "offgridPixels": 0
+  },
+  {
+    "id": "icon_jug",
+    "rawPath": "art/raw/icon_jug.png",
+    "rawSize": [
+      1254,
+      1254
+    ],
+    "runtimePath": "games/grelok/assets/icons/jug.png",
+    "pictureSize": [
+      48,
+      32
+    ],
+    "logicalSize": [
+      24,
+      16
+    ],
+    "opaqueColours": 7,
+    "partialAlpha": 0,
+    "offgridPixels": 0
+  },
+  {
+    "id": "icon_chapel_key",
+    "rawPath": "art/raw/icon_chapel_key.png",
+    "rawSize": [
+      1254,
+      1254
+    ],
+    "runtimePath": "games/grelok/assets/icons/chapel_key.png",
+    "pictureSize": [
+      48,
+      32
+    ],
+    "logicalSize": [
+      24,
+      16
+    ],
+    "opaqueColours": 8,
+    "partialAlpha": 0,
+    "offgridPixels": 0
+  },
+  {
+    "id": "icon_shining_sword",
+    "rawPath": "art/raw/icon_shining_sword.png",
+    "rawSize": [
+      1254,
+      1254
+    ],
+    "runtimePath": "games/grelok/assets/icons/shining_sword.png",
+    "pictureSize": [
+      48,
+      32
+    ],
+    "logicalSize": [
+      24,
+      16
+    ],
+    "opaqueColours": 12,
+    "partialAlpha": 0,
+    "offgridPixels": 0
+  }
+]
