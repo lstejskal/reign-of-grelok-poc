@@ -37,6 +37,8 @@ const DOUBLE_CLICK_MS = 400;
 
 /** Each half (out, in) of the fade between scenes, in milliseconds. */
 const FADE_MS = 200;
+/** Verbs Grognak does with his hands: he reaches out before the engine hears them. */
+const REACH_VERBS: ReadonlySet<string> = new Set(['pick_up', 'use', 'give', 'push']);
 
 const COLOR = {
   sentence: 0xf0e0a0,
@@ -336,6 +338,7 @@ export class RoomScene extends Phaser.Scene {
 
   /** Runs every frame. `delta` is the milliseconds since the last frame; movement is always speed x time. */
   update(_time: number, delta: number): void {
+    this.player.talking = this.speechNow?.speaker === this.session.bundle.speakers.default; // the player's own words
     this.player.update(delta);
     this.speech.update((delta / 1000) * (debugState.speedFactor ?? 1), this.pager.current !== '');
     this.drawSpeech();
@@ -506,8 +509,15 @@ export class RoomScene extends Phaser.Scene {
     }
   }
 
-  /** Hand a command to the engine; a successful "Talk to" a speaker opens the talk menu. */
+  /**
+   * Hand a command to the engine; a successful "Talk to" a speaker opens the talk menu. Verbs done with the hands
+   * first play the reach animation and reach the engine when the hand is out.
+   */
   private perform(command: Command): void {
+    if (REACH_VERBS.has(command.verb)) {
+      this.player.reach(() => this.session.perform(command));
+      return;
+    }
     this.session.perform(command);
     const npc = command.verb === 'talk_to' ? command.objects[0] : undefined;
     if (npc !== undefined) this.startDialog(npc);

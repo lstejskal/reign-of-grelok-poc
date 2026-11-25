@@ -495,6 +495,28 @@ export function processFrames(raws: Raster[], o: FrameOptions): Raster[] | undef
     });
 }
 
+/**
+ * A sheet assembled from several generated pictures ("parts", one per animation). Every cell of every part goes
+ * through ONE processFrames call, so all frames share the same scale, palette and outline - Grognak must not change
+ * size or colour between his walk and his talk. `slots` (see sheetLayout) says which cell lands on which frame of a
+ * `columns` x `rows` sheet; frames no slot fills stay transparent.
+ */
+export function processPartsSheet(
+    parts: { raw: Raster; grid: [number, number] }[],
+    slots: { part: number; cell: number; frame: number }[],
+    columns: number,
+    rows: number,
+    o: FrameOptions,
+): Raster | undefined {
+    const cells = parts.map((p) => sliceGrid(p.raw, p.grid[0], p.grid[1]));
+    const picked = slots.map((s) => cells[s.part]![s.cell]!);
+    const frames = processFrames(picked, o);
+    if (!frames) return undefined;
+    const sheet: Raster[] = Array.from({ length: columns * rows }, () => blank(o.frameW, o.frameH));
+    slots.forEach((s, i) => (sheet[s.frame] = frames[i]!));
+    return composeGrid(sheet, columns);
+}
+
 export interface BackgroundOptions {
     /** Snap to this fixed palette. Leave out to choose the best `colors` colours for the picture itself (the default). */
     palette?: readonly Rgb[];

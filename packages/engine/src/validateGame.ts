@@ -1,4 +1,4 @@
-import { ART_SCALE, ICON_HEIGHT, ICON_WIDTH, MAX_VERBS, MAX_VERB_LABEL, PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS, SCENE_HEIGHT, SCENE_WIDTH, iconPath, musicPath, sfxPath } from './sceneTypes';
+import { ART_SCALE, ICON_HEIGHT, ICON_WIDTH, MAX_VERBS, MAX_VERB_LABEL, PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS, REQUIRED_PLAYER_ANIMATIONS, SCENE_HEIGHT, SCENE_WIDTH, iconPath, musicPath, sfxPath } from './sceneTypes';
 import type { GameBundle, VerbSpec } from './sceneTypes';
 import { parseStep } from './cutscene';
 
@@ -31,12 +31,33 @@ export function validateGame(
             problem('game.yml', 'player frameWidth and frameHeight must be positive whole numbers');
         } else if (!assetExists(sprite)) {
             problem('game.yml', `player sprite not found: assets/${sprite}`);
-        } else {
+        } else if (player.animations === undefined) {
             const size = imageSize?.(sprite);
             const [w, h] = [frameWidth * PLAYER_SHEET_COLUMNS, frameHeight * PLAYER_FACING_ROWS.length];
             if (size !== undefined && (size.width !== w || size.height !== h)) {
                 problem('game.yml', `player sprite sheet must be ${w}x${h} pixels (${PLAYER_SHEET_COLUMNS} columns x ${PLAYER_FACING_ROWS.length} rows of ${frameWidth}x${frameHeight}), but assets/${sprite} is ${size.width}x${size.height}`);
             }
+        } else {
+            // a sheet with named animations: `columns` frames per row, as many rows as it needs
+            const columns = player.columns ?? PLAYER_SHEET_COLUMNS;
+            const size = imageSize?.(sprite);
+            let frames = Infinity;
+            if (size !== undefined) {
+                if (size.width !== frameWidth * columns || size.height % frameHeight !== 0) {
+                    problem('game.yml', `player sprite sheet must be ${frameWidth * columns} pixels wide (${columns} columns of ${frameWidth}) and a whole number of ${frameHeight}-pixel rows high, but assets/${sprite} is ${size.width}x${size.height}`);
+                }
+                frames = columns * Math.floor(size.height / frameHeight);
+            }
+            for (const name of REQUIRED_PLAYER_ANIMATIONS) {
+                if (!(name in player.animations)) problem('game.yml', `player animations: missing "${name}"`);
+            }
+            for (const [name, list] of Object.entries(player.animations)) {
+                if (!Array.isArray(list) || list.length === 0) problem('game.yml', `player animation "${name}" needs a list of frame numbers`);
+                else if (!list.every((i) => Number.isInteger(i) && i >= 0 && i < frames)) problem('game.yml', `player animation "${name}" uses frames outside the sheet (it has ${frames})`);
+            }
+        }
+        if (player.walkStride !== undefined && !(typeof player.walkStride === 'number' && player.walkStride > 0)) {
+            problem('game.yml', `player walkStride must be a number above 0, got ${JSON.stringify(player.walkStride)}`);
         }
     }
     if (config?.startPosition !== undefined) checkPoint(config.startPosition, 'startPosition', 'game.yml', problem);

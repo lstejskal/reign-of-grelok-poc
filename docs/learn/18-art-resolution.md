@@ -13,6 +13,6 @@ at 64x96 the face, beard, belt and legs survive.
 - Walkmasks are not art: they stay 320x144. The validator knows which is which.
 - `art/assets.yml` sizes are picture pixels; placeholders are drawn at game size and doubled.
 
-**Walk cycle:** `client/src/walk/walkCycle.ts`. Swapping two stride frames looks like sliding (seen from the side they
+**Walk cycle:** now in `client/src/scene/playerAnimation.ts` (see 19). Swapping two stride frames looks like sliding (seen from the side they
 have the same outline). The cycle is stride, legs together, other stride, legs together, with a 1 picture-pixel bob on
 "legs together".

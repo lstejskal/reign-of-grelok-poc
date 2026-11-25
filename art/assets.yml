@@ -17,14 +17,46 @@ palette: art/palette.hex
 outline: '#340034'
 game: grelok
 assets:
+  # Grognak is made of several pictures (art/raw/grognak_<part>.png), one per animation: an image generator keeps
+  # a character consistent far better in a small strip than in one big grid. Each part becomes a row of the sheet
+  # (6 frames of 64x96 per row); `frames` hands its cells, read row by row, to named animations. Walking left is the
+  # walking-right picture mirrored by the game. After importing, game.yml needs the animation table the importer prints.
+  # Full prompts: art/briefs/07-grognak-animation.md.
   grognak:
     type: sheet
     out: sprites/grognak.png
-    prompt: '{style} {cutout} Character sheet of {grognak} 4 rows (facing front, back, right, left) by 3 columns (standing,
-      walking step one, walking step two). Same size in every cell.'
     frame: [64, 96]
-    grid: [3, 4]
-    animations: {idle_s: [0], walk_s: [0, 1, 0, 2], idle_n: [3], walk_n: [3, 4, 3, 5], idle_e: [6], walk_e: [6, 7, 6, 8], idle_w: [9], walk_w: [9, 10, 9, 11]}
+    columns: 6
+    parts:
+      - name: walk_e
+        grid: [3, 2]
+        frames: {walk_e: 6}
+        prompt: '{style} {cutout} {grognak} A 6-frame walk cycle seen from the side, walking to the right, 3 columns x 2
+          rows: contact, down, passing, contact (other leg), down, passing.'
+      - name: walk_s
+        grid: [2, 2]
+        frames: {walk_s: 4}
+        prompt: '{style} {cutout} {grognak} A 4-frame walk cycle walking towards the viewer, 2 x 2: left foot forward,
+          passing, right foot forward, passing.'
+      - name: walk_n
+        grid: [2, 2]
+        frames: {walk_n: 4}
+        prompt: '{style} {cutout} {grognak} A 4-frame walk cycle walking away from the viewer (seen from behind), 2 x 2:
+          left foot forward, passing, right foot forward, passing.'
+      - name: idle
+        grid: [3, 1]
+        frames: {idle_s: 1, idle_n: 1, idle_e: 1}
+        prompt: '{style} {cutout} {grognak} Standing still, 3 views side by side: front, back, side facing right.'
+      - name: talk
+        grid: [2, 2]
+        frames: {talk_s: 2, talk_e: 2}
+        prompt: '{style} {cutout} {grognak} Talking, 2 x 2: front mouth shut, front mouth open with a hand gesture, side
+          (facing right) mouth shut, side mouth open with a hand gesture.'
+      - name: reach
+        grid: [2, 2]
+        frames: {reach_e: 2, reach_s: 1, reach_n: 1}
+        prompt: '{style} {cutout} {grognak} Reaching for something, 2 x 2: side (facing right) arm half out, side arm out
+          low, front bending to reach down, back reaching forward.'
   standing_stone:
     type: sprite
     out: sprites/standing_stone.png
@@ -40,6 +72,18 @@ assets:
     out: sprites/zombie_down.png
     prompt: '{style} {cutout} {zombie} Lying flat on the ground, defeated.'
     size: [120, 48]
+  open_grave:   # a separate sprite, so it sits exactly under its hotspot (the zombie falls into it)
+    type: sprite
+    out: sprites/open_grave.png
+    prompt: '{style} {cutout} A freshly dug open grave seen from the side and a little from above: a dark rectangular hole
+      in the ground with a mound of earth beside it and a leaning wooden grave marker.'
+    size: [100, 50]
+  basin:   # the holy water basin on its marble pillar (chapel interior), a sprite so it sits under its hotspot
+    type: sprite
+    out: sprites/basin.png
+    prompt: '{style} {cutout} A small marble holy water basin on a slender carved marble pillar, the water glowing faintly
+      pale blue.'
+    size: [60, 100]
   chapel_door_open:
     type: sprite
     out: sprites/chapel_door_open.png

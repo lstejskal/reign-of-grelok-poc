@@ -275,8 +275,18 @@ test('Grognak starts where game.yml says, drawn from the sprite sheet, with dept
   const p = await player(page);
   expect([p.x, p.y, p.facing, p.walking]).toEqual([160, 112, 's', false]);
   expect(p.depth).toBe(p.y); // lower on the screen = nearer = drawn in front
-  // the sheet was cut into 3 columns x 4 rows of frames
-  expect(await page.evaluate(() => Object.keys(window.__adv.game.textures.get('asset:sprites/grognak.png').frames).filter((f) => f !== '__BASE').length)).toBe(12);
+  // the sheet was cut into frames of the size game.yml gives (3 columns x 4 rows for the original layout)
+  const { frames, expected } = await page.evaluate(() => {
+    const texture = window.__adv.game.textures.get('asset:sprites/grognak.png');
+    const { frameWidth, frameHeight } = window.__adv.bundle.config.player;
+    const image = texture.getSourceImage();
+    return {
+      frames: Object.keys(texture.frames).filter((f) => f !== '__BASE').length,
+      expected: (image.width / frameWidth) * (image.height / frameHeight),
+    };
+  });
+  expect(frames).toBe(expected);
+  expect(frames).toBeGreaterThanOrEqual(12);
 });
 
 test('clicking the floor walks there and turns him the way he walked', async ({ page }) => {
@@ -360,6 +370,38 @@ test('a new click redirects him, and the old walk is forgotten', async ({ page }
   const p = await player(page);
   expect([p.x, p.y]).toEqual([250, 120]);
   expect(await page.evaluate(() => window.__adv.engine.state.inventory)).not.toContain('pebble');
+});
+
+// --- Step 17: Grognak's animations (walk, talk, reach). Only with a sheet that has them (game.yml `animations:`). ----
+
+const animations = (page: Page): Promise<Record<string, number[]> | undefined> =>
+  page.evaluate(() => window.__adv.bundle.config.player.animations);
+
+test('walking west shows the walking-east frames mirrored', async ({ page }) => {
+  const anims = await animations(page);
+  test.skip(!anims || 'walk_w' in anims, 'the sheet has no mirrored walk');
+  await walkSpeed(page, 0.5);
+  await clickAt(page, 40, 116);
+  await expect.poll(async () => (await player(page)).anim).toBe('walk_e');
+  expect((await player(page)).flipX).toBe(true);
+});
+
+test('picking something up: he reaches out first, and the engine hears it when his hand is out', async ({ page }) => {
+  test.skip(!(await animations(page))?.reach_n, 'the sheet has no reach animation');
+  await walkSpeed(page, 1);
+  await clickVerb(page, 'pick_up');
+  await clickAt(page, 66, 116); // the pebble
+  await expect.poll(async () => (await player(page)).anim, { timeout: 15_000 }).toMatch(/^reach_/);
+  await expect.poll(() => page.evaluate(() => window.__adv.engine.state.inventory)).toContain('pebble');
+});
+
+test('while Grognak speaks he plays his talk animation, and stops when the speech is over', async ({ page }) => {
+  test.skip(!(await animations(page))?.talk_s, 'the sheet has no talk animation');
+  await walkSpeed(page, 1);
+  await page.evaluate(() => (window.__adv.game.scene.getScene('RoomScene') as any).speech.say('grognak', 'By my beard, what a fine pebble!'));
+  await expect.poll(async () => (await player(page)).anim).toBe('talk_s');
+  await clickAt(page, 250, 120); // skip the speech
+  await expect.poll(async () => (await player(page)).anim).toBe('idle_s');
 });
 
 test('arriving in a new location places him at the matching exit', async ({ page }) => {

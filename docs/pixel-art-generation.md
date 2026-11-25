@@ -68,7 +68,7 @@ For sprites, sheets, and icons, follow the current **solid magenta cutout workfl
 
 For backgrounds, fill the canvas; omit the magenta cutout instructions and the sprite outline requirement. Follow the requested generation size and keep essential content inside the final 640x288 crop. The importer crops rather than stretches, so composition must survive that crop. Leave the walkable floor and exits readable. Do not bake separately rendered characters or interactive props into the background: the plain's standing stone, for example, is a separate sprite.
 
-For sheets, check the exact grid and cell count. Grognak currently needs **3 columns by 4 rows**: front, back, right, left; each row contains standing, walking step one, walking step two. Keep every figure fully inside its cell, at the same scale and baseline, with no grid lines.
+For sheets, check the exact grid and cell count. Grognak is a **multi-part sheet** (`parts:` in `art/assets.yml`, brief 07): one picture per animation (walk right 3x2, walk towards/away 2x2 each, standing 3x1, talking 2x2, reaching 2x2), each an evenly spaced grid of poses. Walking left is walking right mirrored by the game, so it is never drawn. Keep every figure fully inside its cell, at the same scale and baseline, with no grid lines.
 
 ## Model and effort for good value
 

@@ -123,6 +123,7 @@ describe('validateGame', () => {
         expect(validateGame(bundle, everythingExists).join('\n')).toContain('game.yml: missing "player"');
 
         const wrong = fresh();
+        wrong.config.player = { sprite: wrong.config.player.sprite, frameWidth: 64, frameHeight: 96 }; // the original 3x4 layout
         const sheet = wrong.config.player.sprite;
         const sized = validateGame(wrong, everythingExists, (a) => (a === sheet ? { width: 10, height: 10 } : undefined)).join('\n');
         expect(sized).toContain('player sprite sheet must be 192x384 pixels');
@@ -130,6 +131,18 @@ describe('validateGame', () => {
         const scaled = fresh();
         scaled.scenes.plain!.scale = { top: 0, bottom: 5 };
         expect(validateGame(scaled, everythingExists).join('\n')).toContain('scenes/plain.yml: scale:');
+    });
+    it('checks named player animations: required ones, frames inside the sheet, the sheet width', () => {
+        const bundle = fresh();
+        const sheet = bundle.config.player.sprite;
+        Object.assign(bundle.config.player, { columns: 6, walkStride: 0, animations: { idle_s: [0], idle_n: [1], idle_e: [2], walk_s: [3], walk_e: [6, 7, 99] } });
+        const errors = validateGame(bundle, everythingExists, (a) => (a === sheet ? { width: 64 * 6, height: 96 * 2 } : undefined)).join('\n');
+        expect(errors).toContain('player animations: missing "walk_n"');
+        expect(errors).toContain('player animation "walk_e" uses frames outside the sheet (it has 12)');
+        expect(errors).toContain('player walkStride must be a number above 0');
+        expect(errors).not.toContain('pixels wide');
+        const narrow = validateGame(bundle, everythingExists, (a) => (a === sheet ? { width: 64 * 3, height: 96 * 2 } : undefined)).join('\n');
+        expect(narrow).toContain('player sprite sheet must be 384 pixels wide (6 columns of 64)');
     });
     it('reports bad verb buttons: too many, duplicate, bad name, long label, missing preposition', () => {
         const bundle = fresh();

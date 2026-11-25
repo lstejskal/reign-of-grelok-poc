@@ -115,9 +115,44 @@ export interface PlayerConfig {
     sprite: string;
     frameWidth: number;
     frameHeight: number;
+    /** Frames per row of the sheet (default PLAYER_SHEET_COLUMNS). Only with `animations`. */
+    columns?: number;
+    /** Named frame lists (see PlayerAnimations). Without it the sheet has the original 3x4 layout. */
+    animations?: PlayerAnimations;
+    /** Scene pixels one whole walk cycle covers at full size, so the feet don't slide (default DEFAULT_WALK_STRIDE). */
+    walkStride?: number;
 }
 export const PLAYER_SHEET_COLUMNS = 3;
 export const PLAYER_FACING_ROWS: readonly Facing[] = ['s', 'n', 'e', 'w'];
+
+/**
+ * The player's animations: lists of frame indices into the sheet (counted row by row), named `<kind>_<facing>`:
+ *   idle_s|n|e   standing still                 walk_s|n|e   one whole walk cycle (two steps)
+ *   talk_s|e     while he speaks (optional)     reach_s|n|e  picking up / using / giving / pushing (optional)
+ * Facing west uses the `_w` animation if there is one, otherwise the `_e` one mirrored. A missing talk or reach
+ * animation falls back to idle; a missing `_n`/`_s` one to `_s`/`_e`.
+ */
+export type PlayerAnimations = Record<string, number[]>;
+export const REQUIRED_PLAYER_ANIMATIONS = ['idle_s', 'idle_n', 'idle_e', 'walk_s', 'walk_n', 'walk_e'] as const;
+
+/**
+ * A game.yml without `animations:` has the original sheet: 3 columns (stand, stride, other stride) x 4 rows
+ * (PLAYER_FACING_ROWS). Its walk passes through the standing frame between the strides: stride, together, stride,
+ * together. (`legacy` tells the client to add a small bob on the "together" frames, which a real cycle draws itself.)
+ */
+export function playerAnimations(config: PlayerConfig): { animations: PlayerAnimations; columns: number; legacy: boolean } {
+    if (config.animations) return { animations: config.animations, columns: config.columns ?? PLAYER_SHEET_COLUMNS, legacy: false };
+    const animations: PlayerAnimations = {};
+    PLAYER_FACING_ROWS.forEach((facing, row) => {
+        const at = (column: number) => row * PLAYER_SHEET_COLUMNS + column;
+        animations[`idle_${facing}`] = [at(0)];
+        animations[`walk_${facing}`] = [at(1), at(0), at(2), at(0)];
+    });
+    return { animations, columns: PLAYER_SHEET_COLUMNS, legacy: true };
+}
+
+/** Scene pixels one whole walk cycle covers at full size, when game.yml does not say (two steps of 12). */
+export const DEFAULT_WALK_STRIDE = 24;
 
 /** One verb button: what the player reads, and how many things the sentence needs. */
 export interface VerbSpec {

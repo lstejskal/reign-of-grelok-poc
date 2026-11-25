@@ -346,8 +346,15 @@ mirror left↔right, walk bob via tween, talk = 2-frame mouth swap, idle = slow 
 - **Art resolution:** 32x48 was too small for AI-generated art (grainy). Art now has 2 picture pixels per game pixel
   (`ART_SCALE`): canvas 640x400, every camera zooms 2x, so positions, scene files, walkmasks and the interface stayed in
   320x200 units. Backgrounds 640x288, Grognak 64x96 frames, icons 48x32; all assets re-imported or doubled. The walk
-  cycle now passes through "legs together" with a small bob (`client/src/walk/walkCycle.ts`; the client uses the sheet
-  columns directly, not the atlas). See `docs/learn/18-art-resolution.md`.
+  cycle now passes through "legs together" with a small bob (now `client/src/scene/playerAnimation.ts`, see below; the
+  client uses frame numbers from game.yml, not the atlas). See `docs/learn/18-art-resolution.md`.
+- **Character animation:** game.yml `player:` may name its animations (`animations:`, `columns:`, `walkStride:`):
+  `idle_*`, `walk_*` (distance-driven, so feet don't skate), `talk_*` (while his own speech shows), `reach_*` (before
+  pick up / use / give / push reach the engine). West mirrors east. Without `animations:` the original 3x4 layout is
+  used (the demo). The perspective scale moves in 5% steps so the sprite doesn't "boil". The importer builds a sheet
+  from several pictures (`parts:` in `art/assets.yml`) with one common scale and palette. Grognak's art for it is
+  brief 07 (also fixes his colours against the dirt road); the e2e tests for walk/talk/reach skip until it is
+  imported. See `docs/learn/19-character-animation.md`.
 
 ### Step 18 — Music & SFX pass (AI-generated)
 - `audio/prompts.md`: one prompt per track with a shared prefix ("instrumental, 16-bit Sega Mega Drive FM synth,

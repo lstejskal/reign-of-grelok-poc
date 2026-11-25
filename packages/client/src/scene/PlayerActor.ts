@@ -1,10 +1,10 @@
 import Phaser from 'phaser';
-import { ART_SCALE, PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS } from '@grelok/engine';
+import { ART_SCALE } from '@grelok/engine';
 import type { Facing, PlayerConfig, Point } from '@grelok/engine';
 import { textureKey } from '../data/assets';
 import { PathFollower } from '../walk/PathFollower';
 import type { WalkArea } from '../walk/WalkArea';
-import { walkPose } from '../walk/walkCycle';
+import { playerFrame, quantizeScale, reachTiming } from './playerAnimation';
 
 /** Walking speed in scene pixels per second at full size; far away (smaller) he walks proportionally slower. */
 export const WALK_SPEED = 64;
@@ -27,10 +27,16 @@ export class PlayerActor {
   readonly follower: PathFollower;
   private readonly sprite: Phaser.GameObjects.Sprite;
   private arrival: Arrival | undefined;
+  /** Is he speaking? RoomScene sets this every frame from the speech on screen. */
+  talking = false;
+  private talkingMs = 0;
+  /** A reach in progress: how long it has run, and the action to do once the hand is out (if not done yet). */
+  private reaching: { ms: number; handOutMs: number; totalMs: number; then?: () => void } | undefined;
+  private lastPose = { frame: 0, flipX: false, anim: '' };
 
   constructor(
     scene: Phaser.Scene,
-    config: PlayerConfig,
+    private readonly config: PlayerConfig,
     start: Point,
     private area: WalkArea,
     private readonly speedFactor: () => number,
@@ -42,7 +48,8 @@ export class PlayerActor {
 
   get state() {
     const [x, y] = this.follower.position;
-    return { x, y, facing: this.follower.facing, walking: this.follower.walking, scale: this.sprite.scaleX * ART_SCALE, depth: this.sprite.depth };
+    const { frame, flipX, anim } = this.lastPose;
+    return { x, y, facing: this.follower.facing, walking: this.follower.walking, scale: this.sprite.scaleX * ART_SCALE, depth: this.sprite.depth, frame, flipX, anim };
   }
 
   /** Move into another scene's floor and stand at `point`, looking `facing`. */
@@ -56,8 +63,33 @@ export class PlayerActor {
 
   /** Walk to `point` along a path that goes around obstacles. A new walk replaces the old one. */
   walkTo(point: Point, arrival: Arrival = {}): void {
+    this.finishReach(); // a click during a reach: the action still happens, the hand just doesn't linger
     this.arrival = arrival;
     this.follower.setPath(this.area.path(this.follower.position, point));
+  }
+
+  /**
+   * Reach out (pick up, use, give, push) and do `then` at the moment the hand is out. With no reach animation in
+   * the sheet, `then` runs at once.
+   */
+  reach(then: () => void): void {
+    this.finishReach();
+    const { handOutMs, totalMs } = reachTiming(this.config, this.follower.facing);
+    if (totalMs === 0) return then();
+    this.reaching = { ms: 0, handOutMs, totalMs, then };
+    if (handOutMs === 0) this.fireReach();
+    this.sync();
+  }
+
+  private fireReach(): void {
+    const then = this.reaching?.then;
+    if (this.reaching) this.reaching.then = undefined;
+    then?.();
+  }
+
+  private finishReach(): void {
+    this.fireReach();
+    this.reaching = undefined;
   }
 
   /** Turn on the spot. */
@@ -76,6 +108,13 @@ export class PlayerActor {
   /** Call every frame with the time since the last one. */
   update(deltaMs: number): void {
     const seconds = Math.min(deltaMs, MAX_FRAME_MS) / 1000;
+    const animMs = seconds * 1000 * this.speedFactor(); // the debug speed-up (tests) also speeds up animations
+    this.talkingMs = this.talking ? this.talkingMs + animMs : 0;
+    if (this.reaching) {
+      this.reaching.ms += animMs;
+      if (this.reaching.ms >= this.reaching.handOutMs) this.fireReach();
+      if (this.reaching && this.reaching.ms >= this.reaching.totalMs) this.reaching = undefined;
+    }
     const speed = WALK_SPEED * this.area.scaleAt(this.follower.position[1]) * this.speedFactor();
     if (this.follower.update(seconds, speed)) this.arrive();
     this.sync();
@@ -90,18 +129,27 @@ export class PlayerActor {
     arrival?.then?.();
   }
 
-  /** Put the sprite where the follower says: position, size (perspective), frame (facing + walking pose), depth. */
+  /** Put the sprite where the follower says: position, size (perspective, in steps), frame (see playerAnimation), depth. */
   private sync(): void {
     const [x, y] = this.follower.position;
-    const row = PLAYER_FACING_ROWS.indexOf(this.follower.facing);
-    const pose = walkPose(this.follower.walking, this.follower.walked);
+    const scale = quantizeScale(this.area.scaleAt(y));
+    const pose = playerFrame(this.config, {
+      facing: this.follower.facing,
+      walking: this.follower.walking,
+      walked: this.follower.walked,
+      scale,
+      talkingMs: this.talking ? this.talkingMs : undefined,
+      reachMs: this.reaching?.ms,
+    });
+    this.lastPose = pose;
     // Snap to whole PICTURE pixels (half a scene pixel at ART_SCALE 2), like everything in a pixel-art game. The sheet
     // has ART_SCALE times the detail, so it is drawn at 1/ART_SCALE of its size (times the perspective).
     const snap = (v: number) => Math.round(v * ART_SCALE) / ART_SCALE;
     this.sprite
       .setPosition(snap(x), snap(y) - pose.lift / ART_SCALE)
-      .setScale(this.area.scaleAt(y) / ART_SCALE)
-      .setFrame(row * PLAYER_SHEET_COLUMNS + pose.column)
+      .setScale(scale / ART_SCALE)
+      .setFrame(pose.frame)
+      .setFlipX(pose.flipX)
       .setDepth(y);
   }
 }

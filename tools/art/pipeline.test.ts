@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
     blank, buildPalette, chromaKey, composeGrid, contentBox, coverCrop, crop, despeckle, hexOf, makeAtlas, MEGA_DRIVE_LEVELS, nearestIndex, outline, pad,
-    parsePalette, place, processBackground, processFrames, quantize, resize, resizeDominant, sliceGrid, snapToMegaDrive,
+    parsePalette, place, processBackground, processFrames, processPartsSheet, quantize, resize, resizeDominant, sliceGrid, snapToMegaDrive,
 } from './pipeline';
 import type { Raster, Rgb } from './pipeline';
 
@@ -197,6 +197,23 @@ describe('processFrames (the whole recipe)', () => {
         const empty = blank(8, 8);
         for (let i = 0; i < empty.data.length; i += 4) empty.data.set([255, 0, 255, 255], i);
         expect(processFrames([empty], options)).toBeUndefined();
+    });
+
+    it('builds a sheet from several pictures: every frame treated alike, unused frames transparent', () => {
+        // part 0: two cells side by side (80x60); part 1: one cell. Sheet: 3 columns x 2 rows.
+        const two = blank(80, 60);
+        const [left, right] = [raw(10), raw(14)];
+        for (let y = 0; y < 60; y++) {
+            two.data.set(left.data.subarray(y * 160, y * 160 + 160), y * 320);
+            two.data.set(right.data.subarray(y * 160, y * 160 + 160), y * 320 + 160);
+        }
+        const slots = [{ part: 0, cell: 0, frame: 0 }, { part: 0, cell: 1, frame: 1 }, { part: 1, cell: 0, frame: 3 }];
+        const sheet = processPartsSheet([{ raw: two, grid: [2, 1] }, { raw: raw(10), grid: [1, 1] }], slots, 3, 2, options)!;
+        expect([sheet.width, sheet.height]).toEqual([30, 28]);
+        const frame = (i: number) => crop(sheet, { x: (i % 3) * 10, y: Math.floor(i / 3) * 14, w: 10, h: 14 });
+        expect(contentBox(frame(0))!.h).toBe(contentBox(frame(3))!.h); // same scale across parts
+        expect(contentBox(frame(2))).toBeUndefined(); // no slot: empty
+        expect(contentBox(frame(5))).toBeUndefined();
     });
 });
 
