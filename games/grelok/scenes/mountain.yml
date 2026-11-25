@@ -1,31 +1,52 @@
-# Scene for location "mountain". Coordinates: x 0-319, y 0-143. Music is added in Step 15.
+# Scene for location "mountain". Coordinates: x 0-319, y 0-143.
+# Layout follows the approved preview in art/briefs/02-mountain-generation-log.md (Grelok on the ledge at the right,
+# the rubble on the ash by the path at the left, the path back south in the middle).
 
 background: backgrounds/mountain.png
-walkmask: walkmasks/mountain.png   # white = walkable
+walkmask: walkmasks/mountain.png   # white = walkable; painted from walkArea below (npm run walkmask -- grelok mountain)
 music: music/mountain.mp3   # loops while the player is here; changing scene crossfades to the next tune
 scale: {top: 0.6, bottom: 1.0}   # Grognak is drawn at 60% on the farthest floor row, 100% on the nearest
 
+# The floor, traced from the background: the ash plateau below the cliffs, but not up onto Grelok's raised ledge on
+# the right (its rock face runs down to about y 105-110), and not through the heap of rubble.
+walkArea:
+  floor:
+    - [[0, 84], [200, 84], [206, 100], [214, 106], [250, 110], [320, 111], [320, 144], [0, 144]]
+  blocked:
+    - [[42, 111], [108, 111], [110, 122], [40, 122]]   # the base of the rubble
+
 hotspots:   # later entries are on top
   - id: rubble
-    polygon: [[40, 100], [110, 100], [110, 125], [40, 125]]
+    polygon: [[40, 99], [110, 99], [110, 121], [40, 121]]
     walkTo: [75, 128]
-  - id: gemstone
-    polygon: [[70, 108], [80, 108], [80, 116], [70, 116]]
+  - id: gemstone   # lies on top of the rubble, so it is listed after it (wins the click)
+    polygon: [[69, 101], [81, 101], [81, 111], [69, 111]]
     walkTo: [75, 128]
-  - id: grelok
-    polygon: [[190, 30], [250, 30], [250, 105], [190, 105]]
-    walkTo: [215, 112]
+  - id: grelok   # on his ledge; Grognak stays below it
+    polygon: [[208, 33], [248, 33], [248, 92], [208, 92]]
+    walkTo: [200, 114]
     facing: e
 
 sprites:
+  - id: grelok
+    thing: grelok
+    x: 228
+    y: 92
+    image: sprites/grelok.png
+  - id: rubble
+    thing: rubble
+    x: 75
+    y: 121
+    image: sprites/rubble.png
   - id: gemstone
     thing: gemstone            # appears when the engine reveals it, vanishes when picked up
     x: 75
-    y: 116
+    y: 110
+    depth: 122                 # lies on the rubble: drawn in front of it (the rubble's feet are at 121)
     image: sprites/gemstone.png
 
 exits:
-  - direction: s
+  - direction: s   # the path back down to the plain
     polygon: [[120, 128], [200, 128], [200, 144], [120, 144]]
     walkTo: [160, 124]
     spawn: [160, 118]

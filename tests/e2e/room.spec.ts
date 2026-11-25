@@ -111,7 +111,7 @@ test('pointing at a thing shows its name in the sentence line', async ({ page })
 
 test('hidden things cannot be pointed at until the engine reveals them', async ({ page }) => {
   await say(page, 'north');
-  await moveMouseTo(page, 75, 112); // the gemstone sits on top of the rubble
+  await moveMouseTo(page, 75, 106); // the gemstone lies on top of the rubble
   await expect.poll(() => page.evaluate(() => window.__adv.sentence)).toBe('Walk to rubble');
 
   await say(page, 'look at rubble'); // reveals the gemstone
@@ -248,7 +248,7 @@ test('Give gemstone to wizard takes the gemstone out of the inventory', async ({
   await say(page, 'north');
   await say(page, 'look at rubble'); // reveals the gemstone
   await clickVerb(page, 'pick_up');
-  await clickAt(page, 75, 112);
+  await clickAt(page, 75, 106); // the gemstone
   await expect.poll(() => page.evaluate(() => window.__adv.inventory)).toContain('gemstone');
 
   await say(page, 'south');
@@ -571,11 +571,11 @@ test('a sprite is drawn for a thing in the scene, at its feet position and sorte
 
 test('a hidden thing gets its sprite only when the engine reveals it', async ({ page }) => {
   await say(page, 'north');
-  expect(await spriteIds(page)).toEqual([]); // the gemstone is hidden under the rubble
+  expect(await spriteIds(page)).toEqual(['grelok', 'rubble']); // the gemstone is hidden in the rubble
   await say(page, 'look at rubble');
-  expect(await spriteIds(page)).toEqual(['gemstone']);
+  expect(await spriteIds(page)).toEqual(['grelok', 'rubble', 'gemstone']);
   await say(page, 'take gemstone');
-  expect(await spriteIds(page)).toEqual([]);
+  expect(await spriteIds(page)).toEqual(['grelok', 'rubble']);
 });
 
 test('the world changes visibly as the puzzle is solved: zombie falls, door opens', async ({ page }) => {

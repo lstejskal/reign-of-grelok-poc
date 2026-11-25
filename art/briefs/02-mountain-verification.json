@@ -1,0 +1,92 @@
+[
+  {
+    "id": "grelok",
+    "raw": [
+      1024,
+      1536
+    ],
+    "out": "sprites/grelok.png",
+    "size": [
+      80,
+      128
+    ],
+    "colours": 15,
+    "partial": 0,
+    "offgrid": 0
+  },
+  {
+    "id": "bg_mountain",
+    "raw": [
+      1536,
+      1024
+    ],
+    "out": "backgrounds/mountain.png",
+    "size": [
+      640,
+      288
+    ],
+    "colours": 19,
+    "partial": 0,
+    "offgrid": 0
+  },
+  {
+    "id": "rubble",
+    "raw": [
+      1536,
+      1024
+    ],
+    "out": "sprites/rubble.png",
+    "size": [
+      144,
+      56
+    ],
+    "colours": 13,
+    "partial": 0,
+    "offgrid": 0
+  },
+  {
+    "id": "gemstone",
+    "raw": [
+      1254,
+      1254
+    ],
+    "out": "sprites/gemstone.png",
+    "size": [
+      20,
+      16
+    ],
+    "colours": 4,
+    "partial": 0,
+    "offgrid": 0
+  },
+  {
+    "id": "icon_gemstone",
+    "raw": [
+      1402,
+      1122
+    ],
+    "out": "icons/gemstone.png",
+    "size": [
+      48,
+      32
+    ],
+    "colours": 5,
+    "partial": 0,
+    "offgrid": 0
+  },
+  {
+    "id": "icon_rusty_sword",
+    "raw": [
+      1254,
+      1254
+    ],
+    "out": "icons/rusty_sword.png",
+    "size": [
+      48,
+      32
+    ],
+    "colours": 10,
+    "partial": 0,
+    "offgrid": 0
+  }
+]

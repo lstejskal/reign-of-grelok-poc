@@ -191,6 +191,7 @@ export function validateGame(
             if (spriteIds.has(sprite.id)) problem(where, `${label}: defined twice`);
             spriteIds.add(sprite.id);
             checkPoint([sprite.x, sprite.y], `${label} x, y`, where, problem);
+            if (sprite.depth !== undefined && typeof sprite.depth !== 'number') problem(where, `${label}: depth must be a number (a y to sort by)`);
             if (sprite.thing !== undefined && !(sprite.thing in logic.things)) problem(where, `${label}: unknown thing "${sprite.thing}"`);
             if (!sprite.states?.length) problem(where, `${label}: needs "states" (or a single "image")`);
             for (const state of sprite.states ?? []) {

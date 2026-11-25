@@ -849,7 +849,7 @@ export class RoomScene extends Phaser.Scene {
         continue;
       }
       // sorted by y, like the player: whoever is lower on the screen is in front
-      image.setTexture(textureKey(look.image)).setPosition(look.at[0], look.at[1]).setDepth(look.at[1]).setVisible(true);
+      image.setTexture(textureKey(look.image)).setPosition(look.at[0], look.at[1]).setDepth(look.depth).setVisible(true);
     }
   }
 

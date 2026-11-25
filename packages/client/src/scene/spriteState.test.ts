@@ -17,11 +17,15 @@ const world = (booleans: Record<string, boolean>, visibleThings = ['zombie']) =>
 
 describe('lookOf', () => {
   it('picks the first state whose conditions hold', () => {
-    expect(lookOf(zombie, world({ blocks: true }))).toEqual({ image: 'standing.png', at: [220, 110] });
+    expect(lookOf(zombie, world({ blocks: true }))).toEqual({ image: 'standing.png', at: [220, 110], depth: 110 });
   });
 
   it('falls through to a state without conditions, which may move the sprite', () => {
-    expect(lookOf(zombie, world({ blocks: false }))).toEqual({ image: 'down.png', at: [220, 112] });
+    expect(lookOf(zombie, world({ blocks: false }))).toEqual({ image: 'down.png', at: [220, 112], depth: 112 });
+  });
+
+  it('sorts by its own depth when it has one (a gem lying on a heap is drawn in front of it)', () => {
+    expect(lookOf({ ...zombie, depth: 125 }, world({ blocks: true }))?.depth).toBe(125);
   });
 
   it('draws nothing while its thing is not visible here (picked up, hidden, elsewhere)', () => {

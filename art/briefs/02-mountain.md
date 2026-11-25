@@ -15,13 +15,15 @@ which Grognak picks up. The path back south to the plain comes towards the viewe
 
 | # | Asset id | What | Save the raw picture as | Ask for | Ends up in game as (picture pixels, 2 per screen pixel) | Status |
 |---|---|---|---|---|---|---|
-| 1 | `grelok_ref` | Grelok, one big reference picture (not used in game) | `art/reference/grelok_ref.png` | 1024x1536 | (not imported) | **to do** |
-| 2 | `grelok` | Grelok standing in the scene | `art/raw/grelok.png` | 1024x1536 | 80x128 | **to do** |
-| 3 | `bg_mountain` | The mountain background | `art/raw/bg_mountain.png` | 1536x1024 | 640x288 | **to do** |
-| 4 | `rubble` | The heap of rubble by the path | `art/raw/rubble.png` | 1536x1024 | 144x56 | **to do** |
-| 5 | `gemstone` | The gemstone, lying on the rubble | `art/raw/gemstone.png` | 1024x1024 | 20x16 | **to do** |
-| 6 | `icon_gemstone` | The gemstone's inventory icon | `art/raw/icon_gemstone.png` | 1024x1024 | 48x32 | **to do** |
-| 7 | `icon_rusty_sword` | Inventory icon of Grognak's rusty sword (carried from the start, on every screen) | `art/raw/icon_rusty_sword.png` | 1024x1024 | 48x32 | **to do** |
+| 1 | `grelok_ref` | Grelok, one big reference picture (not used in game) | `art/reference/grelok_ref.png` | 1024x1536 | (not imported) | Generated; pending user review |
+| 2 | `grelok` | Grelok standing in the scene | `art/raw/grelok.png` | 1024x1536 | 80x128 | Generated and imported; pending user review |
+| 3 | `bg_mountain` | The mountain background | `art/raw/bg_mountain.png` | 1536x1024 | 640x288 | Generated and imported; pending user review |
+| 4 | `rubble` | The heap of rubble by the path | `art/raw/rubble.png` | 1536x1024 | 144x56 | Generated and imported; pending user review |
+| 5 | `gemstone` | The gemstone, lying on the rubble | `art/raw/gemstone.png` | 1024x1024 | 20x16 | Generated and imported; pending user review |
+| 6 | `icon_gemstone` | The gemstone's inventory icon | `art/raw/icon_gemstone.png` | 1024x1024 | 48x32 | Generated and imported; pending user review |
+| 7 | `icon_rusty_sword` | Inventory icon of Grognak's rusty sword (carried from the start, on every screen) | `art/raw/icon_rusty_sword.png` | 1024x1024 | 48x32 | Generated and imported; pending user review |
+
+Files, exact prompts, reference usage, previews, verification and suggested scene anchors are recorded in [the generation record](02-mountain-generation-log.md).
 
 Order: 1, then 2 (with 1 as reference), then 3, then 4-7 (with the background and screen 1 as style references).
 

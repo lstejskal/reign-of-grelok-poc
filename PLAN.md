@@ -343,6 +343,9 @@ mirror left↔right, walk bob via tween, talk = 2-frame mouth swap, idle = slow 
   walkmask from polygons: `walkArea:` in the scene file → `npm run walkmask` (`tools/make-walkmask.ts`). The north exit
   is now the mountains on the horizon. Open: Grognak's colours are too close to the dirt road (needs an art revision).
   See `docs/learn/17-walkmasks.md`.
+- **Screen 2 (mountain):** brief 02 art in place: Grelok on his ledge, the rubble with the gemstone on it (scene
+  sprites may set `depth:` to be drawn in front of what they lie on), floor traced as `walkArea:` (not up onto the
+  ledge, not through the rubble).
 - **Art resolution:** 32x48 was too small for AI-generated art (grainy). Art now has 2 picture pixels per game pixel
   (`ART_SCALE`): canvas 640x400, every camera zooms 2x, so positions, scene files, walkmasks and the interface stayed in
   320x200 units. Backgrounds 640x288, Grognak 64x96 frames, icons 48x32; all assets re-imported or doubled. The walk

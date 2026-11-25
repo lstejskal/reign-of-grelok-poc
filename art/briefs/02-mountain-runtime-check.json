@@ -1,0 +1,12 @@
+{
+  "state": {
+    "background": "asset:backgrounds/mountain.png",
+    "sprites": [],
+    "inventory": [
+      "rusty_sword",
+      "gemstone"
+    ],
+    "gemstoneTexture": 20
+  },
+  "pageErrors": []
+}

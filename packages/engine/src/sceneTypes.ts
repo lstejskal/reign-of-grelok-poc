@@ -71,6 +71,11 @@ export interface SceneSpriteData {
     thing?: string;
     x: number;
     y: number;
+    /**
+     * Draw order: sort as if the feet were at this y (default: its y). For a thing lying ON another sprite, e.g. a
+     * gemstone on a heap of rubble: its feet are higher up than the heap's, but it must be drawn in front of it.
+     */
+    depth?: number;
     states: SpriteState[];
 }
 

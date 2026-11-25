@@ -13,6 +13,8 @@ export interface SpriteLook {
   image: string;
   /** Where its feet are. */
   at: Point;
+  /** The y to sort by when drawing (its feet, unless the sprite says otherwise). */
+  depth: number;
 }
 
 /**
@@ -25,5 +27,6 @@ export function lookOf(sprite: SceneSpriteData, world: WorldView): SpriteLook | 
   if (sprite.thing !== undefined && !world.visibleThings.includes(sprite.thing)) return undefined;
   const state = sprite.states.find((s) => Object.entries(s.when ?? {}).every(([name, wanted]) => world.booleans[name] === wanted));
   if (!state) return undefined;
-  return { image: state.image, at: [state.x ?? sprite.x, state.y ?? sprite.y] };
+  const at: Point = [state.x ?? sprite.x, state.y ?? sprite.y];
+  return { image: state.image, at, depth: sprite.depth ?? at[1] };
 }
