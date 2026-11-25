@@ -373,6 +373,12 @@ mirror left↔right, walk bob via tween, talk = 2-frame mouth swap, idle = slow 
   importer writes his sheet in 2-pixel steps down to 60% (`sizes:` in assets.yml and game.yml, files
   `grognak_<height>.png`); the game draws the nearest 1:1. Today's art comes from the temporary `grognak_v1` entry
   in assets.yml; delete it when brief 07's parts are imported.
+- **Speech:** outlined in a dark colour on every side, so coloured words stay readable on any background.
+- **Status 2026-11-25 / next (details and step-by-step instructions in `docs/HANDOFF.md`):**
+  1. Importer fix for sheet parts with different cell sizes (Codex found it; bottom-align cells before cropping).
+  2. Import Grognak's brief 07 sheet once its six pictures exist; wire `game.yml`; tune `walkStride`; drop `grognak_v1`.
+  3. Use Codex's title and interface art ("08": title background and logo, interface frame, cursor).
+  Then step 17 is done; steps 18 (music), 19 (polish) and 20 (builds) remain.
 
 ### Step 18 — Music & SFX pass (AI-generated)
 - `audio/prompts.md`: one prompt per track with a shared prefix ("instrumental, 16-bit Sega Mega Drive FM synth,
