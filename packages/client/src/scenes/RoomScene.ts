@@ -94,6 +94,8 @@ export class RoomScene extends Phaser.Scene {
   /** Sounds and music the cutscenes asked for (they are also really played, by session.audio). */
   private readonly audioLog: string[] = [];
   private ended = false;
+  /** The end screen has fully appeared: a click now returns to the title. */
+  private endReady = false;
   /** How many things we carried after the last event, to tell "picked something up" from "gave something away". */
   private carried = 0;
   private endObjects: Phaser.GameObjects.GameObject[] = [];
@@ -217,6 +219,7 @@ export class RoomScene extends Phaser.Scene {
     this.audioLog.length = 0;
     this.carried = this.session.engine.state.inventory.length;
     this.ended = false;
+    this.endReady = false;
     this.endObjects = [];
     this.endLines = [];
     this.lastExitClick = undefined;
@@ -424,7 +427,11 @@ export class RoomScene extends Phaser.Scene {
 
   /** During a cutscene the only thing a click does is move text along: read on, or skip the speech. */
   private onLockedClick([x, y]: Point): void {
-    if (this.ended) return;
+    // on the end screen, once it has fully appeared, a click goes back to the title (where New game starts again)
+    if (this.ended) {
+      if (this.endReady) this.returnToTitle();
+      return;
+    }
     if (this.pager.current !== '' && y < this.answerBand.height) this.pager.next();
     else if (this.speechNow && y < SCENE_HEIGHT) this.speech.skip();
   }
@@ -595,6 +602,10 @@ export class RoomScene extends Phaser.Scene {
 
   private quitToTitle(): void {
     this.autosave();
+    this.returnToTitle();
+  }
+
+  private returnToTitle(): void {
     this.session.audio.setMusic(undefined);
     this.scene.start('TitleScene', { session: this.session });
   }
@@ -688,8 +699,15 @@ export class RoomScene extends Phaser.Scene {
     const credits = lines.map((line, i) =>
       this.add.bitmapText(GAME_WIDTH / 2, 90 + i * 10, PIXEL_FONT, line).setOrigin(0.5, 0).setTint(0xc8c8d8).setDepth(901).setAlpha(0),
     );
-    this.endObjects = [back, title, ...credits];
-    this.tweens.add({ targets: this.endObjects, alpha: 1, duration: 1200 / (debugState.speedFactor ?? 1) });
+    const hint = this.add.bitmapText(GAME_WIDTH / 2, GAME_HEIGHT - 12, PIXEL_FONT, 'CLICK TO CONTINUE').setOrigin(0.5, 0).setTint(0x707080).setDepth(901).setAlpha(0);
+    this.endObjects = [back, title, ...credits, hint];
+    this.endReady = false;
+    this.tweens.add({
+      targets: this.endObjects,
+      alpha: 1,
+      duration: 1200 / (debugState.speedFactor ?? 1),
+      onComplete: () => (this.endReady = true), // clicks during the fade-in (still reading) do nothing
+    });
   }
 
   // --- speech and talking -------------------------------------------------------------------------

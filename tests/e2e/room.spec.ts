@@ -741,6 +741,15 @@ test('a game that ends without a cutscene still gets an end screen, once the tex
   expect((await cutscene(page)).ended).toBe(false); // the victory text is still waiting to be read
   await dismissAnswer(page);
   await expect.poll(async () => (await cutscene(page)).ended).toBe(true);
+
+  // once THE END has faded in, a click goes back to the title screen
+  await page.waitForTimeout(400); // the fade-in (1.2 s, sped up 10x in tests)
+  await clickAt(page, 160, 100);
+  await expect.poll(() => page.evaluate(() => window.__adv.scene)).toBe('TitleScene');
+  // ...and New game starts over
+  await clickMenu(page, 'New game');
+  await expect.poll(() => page.evaluate(() => window.__adv.scene)).toBe('RoomScene');
+  expect(await page.evaluate(() => [window.__adv.engine.state.location, window.__adv.engine.state.over])).toEqual(['plain', false]);
 });
 
 // --- Step 13: title screen, save & load ----------------------------------------------------------
