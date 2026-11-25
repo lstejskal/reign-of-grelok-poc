@@ -3,6 +3,18 @@
 Turn the text adventure in `../reign-of-grelok-ts` into a LucasArts-style (SCUMM-like) point-and-click
 game with Golden Axe-inspired pixel art and FM/chiptune-style fantasy music.
 
+## Status at a glance
+Keep this table current when a step changes. Each step below also has a **Status:** line; open tasks with
+step-by-step instructions are in `docs/HANDOFF.md`.
+
+| Step | What | Status |
+|---|---|---|
+| 1–16 | Engine, scenes, verbs, inventory, walking, exits, dialogs, sprites, cutscenes, save/load, demo game, audio system, art pipeline | ✅ Done |
+| 17 | Art pass: all six screens, title and interface art, player animation system, perspective sizes | 🟡 Nearly done: only **Grognak's new animation sheet** (brief 07) is left: drafts in `art/wip/grognak-07/`, the side walk needs its second row redone, then import (HANDOFF Task 2) |
+| 18 | Music & SFX pass (real tracks instead of the generated placeholders) | ⬜ To do |
+| 19 | Polish (cursor states, text speed, fullscreen, verb shortcuts, skip cutscene, credits…) | 🟡 Started: custom cursor, readable speech outline, return to the title after THE END; the rest of the list is open |
+| 20 | Builds & distribution (web zip for itch.io, desktop app) | ⬜ To do |
+
 ---
 
 ## 1. Technology decision
@@ -325,7 +337,9 @@ Verbs: Look at, Pick up, Use, Give, Talk to, Walk to. "Attack" = Use X on Y (sam
 - **Concept:** asset pipelines, why palettes and nearest-neighbour scaling make the "retro" look.
 - **Status: done.** `docs/art-style.md`, `art/palette.hex` (32 Mega Drive-level colours), `art/prompts/fragments.yml` (shared style + one brief per character; YAML instead of `characters.md` so the tool can read it), `art/assets.yml` (25 assets with prompts). `tools/art/pipeline.ts` (pure, tested: chroma key, crop-to-union, resize nearest/box, despeckle, quantize with optional ordered dithering, outline, grid slice/compose, Phaser atlas JSON), `npm run import-art`, `npm run gen-image` (prints prompts, or calls any OpenAI-style image API when `.env` has a key; tested with a fake service only). Shipped in game: `standing_stone` (new plain sprite) and the Grognak sheet (+ `grognak.json` atlas). Deviations: (1) I cannot generate images, so the two raw pictures are stand-ins drawn by `npm run sample-raw` (replace `art/raw/*.png` with real ones and re-import); (2) the client does not read the atlas yet (Step 17); (3) the palette test checks every asset that has an `art/raw` picture. See `docs/learn/16-art-pipeline.md`.
 
-### Step 17 — Art pass (sub-steps, one logical change each, uncommitted)
+### Step 17 — Art pass (sub-steps, one logical change each)
+- **Status: nearly done.** All screens, the title and the interface have final art; Grognak's new animation sheet
+  (brief 07) is still open. Details in the Progress notes at the end of this step.
 AI is bad at keeping a character consistent across many frames, so keep frame counts low and let code do the rest:
 mirror left↔right, walk bob via tween, talk = 2-frame mouth swap, idle = slow breathing scale tween.
 - 17a Grognak: generate a character sheet (front, back, side) → derive `idle` (3 dirs), `walk` (4 frames side,
@@ -390,17 +404,22 @@ mirror left↔right, walk bob via tween, talk = 2-frame mouth swap, idle = slow 
 - `tools/import-audio.ts` (uses ffmpeg): trim silence, cut to a loop length, short crossfade at the loop seam,
   loudness normalize, encode OGG (+ M4A fallback for Safari), write to `games/grelok/assets/music/` with placeholder names.
 - **Output:** final soundtrack in game. **Test:** validator — every track exists, duration > 10 s, files < 3 MB.
+- **Status: to do.** (`ffmpeg` is installed; the game still plays the generated placeholder tunes.)
 
 ### Step 19 — Polish
 - Cursor states (crosshair / highlighted over hotspot / busy), hotspot name follows cursor (optional),
   text speed setting, fullscreen toggle, keyboard shortcuts for verbs, "skip cutscene" (Esc), credits including
   original Bethesda Easter egg credit.
 - **Output:** feels like a classic LucasArts game. **Test:** existing suite green; e2e full walkthrough via clicks.
+- **Status: started.** Done so far: custom mouse cursor (brief 08 art), dark outline around speech text, a click on
+  the end screen returns to the title. Still open: cursor states, hotspot name at the cursor, text speed, fullscreen,
+  verb shortcuts, skip cutscene, Bethesda credit, full walkthrough by clicks in e2e.
 
 ### Step 20 — Builds & distribution
 - `npm run build` → static web build (itch.io-ready zip).
 - Desktop wrapper (Electron; `steamworks.js` later for achievements) → `npm run package` for macOS/Windows.
 - **Output:** downloadable zip + runnable desktop app. **Test:** e2e smoke against the production build.
+- **Status: to do.**
 
 ---
 

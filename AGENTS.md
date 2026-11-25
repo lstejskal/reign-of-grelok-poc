@@ -10,4 +10,5 @@ Essentials:
   and are generated from `walkArea:` polygons (`npm run walkmask`).
 - Before finishing: `npm run typecheck`, `npm test`, `npm run validate`, `npm run e2e`, and look at the result in the
   running game (restart the dev server after adding picture files).
-- Do not commit unless the user asks. Record what you did in the "Log" section of `docs/HANDOFF.md`.
+- Do not commit unless the user asks. Record what you did in the "Log" section of `docs/HANDOFF.md`, and update the
+  "Status at a glance" table at the top of `PLAN.md` when a step changes.
