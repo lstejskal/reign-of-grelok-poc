@@ -35,7 +35,14 @@ Read this first, then `PLAN.md` (the plan and every step's status) and the `docs
 
 ## Tasks, in order
 
-### Task 1 - Fix the importer for parts with different cell sizes (code; Codex or Claude)
+### Task 1 - DONE (Claude, after the limit reset): `partCells()` in `tools/art/pipeline.ts` scales every part to one
+figure size and stands each part's feet on one line before the shared crop (unit test included). A dry run on the
+real brief 07 pictures gives one consistent size for all 34 frames. Still open on the ART side: the side walk's second
+row (frames 4-6) repeats the first row's leg order; Codex's repair prompt `art/briefs/07-walk-e-far-step-repair.md`
+was never generated. Also note: while all six raws exist but the sheet is not imported, two art tests fail on
+purpose ("raw ready but not imported"); they pass again after Task 2.
+
+Original description, kept for reference:
 Codex reproduced it (`art/briefs/07-grognak-import-preflight.md`): `processPartsSheet` (`tools/art/pipeline.ts`)
 slices each part and crops all cells to one shared **top-origin** box. Cells of different heights (idle 3x1 at
 512x1024 vs 2x2 parts at 512x512) put the figures at different y, so the shared box grows, everything shrinks and
@@ -84,3 +91,6 @@ Codex's instructions: `art/briefs/08-ui-handoff.md` (positions, scales, cursor h
 
 ## Log
 - 2026-11-25 Claude: wrote this handoff. Tasks 1-3 open.
+- Claude: Task 1 done (importer normalises sheet parts). Codex's brief 07 is unfinished: all six raws exist, the
+  reference is approved, but the side walk's second row needs the repair prompt and no picture has been reviewed.
+  Brief 08 art is complete and waits for Task 3 (code).

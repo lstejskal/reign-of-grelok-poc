@@ -513,6 +513,48 @@ export function processFrames(raws: Raster[], o: FrameOptions): Raster[] | undef
 }
 
 /**
+ * The cells of a multi-part sheet, in slot order, made comparable before they are treated together.
+ *
+ * Every part is a separate picture from an image generator, which picks its own canvas and its own figure size: the
+ * side walk may come back as 341x768 cells with a tall figure, the talk as 627x627 cells with a smaller one. processFrames
+ * crops all frames to ONE shared box in cell coordinates, so without this step a figure low in a tall cell and one in a
+ * short cell span a box twice as tall as either: every frame shrinks and the short cells' figures float.
+ *   1. cut out the key colour (so figures can be measured)
+ *   2. scale each part so its TALLEST figure is as tall as the tallest figure of all parts (Grognak is one size)
+ *   3. put every cell on one common canvas: centred, and each part's lowest foot on the same line. Within a part the
+ *      cells keep their positions relative to each other, so a walk's bob or a reach's lean survive.
+ * A sheet from a single picture is returned as it is (its cells already share one coordinate space).
+ */
+export function partCells(parts: { raw: Raster; grid: [number, number] }[], slots: { part: number; cell: number }[], key?: Rgb): Raster[] {
+    const cells = parts.map((p) => sliceGrid(p.raw, p.grid[0], p.grid[1]));
+    const picked = slots.map((s) => cells[s.part]![s.cell]!);
+    if (parts.length < 2) return picked;
+
+    const keyed = picked.map((c) => chromaKey(c, key));
+    const boxes = keyed.map(contentBox);
+    const byPart = (p: number) => slots.map((s, i) => (s.part === p ? boxes[i] : undefined)).filter((b): b is Box => b !== undefined);
+    const tallest = parts.map((_, p) => Math.max(0, ...byPart(p).map((b) => b.h)));
+    const lowest = parts.map((_, p) => Math.max(0, ...byPart(p).map((b) => b.y + b.h)));
+    const reference = Math.max(...tallest);
+    const factor = tallest.map((h) => (h > 0 ? reference / h : 1));
+
+    const scaled = keyed.map((c, i) => {
+        const f = factor[slots[i]!.part]!;
+        return f === 1 ? c : resize(c, Math.max(1, Math.round(c.width * f)), Math.max(1, Math.round(c.height * f)), 'nearest');
+    });
+    const footLine = Math.max(...slots.map((s) => Math.round(lowest[s.part]! * factor[s.part]!)));
+    const top = scaled.map((c, i) => footLine - Math.round(lowest[slots[i]!.part]! * factor[slots[i]!.part]!));
+    const width = Math.max(...scaled.map((c) => c.width));
+    const height = Math.max(...scaled.map((c, i) => top[i]! + c.height));
+    return scaled.map((c, i) => {
+        const out = blank(width, height);
+        const [ox, oy] = [Math.floor((width - c.width) / 2), top[i]!];
+        for (let y = 0; y < c.height; y++) out.data.set(c.data.subarray(at(c, 0, y), at(c, c.width, y)), at(out, ox, oy + y));
+        return out;
+    });
+}
+
+/**
  * A sheet assembled from several generated pictures ("parts", one per animation). Every cell of every part goes
  * through ONE processFrames call, so all frames share the same scale, palette and outline - Grognak must not change
  * size or colour between his walk and his talk. `slots` (see sheetLayout) says which cell lands on which frame of a
@@ -525,9 +567,7 @@ export function processPartsSheet(
     rows: number,
     o: FrameOptions,
 ): Raster | undefined {
-    const cells = parts.map((p) => sliceGrid(p.raw, p.grid[0], p.grid[1]));
-    const picked = slots.map((s) => cells[s.part]![s.cell]!);
-    const frames = processFrames(picked, o);
+    const frames = processFrames(partCells(parts, slots, o.key), o);
     if (!frames) return undefined;
     const sheet: Raster[] = Array.from({ length: columns * rows }, () => blank(o.frameW, o.frameH));
     slots.forEach((s, i) => (sheet[s.frame] = frames[i]!));

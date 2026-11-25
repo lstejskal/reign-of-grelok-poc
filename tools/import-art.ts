@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { colorsFor, loadArtConfig, decodePng, encodePng, outputPath, projectPath, rawPathsOf, sheetLayout, sizeHeights } from './art/config';
 import type { AssetSpec } from './art/config';
-import { framesPalette, makeAtlas, processBackground, processFrames, processPartsSheet, sliceGrid } from './art/pipeline';
+import { framesPalette, makeAtlas, partCells, processBackground, processFrames, processPartsSheet } from './art/pipeline';
 import type { Raster } from './art/pipeline';
 
 const config = loadArtConfig();
@@ -57,9 +57,8 @@ function importSheet(asset: AssetSpec): string {
         layout = { columns, rows, slots: Array.from({ length: columns * rows }, (_, i) => ({ part: 0, cell: i, frame: i })), animations: asset.animations };
     }
     const options = { outlineColor: config.outline, method: asset.method, colors: colorsFor(asset, config.palette), frameW: fw, frameH: fh };
-    // one palette for every size: chosen from all the frames this sheet uses
-    const cells = parts.map((p) => sliceGrid(p.raw, p.grid[0], p.grid[1]));
-    const palette = asset.palette === 'shared' ? config.palette : framesPalette(layout.slots.map((s) => cells[s.part]![s.cell]!), options);
+    // one palette for every size: chosen from all the frames this sheet uses (made comparable first, see partCells)
+    const palette = asset.palette === 'shared' ? config.palette : framesPalette(partCells(parts, layout.slots), options);
     const render = (fit: number) => {
         const sheet = palette && processPartsSheet(parts, layout.slots, layout.columns, layout.rows, { ...options, palette, fit });
         if (!sheet) throw new Error(`${asset.id}: nothing left after removing the magenta background - is the background really flat #FF00FF?`);

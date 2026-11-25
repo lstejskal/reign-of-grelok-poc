@@ -209,6 +209,21 @@ describe('processFrames (the whole recipe)', () => {
         expect(b.y + b.h).toBe(14);
     });
 
+    it('parts with different cell sizes and figure sizes come out at one size, standing on the same line', () => {
+        // part 0: a 40x60 cell, a 20x40 figure 10 px above the bottom. part 1: a 40x120 cell (a taller canvas) with the
+        // same figure drawn at HALF size (10x20), also 10 px above the bottom. Without normalising, the shared crop
+        // spans both figures' cell positions (y 10..110) and everything shrinks.
+        const tall = blank(40, 120);
+        for (let i = 0; i < tall.data.length; i += 4) tall.data.set([255, 0, 255, 255], i);
+        for (let y = 90; y < 110; y++) for (let x = 15; x < 25; x++) tall.data.set([200, 20, 20, 255], (y * 40 + x) * 4);
+        const slots = [{ part: 0, cell: 0, frame: 0 }, { part: 1, cell: 0, frame: 1 }];
+        const sheet = processPartsSheet([{ raw: raw(10), grid: [1, 1] }, { raw: tall, grid: [1, 1] }], slots, 2, 1, options)!;
+        const [a, b] = [0, 1].map((i) => contentBox(crop(sheet, { x: i * 10, y: 0, w: 10, h: 14 }))!);
+        expect(b!.h).toBe(a!.h); // one size
+        expect(b!.y + b!.h).toBe(a!.y + a!.h); // same foot line
+        expect(a!.h).toBeGreaterThanOrEqual(12); // and not shrunk: the frame is 14 high
+    });
+
     it('builds a sheet from several pictures: every frame treated alike, unused frames transparent', () => {
         // part 0: two cells side by side (80x60); part 1: one cell. Sheet: 3 columns x 2 rows.
         const two = blank(80, 60);
