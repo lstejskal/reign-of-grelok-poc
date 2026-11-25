@@ -17,12 +17,14 @@ splits in two: the **gemstone shards** fall on the shore in front of Grognak, wh
 
 | # | Asset id | What | Save the raw picture as | Ask for | Ends up in game as (picture pixels, 2 per screen pixel) | Status |
 |---|---|---|---|---|---|---|
-| 1 | `bg_swamp` | The swamp background, with the tower | `art/raw/bg_swamp.png` | 1536x1024 | 640x288 | **to do** |
-| 2 | `wizard` | The wizard, chest up, as seen in the tower window | `art/raw/wizard.png` | 1024x1024 | 50x40 | **to do** |
-| 3 | `gemstone_shards` | The two shards lying on the ground | `art/raw/gemstone_shards.png` | 1536x1024 | 40x20 | **to do** |
-| 4 | `icon_gemstone_shards` | The shards' inventory icon | `art/raw/icon_gemstone_shards.png` | 1024x1024 | 48x32 | **to do** |
+| 1 | `bg_swamp` | The swamp background, with the tower | `art/raw/bg_swamp.png` | 1536x1024 | 640x288 | Generated/imported; Terra reviewed; pending user review |
+| 2 | `wizard` | The wizard, chest up, as seen in the tower window | `art/raw/wizard.png` | 1024x1024 | 50x40 | Generated/imported; Terra reviewed; pending user review |
+| 3 | `gemstone_shards` | The two shards lying on the ground | `art/raw/gemstone_shards.png` | 1536x1024 | 40x20 | Generated/imported; Terra reviewed; pending user review |
+| 4 | `icon_gemstone_shards` | The shards' inventory icon | `art/raw/icon_gemstone_shards.png` | 1024x1024 | 48x32 | Generated/imported; Terra reviewed; pending user review |
 
 Order: 1, then 2, then 3 (with the mountain's gemstone as reference), then 4 (with 3 as reference).
+
+Completed files, prompts, visual review, previews, checks and Claude placement notes are in [the generation record](04-swamp-generation-log.md).
 
 The game shrinks every picture a lot (the wizard becomes 50x40 pixels: he is far away, in a window). So: **big,
 simple, bold shapes**, strong silhouettes, few details.

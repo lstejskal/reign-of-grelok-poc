@@ -1,0 +1,82 @@
+[
+  {
+    "id": "bg_swamp",
+    "rawPath": "art/raw/bg_swamp.png",
+    "rawSize": [
+      1536,
+      1024
+    ],
+    "runtimePath": "games/grelok/assets/backgrounds/swamp.png",
+    "pictureSize": [
+      640,
+      288
+    ],
+    "logicalSize": [
+      320,
+      144
+    ],
+    "opaqueColours": 32,
+    "partialAlpha": 0,
+    "offgridPixels": 0
+  },
+  {
+    "id": "wizard",
+    "rawPath": "art/raw/wizard.png",
+    "rawSize": [
+      1402,
+      1122
+    ],
+    "runtimePath": "games/grelok/assets/sprites/wizard.png",
+    "pictureSize": [
+      50,
+      40
+    ],
+    "logicalSize": [
+      25,
+      20
+    ],
+    "opaqueColours": 13,
+    "partialAlpha": 0,
+    "offgridPixels": 0
+  },
+  {
+    "id": "gemstone_shards",
+    "rawPath": "art/raw/gemstone_shards.png",
+    "rawSize": [
+      1536,
+      1024
+    ],
+    "runtimePath": "games/grelok/assets/sprites/gemstone_shards.png",
+    "pictureSize": [
+      40,
+      20
+    ],
+    "logicalSize": [
+      20,
+      10
+    ],
+    "opaqueColours": 5,
+    "partialAlpha": 0,
+    "offgridPixels": 0
+  },
+  {
+    "id": "icon_gemstone_shards",
+    "rawPath": "art/raw/icon_gemstone_shards.png",
+    "rawSize": [
+      1254,
+      1254
+    ],
+    "runtimePath": "games/grelok/assets/icons/gemstone_shards.png",
+    "pictureSize": [
+      48,
+      32
+    ],
+    "logicalSize": [
+      24,
+      16
+    ],
+    "opaqueColours": 6,
+    "partialAlpha": 0,
+    "offgridPixels": 0
+  }
+]

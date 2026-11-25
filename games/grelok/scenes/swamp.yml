@@ -1,32 +1,46 @@
-# Scene for location "swamp". Coordinates: x 0-319, y 0-143. Music is added in Step 15.
+# Scene for location "swamp". Coordinates: x 0-319, y 0-143.
+# Layout follows the approved preview in art/briefs/04-swamp-generation-log.md: the wizard's tower on its island left
+# of centre (part of the background), the wizard in its window, the dry shore in front, the path east at the right.
 
 background: backgrounds/swamp.png
-walkmask: walkmasks/swamp.png   # white = walkable
+walkmask: walkmasks/swamp.png   # white = walkable; painted from walkArea below (npm run walkmask -- grelok swamp)
 music: music/swamp.mp3   # loops while the player is here; changing scene crossfades to the next tune
 scale: {top: 0.6, bottom: 1.0}   # Grognak is drawn at 60% on the farthest floor row, 100% on the nearest
 
+# The floor, traced from the background: the dry muddy shore across the front, and the path that climbs to the right
+# edge (the way back east). Not the water, not the island.
+walkArea:
+  floor:
+    - [[0, 122], [230, 122], [258, 106], [274, 98], [296, 97], [320, 99], [320, 144], [0, 144]]
+
 hotspots:   # later entries are on top
-  - id: wizards_tower
-    polygon: [[130, 10], [200, 10], [200, 80], [130, 80]]
-    walkTo: [170, 100]
+  - id: wizards_tower   # across the water: he looks at it from the shore
+    polygon: [[89, 4], [129, 4], [129, 92], [89, 92]]
+    walkTo: [110, 126]
     facing: n
-  - id: wizard
-    polygon: [[150, 14], [175, 14], [175, 34], [150, 34]]
-    walkTo: [165, 100]
+  - id: wizard   # in the tower window
+    polygon: [[97, 47], [120, 47], [120, 69], [97, 69]]
+    walkTo: [110, 126]
     facing: n
-  - id: gemstone_shards
-    polygon: [[100, 110], [120, 110], [120, 120], [100, 120]]
-    walkTo: [110, 124]
+  - id: gemstone_shards   # fall onto the shore in front when the wizard splits the gemstone
+    polygon: [[124, 128], [146, 128], [146, 138], [124, 138]]
+    walkTo: [135, 126]
+    facing: s
 
 sprites:
+  - id: wizard
+    thing: wizard
+    x: 108.5
+    y: 69
+    image: sprites/wizard.png
   - id: gemstone_shards
     thing: gemstone_shards
-    x: 110
-    y: 120
+    x: 135
+    y: 138
     image: sprites/gemstone_shards.png
 
 exits:
-  - direction: e
-    polygon: [[300, 40], [320, 40], [320, 130], [300, 130]]
-    walkTo: [292, 110]
-    spawn: [286, 110]
+  - direction: e   # the path back to the plain
+    polygon: [[298, 92], [320, 92], [320, 120], [298, 120]]
+    walkTo: [312, 100]
+    spawn: [298, 104]

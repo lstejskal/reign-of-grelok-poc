@@ -256,9 +256,9 @@ test('Give gemstone to wizard takes the gemstone out of the inventory', async ({
   await dismissAnswer(page); // the room description covers the top of the scene, where the wizard stands
   await clickVerb(page, 'give');
   await clickInventoryItem(page, 'gemstone');
-  await moveMouseTo(page, 160, 20);
+  await moveMouseTo(page, 108, 58); // the wizard in his tower window
   await expect.poll(() => sentence(page)).toBe('Give gemstone to wizard');
-  await clickAt(page, 160, 20);
+  await clickAt(page, 108, 58);
 
   await expect.poll(() => page.evaluate(() => window.__adv.answer)).toContain('Eye of Grub');
   expect(await page.evaluate(() => window.__adv.inventory)).not.toContain('gemstone');

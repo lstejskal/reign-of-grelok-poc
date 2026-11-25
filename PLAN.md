@@ -346,6 +346,9 @@ mirror left↔right, walk bob via tween, talk = 2-frame mouth swap, idle = slow 
 - **Screen 2 (mountain):** brief 02 art in place: Grelok on his ledge, the rubble with the gemstone on it (scene
   sprites may set `depth:` to be drawn in front of what they lie on), floor traced as `walkArea:` (not up onto the
   ledge, not through the rubble).
+- **Screen 4 (swamp):** brief 04 art in place: the tower is part of the background, the wizard a sprite in its window
+  (at x 108.5: half scene pixels are fine, art has 2 pixels per scene pixel), the shards drop onto the shore in front;
+  floor = the shore plus the path to the east exit.
 - **Screens 5-6 (chapel, chapel interior):** brief 05/06 art in place. Hotspots may have `when:` (like sprite states),
   so a thing that moves is clicked where it is now: the zombie stands at the door, then lies in the open grave (its
   sprite state also sets `x/y/depth`); the door leaf is clickable only while locked, after that the doorway is the

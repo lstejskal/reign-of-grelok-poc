@@ -1,0 +1,28 @@
+{
+  "revealed": {
+    "sprites": [
+      {
+        "id": "gemstone_shards",
+        "image": "sprites/gemstone_shards.png",
+        "x": 110,
+        "y": 120,
+        "depth": 120
+      }
+    ],
+    "inventory": [
+      "rusty_sword"
+    ],
+    "background": "asset:backgrounds/swamp.png",
+    "shardsWidth": 40
+  },
+  "pickedUp": {
+    "sprites": [],
+    "inventory": [
+      "rusty_sword",
+      "gemstone_shards"
+    ],
+    "iconWidth": 48
+  },
+  "returnToPlain": true,
+  "pageErrors": []
+}
