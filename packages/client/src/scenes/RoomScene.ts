@@ -37,6 +37,12 @@ const DOUBLE_CLICK_MS = 400;
 
 /** Each half (out, in) of the fade between scenes, in milliseconds. */
 const FADE_MS = 200;
+/**
+ * Speech is drawn in the speaker's colour on top of the scene, which may be just as colourful (orange words on an orange
+ * sunset). Eight dark copies, one pixel off in every direction, outline every letter, like subtitles.
+ */
+const SPEECH_OUTLINE: readonly (readonly [number, number])[] = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
+const SPEECH_OUTLINE_COLOR = 0x140c14;
 /** Verbs Grognak does with his hands: he reaches out before the engine hears them. */
 const REACH_VERBS: ReadonlySet<string> = new Set(['pick_up', 'use', 'give', 'push']);
 
@@ -104,7 +110,8 @@ export class RoomScene extends Phaser.Scene {
   /** What people are saying, one page at a time, above their heads. */
   private readonly speech = new SpeechQueue();
   private speechText!: Phaser.GameObjects.BitmapText;
-  private speechShadow!: Phaser.GameObjects.BitmapText;
+  /** Dark copies of the speech text around it: an outline, so coloured words stay readable on any background. */
+  private speechOutline: Phaser.GameObjects.BitmapText[] = [];
   /** The open talk menu: who we are talking to and what can be asked. */
   private dialog: { npc: string; speaker: string; choices: DialogChoice[] } | undefined;
   private dialogPanel!: Phaser.GameObjects.Rectangle;
@@ -270,7 +277,7 @@ export class RoomScene extends Phaser.Scene {
       this.choiceLabels.push(this.add.bitmapText(r.x, r.y + 1, PIXEL_FONT, '').setDepth(301).setVisible(false));
     }
     // speech: coloured text with a black copy one pixel lower-right, so it reads on any background
-    this.speechShadow = this.add.bitmapText(0, 0, PIXEL_FONT, '').setTint(0x000000).setDepth(450).setOrigin(0.5, 1).setCenterAlign();
+    this.speechOutline = SPEECH_OUTLINE.map(() => this.add.bitmapText(0, 0, PIXEL_FONT, '').setTint(SPEECH_OUTLINE_COLOR).setDepth(450).setOrigin(0.5, 1).setCenterAlign());
     this.speechText = this.add.bitmapText(0, 0, PIXEL_FONT, '').setDepth(451).setOrigin(0.5, 1).setCenterAlign();
     this.verbs.forEach((spec, i) => {
       const r = verbRect(i);
@@ -711,17 +718,17 @@ export class RoomScene extends Phaser.Scene {
   private drawSpeech(): void {
     const line = this.speechNow;
     this.speechText.setVisible(line !== undefined);
-    this.speechShadow.setVisible(line !== undefined);
+    for (const copy of this.speechOutline) copy.setVisible(line !== undefined);
     if (!line) return;
     this.speechText.setText(line.text).setTint(Number.parseInt(line.color.slice(1), 16));
-    this.speechShadow.setText(line.text);
+    for (const copy of this.speechOutline) copy.setText(line.text);
     const [ax, ay] = this.speechAnchor(line.speaker);
     // keep the whole bubble inside the picture
     const half = this.speechText.width / 2;
-    const x = Math.round(Math.min(Math.max(ax, half + 2), SCENE_WIDTH - half - 2));
-    const y = Math.round(Math.max(ay, this.speechText.height + 2));
+    const x = Math.round(Math.min(Math.max(ax, half + 3), SCENE_WIDTH - half - 3));
+    const y = Math.round(Math.max(ay, this.speechText.height + 3));
     this.speechText.setPosition(x, y);
-    this.speechShadow.setPosition(x + 1, y + 1);
+    this.speechOutline.forEach((copy, i) => copy.setPosition(x + SPEECH_OUTLINE[i]![0], y + SPEECH_OUTLINE[i]![1]));
   }
 
   private startDialog(npc: string): void {
