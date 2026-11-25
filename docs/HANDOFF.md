@@ -88,7 +88,7 @@ Codex's instructions: `art/briefs/08-ui-handoff.md` (positions, scales, cursor h
 - Tests: update `tests/e2e` title screenshots if needed; add one check that the title uses the logo texture.
   Restart the dev server first.
 
-### Task 4 - Smaller polish (any order, optional; PLAN.md step 19 has more)
+### Task 4 - Step 19 (polish) is DONE (see PLAN.md). Still possible later:
 - Grelok finale poses (laugh, death) and NPC talk animations: need art briefs first (Codex), then code.
 - Step 18 (music and sound from an AI music tool; `ffmpeg` is installed via winget) and step 20 (builds).
 

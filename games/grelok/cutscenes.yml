@@ -47,11 +47,12 @@ use_shining_sword_on_grelok:
   - wait: 0.6
   - narrate: {message: use_shining_sword_on_grelok}
   - end:
-      lines:
+      lines:   # at most 9 lines fit above "click to continue"
         - Reign of Grelok
-        - ""
         - A proof of concept
-        - Hero Grognak
-        - Villain Grelok the Gruesome
+        - Hero Grognak, villain Grelok the Gruesome
+        - Made with Claude and Codex
         - ""
-        - Made with Claude
+        - Based on Reign of Grelok,
+        - the terminal game hidden in Fallout 3
+        - by Bethesda Game Studios. Thank you!

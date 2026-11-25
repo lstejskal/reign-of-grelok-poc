@@ -23,10 +23,12 @@ import { SpeechQueue, interpretSay } from '../ui/speech';
 import { Sequencer } from '../cutscene/Sequencer';
 import { MenuPanel } from '../ui/MenuPanel';
 import { volumeLabel } from '../audio/mix';
-import { SLOTS as SAVE_SLOTS, makeSave, slotLabel } from '../save/saveGame';
+import { SLOTS as SAVE_SLOTS, browserStore, makeSave, slotLabel } from '../save/saveGame';
 import type { SavedPlayer, Slot } from '../save/saveGame';
 import type { CutsceneActor } from '../cutscene/Sequencer';
-import { verbsOf } from '../ui/verbs';
+import { verbKeys, verbsOf } from '../ui/verbs';
+import { cycleTextSpeed, loadTextSpeed } from '../ui/settings';
+import type { TextSpeed } from '../ui/settings';
 import type { VerbSpec } from '../ui/verbs';
 import { MENU_BUTTON, SENTENCE_Y, TEXT_BOX, TEXT_BOX_CHARS, TEXT_BOX_LINES, TEXT_BOX_TEXT, inRect, verbAt, verbRect } from '../ui/layout';
 import { SCROLL_LEFT, SCROLL_RIGHT, SLOTS, clampScroll, itemAt, maxScroll, slotRect, visibleItems } from '../ui/inventory';
@@ -107,6 +109,13 @@ export class RoomScene extends Phaser.Scene {
   private readonly areas = new Map<string, WalkArea>();
 
   private verbs: readonly VerbSpec[] = [];
+  /** How fast spoken lines go by (menu: Text speed), remembered in the browser. */
+  private textSpeed: TextSpeed = loadTextSpeed(browserStore());
+  /** The name of what the mouse points at, next to the pointer: [shadow, text]. */
+  private cursorLabel: Phaser.GameObjects.BitmapText[] = [];
+  /** The game's own pointer (from game.yml ui.cursor, or the browser's), and whether it now shows busy instead. */
+  private baseCursor = '';
+  private cursorBusy = false;
   private builder = new SentenceBuilder();
   private readonly pager = new TextPager(TEXT_BOX_CHARS, TEXT_BOX_LINES);
   /** What people are saying, one page at a time, above their heads. */
@@ -285,6 +294,10 @@ export class RoomScene extends Phaser.Scene {
     // speech: coloured text with a black copy one pixel lower-right, so it reads on any background
     this.speechOutline = SPEECH_OUTLINE.map(() => this.add.bitmapText(0, 0, PIXEL_FONT, '').setTint(SPEECH_OUTLINE_COLOR).setDepth(450).setOrigin(0.5, 1).setCenterAlign());
     this.speechText = this.add.bitmapText(0, 0, PIXEL_FONT, '').setDepth(451).setOrigin(0.5, 1).setCenterAlign();
+    // the name at the pointer: a dark shadow copy and the text (below speech and the text box)
+    this.cursorLabel = [0x140c14, 0xf0f0f0].map((tint) => this.add.bitmapText(0, 0, PIXEL_FONT, '').setTint(tint).setDepth(440).setOrigin(0.5, 1).setVisible(false));
+    this.baseCursor = this.input.manager.defaultCursor;
+    this.cursorBusy = false;
     this.verbs.forEach((spec, i) => {
       const r = verbRect(i);
       this.verbLabels.set(spec.verb, this.add.bitmapText(r.x, r.y + 1, PIXEL_FONT, spec.label));
@@ -351,9 +364,10 @@ export class RoomScene extends Phaser.Scene {
 
   /** Runs every frame. `delta` is the milliseconds since the last frame; movement is always speed x time. */
   update(_time: number, delta: number): void {
+    this.refreshCursor();
     this.player.talking = this.speechNow?.speaker === this.session.bundle.speakers.default; // the player's own words
     this.player.update(delta);
-    this.speech.update((delta / 1000) * (debugState.speedFactor ?? 1), this.pager.current !== '');
+    this.speech.update((delta / 1000) * (debugState.speedFactor ?? 1) * this.textSpeed.factor, this.pager.current !== '');
     this.drawSpeech();
     this.waiters = this.waiters.filter((w) => !(w.done() && (w.resolve(), true)));
     // the game is won (or lost) and everything has been read: show the end screen (a cutscene may have shown it already)
@@ -411,11 +425,24 @@ export class RoomScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-ESC', () => {
       if (document.activeElement instanceof HTMLInputElement) return; // Esc belongs to the debug console then
       if (this.menu.visible) this.menu.hide();
+      else if (this.sequencer.running) this.sequencer.skip(); // Esc skips a cutscene (its result still shows)
       else if (this.locked) return;
       else if (!this.builder.idle || this.dialog) {
         this.builder.cancel(); // Esc first cancels what is half done...
         this.endDialog();
       } else this.openMenu(); // ...and with nothing to cancel it opens the menu
+      this.refreshUi();
+    });
+
+    // letters: F = fullscreen, and a shortcut for every verb (the first free letter of its label, see verbKeys)
+    const keys = verbKeys(this.verbs);
+    this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
+      if (document.activeElement instanceof HTMLInputElement || event.ctrlKey || event.metaKey || event.altKey) return;
+      const key = event.key.toUpperCase();
+      if (key === 'F') return this.toggleFullscreen();
+      const verb = keys.get(key);
+      if (verb === undefined || this.locked || this.menu.visible || this.dialog) return;
+      this.builder.selectVerb(verb);
       this.refreshUi();
     });
   }
@@ -548,6 +575,8 @@ export class RoomScene extends Phaser.Scene {
       { label: 'Save', onChoose: () => this.showSlots('save') },
       { label: 'Load', enabled: hasSave, onChoose: () => this.showSlots('load') },
       { label: `Volume: ${volumeLabel(this.session.audio.settings)}`, onChoose: () => { this.session.audio.cycleVolume(); this.openMenu(); } },
+      { label: `Text speed: ${this.textSpeed.label}`, onChoose: () => { this.textSpeed = cycleTextSpeed(browserStore(), this.textSpeed); this.openMenu(); } },
+      { label: `Fullscreen: ${this.scale.isFullscreen ? 'ON' : 'OFF'}`, onChoose: () => { this.menu.hide(); this.toggleFullscreen(); } },
       { label: 'Quit to title', onChoose: () => this.quitToTitle() },
       { label: 'Back', onChoose: () => this.menu.hide() },
     ]);
@@ -605,7 +634,14 @@ export class RoomScene extends Phaser.Scene {
     this.returnToTitle();
   }
 
+  /** The whole screen or back to the window (F, or the menu). The canvas keeps its whole-number zoom (see scale.ts). */
+  private toggleFullscreen(): void {
+    if (this.scale.isFullscreen) this.scale.stopFullscreen();
+    else this.scale.startFullscreen();
+  }
+
   private returnToTitle(): void {
+    this.input.setDefaultCursor(this.baseCursor); // never leave a busy pointer behind
     this.session.audio.setMusic(undefined);
     this.scene.start('TitleScene', { session: this.session });
   }
@@ -684,6 +720,12 @@ export class RoomScene extends Phaser.Scene {
       this.refreshUi();
     },
     end: (lines) => this.showEnd(lines),
+    hurry: () => {
+      this.player.skipWalk(); // a walk ends at its destination
+      for (const tween of this.tweens.getTweensOf(this.cutsceneFade)) tween.complete(); // a fade ends where it was going
+      this.cameras.main.resetFX(); // a shake stops
+      this.speech.clear(); // a spoken line goes away
+    },
   };
 
   /** The end screen: black, THE END, and some credits. After it nothing can be done. */
@@ -922,7 +964,40 @@ export class RoomScene extends Phaser.Scene {
   }
 
   /** Bring every piece of the UI strip in line with the builder and the pager. */
+  /**
+   * The name of what the mouse points at, just above the pointer in the scene (the classic games showed it there
+   * too; the sentence line below says what clicking will do). Hidden while the player cannot act.
+   */
+  private drawCursorLabel(): void {
+    const [px, py] = this.pointer ?? [0, 0];
+    let name = '';
+    if (this.pointer && py < SCENE_HEIGHT && !this.locked && !this.menu.visible && !this.dialog && !this.transitioning) {
+      if (this.hovered !== undefined) name = Thing.aliasToName(this.hovered);
+      else if (this.hoveredExit) {
+        const { locations } = this.session.bundle.logic;
+        const to = locations[this.shownLocation]?.directions[this.hoveredExit.direction];
+        name = to === undefined ? '' : (locations[to]?.name ?? to);
+      }
+    }
+    for (const label of this.cursorLabel) label.setText(name.toUpperCase()).setVisible(name !== '');
+    if (name === '') return;
+    const half = this.cursorLabel[1]!.width / 2;
+    const x = Math.round(Math.min(Math.max(px, half + 2), SCENE_WIDTH - half - 2));
+    const y = py < 16 ? py + 22 : py - 4; // above the pointer, or below it at the very top
+    this.cursorLabel[0]!.setPosition(x + 1, y + 1);
+    this.cursorLabel[1]!.setPosition(x, y);
+  }
+
+  /** While a cutscene plays the pointer shows it is busy (it still reads on with a click). */
+  private refreshCursor(): void {
+    const busy = this.sequencer.running;
+    if (busy === this.cursorBusy) return;
+    this.cursorBusy = busy;
+    this.input.setDefaultCursor(busy ? 'progress' : this.baseCursor);
+  }
+
   private refreshUi(): void {
+    this.drawCursorLabel();
     this.sentenceLine.setText(this.exitAwareSentence());
     // centre on whole pixels (half pixels would blur a pixel font)
     this.sentenceLine.setX(Math.round(GAME_WIDTH / 2 - this.sentenceLine.width / 2));

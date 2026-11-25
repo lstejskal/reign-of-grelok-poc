@@ -24,6 +24,11 @@ function fakeActor() {
     music: (n) => void calls.push(`music ${n}`),
     sync: () => void calls.push('sync'),
     end: (lines) => void calls.push(`end ${lines.length}`),
+    hurry: () => {
+      // finishes everything that is moving: the real actor ends walks, fades, shakes and speech
+      calls.push('hurry');
+      for (const release of releases.splice(0)) release();
+    },
   };
   /** Finish the step that is waiting, and give the sequencer a moment to carry on. */
   const finishCurrent = async () => {
@@ -55,6 +60,26 @@ describe('Sequencer', () => {
     await done;
     expect(calls.at(-1)).toBe('sfx clang');
     expect(sequencer.log).toEqual(['face e', 'wait 1', 'sync', 'narrate hello', 'sfx clang']);
+  });
+
+  it('skip: leaves out what only takes time, finishes moves at once, but still syncs, narrates and ends', async () => {
+    const { actor, calls, finishCurrent } = fakeActor();
+    const sequencer = new Sequencer();
+    const done = sequencer.play(
+      steps({ wait: 2 }, 'sync', { fade: 'out' }, { say: { speaker: 'grelok', text: 'No!' } }, { sfx: 'boom' }, { narrate: { message: 'won' } }, { end: { lines: [] } }),
+      actor,
+      text,
+    );
+    await new Promise((r) => setTimeout(r, 0));
+    expect(calls).toEqual(['wait 2']);
+    sequencer.skip(); // Esc in the middle of the wait
+    await new Promise((r) => setTimeout(r, 0));
+    expect(calls).toEqual(['wait 2', 'hurry', 'sync', 'fade out', 'hurry', 'narrate <won>']); // no say, no sfx
+    expect(sequencer.running).toBe(true); // the result is still there to read
+    await finishCurrent();
+    await done;
+    expect(calls.at(-1)).toBe('end 0');
+    expect(sequencer.running).toBe(false);
   });
 
   it('is running (input locked) from the start until the last step, and not after', async () => {

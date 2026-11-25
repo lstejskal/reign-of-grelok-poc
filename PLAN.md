@@ -12,7 +12,7 @@ step-by-step instructions are in `docs/HANDOFF.md`.
 | 1–16 | Engine, scenes, verbs, inventory, walking, exits, dialogs, sprites, cutscenes, save/load, demo game, audio system, art pipeline | ✅ Done |
 | 17 | Art pass: all six screens, title and interface art, player animation system, perspective sizes | 🟡 Nearly done: only **Grognak's new animation sheet** (brief 07) is left: drafts in `art/wip/grognak-07/`, the side walk needs its second row redone, then import (HANDOFF Task 2) |
 | 18 | Music & SFX pass (real tracks instead of the generated placeholders) | ⬜ To do |
-| 19 | Polish (cursor states, text speed, fullscreen, verb shortcuts, skip cutscene, credits…) | 🟡 Started: custom cursor, readable speech outline, return to the title after THE END; the rest of the list is open |
+| 19 | Polish (cursor states, text speed, fullscreen, verb shortcuts, skip cutscene, credits…) | ✅ Done: cursor (custom, busy during cutscenes, name of what it points at), text speed, fullscreen, verb keys, Esc skips cutscenes, credits, return to title, mouse-only walkthrough test |
 | 20 | Builds & distribution (web zip for itch.io, desktop app) | ⬜ To do |
 
 ---
@@ -411,9 +411,13 @@ mirror left↔right, walk bob via tween, talk = 2-frame mouth swap, idle = slow 
   text speed setting, fullscreen toggle, keyboard shortcuts for verbs, "skip cutscene" (Esc), credits including
   original Bethesda Easter egg credit.
 - **Output:** feels like a classic LucasArts game. **Test:** existing suite green; e2e full walkthrough via clicks.
-- **Status: started.** Done so far: custom mouse cursor (brief 08 art), dark outline around speech text, a click on
-  the end screen returns to the title. Still open: cursor states, hotspot name at the cursor, text speed, fullscreen,
-  verb shortcuts, skip cutscene, Bethesda credit, full walkthrough by clicks in e2e.
+- **Status: done.** Custom pointer (brief 08) that shows busy (`progress`) while a cutscene plays; the name of what
+  the mouse points at just above the pointer (instead of a highlighted cursor, which would need more art); menu rows
+  Text speed (SLOW/NORMAL/FAST, remembered: `ui/settings.ts`) and Fullscreen (also the F key); verb keys = the first
+  free letter of each label (G P U L T S, `verbKeys`); Esc skips a cutscene (`Sequencer.skip`: what only takes time
+  is left out, walks and fades finish at once, the result is still narrated); credits with the Bethesda credit
+  (`cutscenes.yml`); speech outlined; a click on the end screen returns to the title. Test: `tests/e2e/polish.spec.ts`
+  plays the whole game with the mouse alone.
 
 ### Step 20 — Builds & distribution
 - `npm run build` → static web build (itch.io-ready zip).

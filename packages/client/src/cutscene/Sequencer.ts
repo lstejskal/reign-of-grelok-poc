@@ -17,7 +17,12 @@ export interface CutsceneActor {
   music(name: string): void;
   sync(): void;
   end(lines: string[]): void;
+  /** Skipping: finish whatever is moving right now (the walk, the fade, the shake, a spoken line) at once. */
+  hurry(): void;
 }
+
+/** Steps that only take time; a skipped cutscene leaves them out. (Walks and fades still happen, instantly.) */
+const ONLY_TAKE_TIME: ReadonlySet<CutsceneStep['type']> = new Set(['wait', 'shake', 'say', 'sfx']);
 
 /** A short description of a step, for logs and tests ("wait 0.5", "sfx clang"). */
 export function describeStep(step: CutsceneStep): string {
@@ -57,6 +62,11 @@ export class Sequencer {
   private waiting = 0;
   /** What has been played, in order (the last 50 steps): handy in tests and when debugging a cutscene. */
   readonly log: string[] = [];
+  /** The player asked to skip the cutscene that plays now. */
+  private skipping = false;
+  private actorNow: CutsceneActor | undefined;
+  /** Resolves the step being waited for when a skip is asked for in the middle of it. */
+  private interrupt: (() => void) | undefined;
 
   constructor(private readonly onError: (error: unknown) => void = console.error) {}
 
@@ -64,19 +74,42 @@ export class Sequencer {
     return this.waiting > 0;
   }
 
+  /**
+   * Skip the cutscene that plays now (Esc). What only takes time (waits, shakes, spoken lines, sounds) is left out;
+   * walks and fades finish at once; what changes the story (sync, narration, music, the end screen) still happens, so
+   * the world ends up exactly as after watching it. Narration still waits for a click: it is the result to read.
+   */
+  skip(): void {
+    if (!this.running || this.skipping) return;
+    this.skipping = true;
+    this.actorNow?.hurry();
+    this.interrupt?.();
+  }
+
   /** Play `steps` (after any cutscene already playing). Resolves when they are all done. */
   play(steps: readonly CutsceneStep[], actor: CutsceneActor, messageText: (key: string) => string): Promise<void> {
     this.waiting++;
     const run = async () => {
+      this.skipping = false;
+      this.actorNow = actor;
       try {
         for (const step of steps) {
           this.log.push(describeStep(step));
           if (this.log.length > 50) this.log.shift();
-          await this.perform(step, actor, messageText);
+          if (this.skipping && ONLY_TAKE_TIME.has(step.type)) continue;
+          const done = this.perform(step, actor, messageText);
+          const toRead = step.type === 'narrate' || step.type === 'end';
+          if (this.skipping && (step.type === 'walk' || step.type === 'fade')) actor.hurry(); // started while skipping: finish it now
+          // a skip asked for in the middle of a step that only moves things along ends that step at once
+          if (toRead) await done;
+          else await Promise.race([done, new Promise<void>((resolve) => (this.interrupt = resolve))]);
+          this.interrupt = undefined;
         }
       } catch (error) {
         this.onError(error);
       } finally {
+        this.skipping = false;
+        this.actorNow = undefined;
         this.waiting--;
       }
     };
