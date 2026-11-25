@@ -1,0 +1,183 @@
+[
+  {
+    "id": "grognak_walk_e",
+    "rawPath": "art/raw/grognak_walk_e.png",
+    "brief": "art/briefs/07-grognak-animation.md",
+    "approvalRequired": true,
+    "approvalStatus": "approved",
+    "references": [
+      "C:/Users/lukas/Documents/projects/reign-of-grelok-poc/art/reference/grognak_ref.png"
+    ],
+    "requestedRawSize": [
+      1536,
+      1024
+    ],
+    "grid": [
+      3,
+      2
+    ],
+    "frameSize": [
+      64,
+      96
+    ],
+    "poses": [
+      "near-leg contact",
+      "near-leg down",
+      "near-leg passing",
+      "far-leg contact",
+      "far-leg down",
+      "far-leg passing"
+    ],
+    "prompt": "Generate the Grognak walk_e animation as a single 1536×1024 PNG with exactly 3 columns and 2 rows.\n\nImage 1 is the approved Grognak character reference for exact identity, silhouette and material colours. Preserve his stocky muscular proportions, hands, horned blue-grey steel helmet with off-white bone horns, dark chestnut hair and beard braids, peach-tan skin, leather strap, wide belt and metal buckle, dark-chocolate fur loincloth and boot fur, dark leather boots, and his exact steel broadsword. The sword stays in his anatomical right hand in every frame; viewer-left in front view, viewer-right in rear view, near hand in right-facing side view. Never transfer it to the gesturing hand. The allowed changes are the requested view and pose. Keep weapon, extremities and horn tips inside the cells.\n\nOriginal 16-bit Sega Mega Drive fantasy arcade pixel art for Reign of Grelok. Crisp deliberate square pixel clusters, dark plum #340034 silhouette outline, 2–3 flat tones per material, upper-left light, approximately 16 colours for shared final sprite palette. Pure perfectly flat opaque #FF00FF background in every gap and margin, no magenta on subject, no transparency, background shadows, scenery, text, grid lines, framing, watermark, blur, anti-aliasing or gradient.\n\nArrange one complete figure per equal-sized cell, read left to right and then top to bottom. Match apparent character scale, body centre and support-foot baseline between cells, with feet close to but inside the lower cell edge. Include clean magenta gutters without drawing grid marks. The game frame is 64×96 picture pixels. Keep the head, torso, leg sides, stepped boot placement and hand poses clear at that size; retain the scale of the character’s anatomy.\n\nExactly side view facing viewer-right, one full step per row. Always hold the sword in the near hand pointing down. Row 1 left: CONTACT, near leg extends to the right heel-first, far leg stretches back left onto its toe, legs far apart, arms counter-swing. Row 1 middle: DOWN, near foot flat forward, near knee clearly bent, body visibly lowest, far foot lifting. Row 1 right: PASSING, near leg straight under body, far bent leg swinging past it, feet closer, body visibly highest. Row 2 left: CONTACT, far leg extends to the right heel-first and near leg stretches back left onto its toe; reverse arm swing. Row 2 middle: DOWN, far foot flat, far knee clearly bent, body lowest, near foot lifting. Row 2 right: PASSING, far leg straight under body, near bent leg swinging past, feet closer, body highest. Make each contact visibly alternate the leading leg. Each down pose must show shock absorption distinct from contact. Each passing pose has a clear narrow leg profile distinct from both. Head and torso only bob slightly. The game mirrors this animation for left walking; do not draw separate left-facing poses.",
+    "approvalNote": "User approved the right-hand recolour comparison on 2026-11-25."
+  },
+  {
+    "id": "grognak_walk_s",
+    "rawPath": "art/raw/grognak_walk_s.png",
+    "brief": "art/briefs/07-grognak-animation.md",
+    "approvalRequired": true,
+    "approvalStatus": "approved",
+    "references": [
+      "C:/Users/lukas/Documents/projects/reign-of-grelok-poc/art/reference/grognak_ref.png"
+    ],
+    "requestedRawSize": [
+      1024,
+      1024
+    ],
+    "grid": [
+      2,
+      2
+    ],
+    "frameSize": [
+      64,
+      96
+    ],
+    "poses": [
+      "right foot forward",
+      "passing",
+      "left foot forward",
+      "passing"
+    ],
+    "prompt": "Generate the Grognak walk_s animation as a single 1024×1024 PNG with exactly 2 columns and 2 rows.\n\nImage 1 is the approved Grognak character reference for exact identity, silhouette and material colours. Preserve his stocky muscular proportions, hands, horned blue-grey steel helmet with off-white bone horns, dark chestnut hair and beard braids, peach-tan skin, leather strap, wide belt and metal buckle, dark-chocolate fur loincloth and boot fur, dark leather boots, and his exact steel broadsword. The sword stays in his anatomical right hand in every frame; viewer-left in front view, viewer-right in rear view, near hand in right-facing side view. Never transfer it to the gesturing hand. The allowed changes are the requested view and pose. Keep weapon, extremities and horn tips inside the cells.\n\nOriginal 16-bit Sega Mega Drive fantasy arcade pixel art for Reign of Grelok. Crisp deliberate square pixel clusters, dark plum #340034 silhouette outline, 2–3 flat tones per material, upper-left light, approximately 16 colours for shared final sprite palette. Pure perfectly flat opaque #FF00FF background in every gap and margin, no magenta on subject, no transparency, background shadows, scenery, text, grid lines, framing, watermark, blur, anti-aliasing or gradient.\n\nArrange one complete figure per equal-sized cell, read left to right and then top to bottom. Match apparent character scale, body centre and support-foot baseline between cells, with feet close to but inside the lower cell edge. Include clean magenta gutters without drawing grid marks. The game frame is 64×96 picture pixels. Keep the head, torso, leg sides, stepped boot placement and hand poses clear at that size; retain the scale of the character’s anatomy.\n\nWalk toward the viewer in front view. Top left, his right foot at viewer-left forward and lower, body tilted slightly, opposite arm forward. Top right, passing with feet together under the body and torso at its highest. Bottom left, his left foot at viewer-right forward and lower, opposite arm forward. Bottom right, passing with feet together again. Make the alternating forward boot positions unmistakable. Sword remains in his right hand at viewer-left.",
+    "approvalNote": "User approved the right-hand recolour comparison on 2026-11-25."
+  },
+  {
+    "id": "grognak_walk_n",
+    "rawPath": "art/raw/grognak_walk_n.png",
+    "brief": "art/briefs/07-grognak-animation.md",
+    "approvalRequired": true,
+    "approvalStatus": "approved",
+    "references": [
+      "C:/Users/lukas/Documents/projects/reign-of-grelok-poc/art/reference/grognak_ref.png"
+    ],
+    "requestedRawSize": [
+      1024,
+      1024
+    ],
+    "grid": [
+      2,
+      2
+    ],
+    "frameSize": [
+      64,
+      96
+    ],
+    "poses": [
+      "left foot forward",
+      "passing",
+      "right foot forward",
+      "passing"
+    ],
+    "prompt": "Generate the Grognak walk_n animation as a single 1024×1024 PNG with exactly 2 columns and 2 rows.\n\nImage 1 is the approved Grognak character reference for exact identity, silhouette and material colours. Preserve his stocky muscular proportions, hands, horned blue-grey steel helmet with off-white bone horns, dark chestnut hair and beard braids, peach-tan skin, leather strap, wide belt and metal buckle, dark-chocolate fur loincloth and boot fur, dark leather boots, and his exact steel broadsword. The sword stays in his anatomical right hand in every frame; viewer-left in front view, viewer-right in rear view, near hand in right-facing side view. Never transfer it to the gesturing hand. The allowed changes are the requested view and pose. Keep weapon, extremities and horn tips inside the cells.\n\nOriginal 16-bit Sega Mega Drive fantasy arcade pixel art for Reign of Grelok. Crisp deliberate square pixel clusters, dark plum #340034 silhouette outline, 2–3 flat tones per material, upper-left light, approximately 16 colours for shared final sprite palette. Pure perfectly flat opaque #FF00FF background in every gap and margin, no magenta on subject, no transparency, background shadows, scenery, text, grid lines, framing, watermark, blur, anti-aliasing or gradient.\n\nArrange one complete figure per equal-sized cell, read left to right and then top to bottom. Match apparent character scale, body centre and support-foot baseline between cells, with feet close to but inside the lower cell edge. Include clean magenta gutters without drawing grid marks. The game frame is 64×96 picture pixels. Keep the head, torso, leg sides, stepped boot placement and hand poses clear at that size; retain the scale of the character’s anatomy.\n\nWalk away from the viewer, rear view showing his back, rear of his iron helmet and curved horns, and the readable hanging braids. Top left, his left leg at viewer-left steps forward away from the camera and the back heel lifts. Top right, passing with feet together and torso highest. Bottom left, his right leg at viewer-right steps away and the opposite rear heel lifts. Bottom right, passing with feet together again. Make left and right steps visibly distinct. Sword stays in his right hand at viewer-right.",
+    "approvalNote": "User approved the right-hand recolour comparison on 2026-11-25."
+  },
+  {
+    "id": "grognak_idle",
+    "rawPath": "art/raw/grognak_idle.png",
+    "brief": "art/briefs/07-grognak-animation.md",
+    "approvalRequired": true,
+    "approvalStatus": "approved",
+    "references": [
+      "C:/Users/lukas/Documents/projects/reign-of-grelok-poc/art/reference/grognak_ref.png"
+    ],
+    "requestedRawSize": [
+      1536,
+      1024
+    ],
+    "grid": [
+      3,
+      1
+    ],
+    "frameSize": [
+      64,
+      96
+    ],
+    "poses": [
+      "front",
+      "back",
+      "right side"
+    ],
+    "prompt": "Generate the Grognak idle animation as a single 1536×1024 PNG with exactly 3 columns and 1 rows.\n\nImage 1 is the approved Grognak character reference for exact identity, silhouette and material colours. Preserve his stocky muscular proportions, hands, horned blue-grey steel helmet with off-white bone horns, dark chestnut hair and beard braids, peach-tan skin, leather strap, wide belt and metal buckle, dark-chocolate fur loincloth and boot fur, dark leather boots, and his exact steel broadsword. The sword stays in his anatomical right hand in every frame; viewer-left in front view, viewer-right in rear view, near hand in right-facing side view. Never transfer it to the gesturing hand. The allowed changes are the requested view and pose. Keep weapon, extremities and horn tips inside the cells.\n\nOriginal 16-bit Sega Mega Drive fantasy arcade pixel art for Reign of Grelok. Crisp deliberate square pixel clusters, dark plum #340034 silhouette outline, 2–3 flat tones per material, upper-left light, approximately 16 colours for shared final sprite palette. Pure perfectly flat opaque #FF00FF background in every gap and margin, no magenta on subject, no transparency, background shadows, scenery, text, grid lines, framing, watermark, blur, anti-aliasing or gradient.\n\nArrange one complete figure per equal-sized cell, read left to right and then top to bottom. Match apparent character scale, body centre and support-foot baseline between cells, with feet close to but inside the lower cell edge. Include clean magenta gutters without drawing grid marks. The game frame is 64×96 picture pixels. Keep the head, torso, leg sides, stepped boot placement and hand poses clear at that size; retain the scale of the character’s anatomy.\n\nStand casually and heroically. Left cell faces the viewer, middle cell shows the back, right cell faces viewer-right in clean side profile. The right-hand sword hangs down in all three. Match leg lengths, height, shoulders and side-view stance with the walk assets.\n\nThe requested portrait-like cells are 512×1024. Keep the entire three figures within the bottom 512 raw rows of the canvas with the same local figure height and foot margin as the 512×512 cells of the other sheets. Leave raw y0–511 completely blank #FF00FF. Put feet close to the full canvas bottom without clipping. This retains the 3×1 pose order and gives the handoff an optional empty-band crop for compatible cell coordinates.",
+    "approvalNote": "User approved the right-hand recolour comparison on 2026-11-25."
+  },
+  {
+    "id": "grognak_talk",
+    "rawPath": "art/raw/grognak_talk.png",
+    "brief": "art/briefs/07-grognak-animation.md",
+    "approvalRequired": true,
+    "approvalStatus": "approved",
+    "references": [
+      "C:/Users/lukas/Documents/projects/reign-of-grelok-poc/art/reference/grognak_ref.png"
+    ],
+    "requestedRawSize": [
+      1024,
+      1024
+    ],
+    "grid": [
+      2,
+      2
+    ],
+    "frameSize": [
+      64,
+      96
+    ],
+    "poses": [
+      "front mouth closed",
+      "front mouth open and gesture",
+      "right side mouth closed",
+      "right side mouth open and gesture"
+    ],
+    "prompt": "Generate the Grognak talk animation as a single 1024×1024 PNG with exactly 2 columns and 2 rows.\n\nImage 1 is the approved Grognak character reference for exact identity, silhouette and material colours. Preserve his stocky muscular proportions, hands, horned blue-grey steel helmet with off-white bone horns, dark chestnut hair and beard braids, peach-tan skin, leather strap, wide belt and metal buckle, dark-chocolate fur loincloth and boot fur, dark leather boots, and his exact steel broadsword. The sword stays in his anatomical right hand in every frame; viewer-left in front view, viewer-right in rear view, near hand in right-facing side view. Never transfer it to the gesturing hand. The allowed changes are the requested view and pose. Keep weapon, extremities and horn tips inside the cells.\n\nOriginal 16-bit Sega Mega Drive fantasy arcade pixel art for Reign of Grelok. Crisp deliberate square pixel clusters, dark plum #340034 silhouette outline, 2–3 flat tones per material, upper-left light, approximately 16 colours for shared final sprite palette. Pure perfectly flat opaque #FF00FF background in every gap and margin, no magenta on subject, no transparency, background shadows, scenery, text, grid lines, framing, watermark, blur, anti-aliasing or gradient.\n\nArrange one complete figure per equal-sized cell, read left to right and then top to bottom. Match apparent character scale, body centre and support-foot baseline between cells, with feet close to but inside the lower cell edge. Include clean magenta gutters without drawing grid marks. The game frame is 64×96 picture pixels. Keep the head, torso, leg sides, stepped boot placement and hand poses clear at that size; retain the scale of the character’s anatomy.\n\nTop row is frontal speech. Left mouth shut with free hand by the side. Right mouth plainly open in the beard with chin dropped, free hand palm-up as if making a point. Bottom row is viewer-right side speech. Left mouth shut and free arm relaxed. Right mouth open and free hand raised forward. The moving jaw and beard must read at 64×96. Within each corresponding row keep the torso, legs, feet, weapon arm and upright sword position identical between the closed and open frames.",
+    "approvalNote": "User approved the right-hand recolour comparison on 2026-11-25."
+  },
+  {
+    "id": "grognak_reach",
+    "rawPath": "art/raw/grognak_reach.png",
+    "brief": "art/briefs/07-grognak-animation.md",
+    "approvalRequired": true,
+    "approvalStatus": "approved",
+    "references": [
+      "C:/Users/lukas/Documents/projects/reign-of-grelok-poc/art/reference/grognak_ref.png"
+    ],
+    "requestedRawSize": [
+      1024,
+      1024
+    ],
+    "grid": [
+      2,
+      2
+    ],
+    "frameSize": [
+      64,
+      96
+    ],
+    "poses": [
+      "right side half reach",
+      "right side full forward-down reach",
+      "front reach down",
+      "back reach forward-up"
+    ],
+    "prompt": "Generate the Grognak reach animation as a single 1024×1024 PNG with exactly 2 columns and 2 rows.\n\nImage 1 is the approved Grognak character reference for exact identity, silhouette and material colours. Preserve his stocky muscular proportions, hands, horned blue-grey steel helmet with off-white bone horns, dark chestnut hair and beard braids, peach-tan skin, leather strap, wide belt and metal buckle, dark-chocolate fur loincloth and boot fur, dark leather boots, and his exact steel broadsword. The sword stays in his anatomical right hand in every frame; viewer-left in front view, viewer-right in rear view, near hand in right-facing side view. Never transfer it to the gesturing hand. The allowed changes are the requested view and pose. Keep weapon, extremities and horn tips inside the cells.\n\nOriginal 16-bit Sega Mega Drive fantasy arcade pixel art for Reign of Grelok. Crisp deliberate square pixel clusters, dark plum #340034 silhouette outline, 2–3 flat tones per material, upper-left light, approximately 16 colours for shared final sprite palette. Pure perfectly flat opaque #FF00FF background in every gap and margin, no magenta on subject, no transparency, background shadows, scenery, text, grid lines, framing, watermark, blur, anti-aliasing or gradient.\n\nArrange one complete figure per equal-sized cell, read left to right and then top to bottom. Match apparent character scale, body centre and support-foot baseline between cells, with feet close to but inside the lower cell edge. Include clean magenta gutters without drawing grid marks. The game frame is 64×96 picture pixels. Keep the head, torso, leg sides, stepped boot placement and hand poses clear at that size; retain the scale of the character’s anatomy.\n\nTop left, right-facing side view with a slight lean and the free arm half extended forward at waist level. Top right, same right-facing side view, free arm fully extended forward and down with open hand as if reaching toward a low ledge or the ground. Bottom left, front view bending forward and reaching down toward the viewer with the free hand. Bottom right, rear view with the free arm reaching forward and up toward a higher object in front. Keep feet planted in all four frames, maintain same anatomy and weapon grip, and use a clear silhouette for each reach.",
+    "approvalNote": "User approved the right-hand recolour comparison on 2026-11-25."
+  }
+]

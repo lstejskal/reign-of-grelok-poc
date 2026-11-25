@@ -52,7 +52,10 @@ unit test in `tools/art/pipeline.test.ts` with two parts of different cell heigh
 on the same row and both keep the same size. Run `npm test`.
 
 ### Task 2 - Import Grognak's new animation sheet (brief 07; Claude preferred, Codex can do it carefully)
-Precondition: the six raws exist (`npm run import-art -- --list` shows `grognak` "raw ready") and Task 1 is done.
+Precondition: the six pictures are final. Today they wait in `art/wip/grognak-07/` (kept out of `art/raw/` so the art
+tests don't treat them as ready); the side walk `grognak_walk_e.png` still needs its second row redone
+(`art/briefs/07-walk-e-far-step-repair.md`). Then **move all six into `art/raw/`** (same names) and check that
+`npm run import-art -- --list` shows `grognak` "raw ready". Task 1 is done.
 1. `npm run import-art -- grognak`. It prints a `game.yml` block: `columns: 6`, `animations:` and `sizes:`.
 2. In `games/grelok/game.yml` `player:` add `columns: 6`, the `animations:` table and `walkStride: 40`, and replace
    `sizes:` with the printed list. Update the comment above `player:` (layout is now 6 columns, see brief 07).

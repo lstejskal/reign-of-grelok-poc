@@ -1,0 +1,37 @@
+{
+  "status": "Provisional measurements for five current source plates. Recheck after visual revisions and add reach before staging.",
+  "targetPelvisX": 256,
+  "targetBaselineY": 480,
+  "parts": {
+    "walk_e": {
+      "sha256": "8668252ed31f91691d00dc758e926ccf6d7996a81076543af99635344e37ec6f",
+      "scale": 0.79,
+      "sourcePelvisX": 190,
+      "sourceBaselineY": 648
+    },
+    "walk_s": {
+      "sha256": "19f04a41e7537a3f4f9ff4be429b284cde9b1bca5069452d25d1a5f8b7da506b",
+      "scale": 0.7,
+      "sourcePelvisX": 320,
+      "sourceBaselineY": 619
+    },
+    "walk_n": {
+      "sha256": "b4539cea72a6b1d5748c8becea2ba32b1c0ba84ecb4f6e53480aeb8881188c21",
+      "scale": 0.71,
+      "sourcePelvisX": 315,
+      "sourceBaselineY": 610
+    },
+    "idle": {
+      "sha256": "aa2f88eb8fc424febed7af4713952bccf172a16434face5632508a8b374f6fd6",
+      "scale": 0.65,
+      "sourcePelvisX": 262,
+      "sourceBaselineY": 1014
+    },
+    "talk": {
+      "sha256": "a42284b8d65c7be638c335185356f65b8f1b1cee47bfc06226525c4c4ccaaf5c",
+      "scale": 0.69,
+      "sourcePelvisX": 320,
+      "sourceBaselineY": 620
+    }
+  }
+}
