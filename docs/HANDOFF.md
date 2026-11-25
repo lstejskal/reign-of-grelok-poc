@@ -90,7 +90,8 @@ Codex's instructions: `art/briefs/08-ui-handoff.md` (positions, scales, cursor h
 
 ### Task 4 - Step 19 (polish) is DONE (see PLAN.md). Still possible later:
 - Grelok finale poses (laugh, death) and NPC talk animations: need art briefs first (Codex), then code.
-- Step 18 (music and sound from an AI music tool; `ffmpeg` is installed via winget) and step 20 (builds).
+- Step 18: the music is done (`npm run import-audio`, originals in `audio/raw/`, not in git); the sound effects are
+  still the generated placeholders. Step 20 (builds) is open.
 
 ## Division of work
 - **Codex:** art direction, briefs' pictures, imports of single assets, review; may take Tasks 1 and 3 (code) while

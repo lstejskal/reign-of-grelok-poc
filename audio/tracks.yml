@@ -1,0 +1,21 @@
+# Music tracks for `npm run import-audio` (tools/import-audio.ts). The originals go in audio/raw/ (not in git);
+# the finished, looping, smaller files are written to games/<game>/assets/<out> (in git).
+#   raw:        the original file, relative to the project folder
+#   out:        relative to games/<game>/assets/
+#   crossfade:  seconds folded from the end over the start, so the track loops without a jump (0 = loop as it is)
+game: grelok
+bitrate: 96k      # mp3, stereo, 44.1 kHz: about 0.7 MB per minute
+loudness: -16     # integrated loudness in LUFS, the same for every track so none is louder than another
+tracks:
+  intro:          # title screen and the finale
+    raw: audio/raw/intro.mp3
+    out: music/intro.mp3
+    crossfade: 3
+  music1:         # plain and town
+    raw: audio/raw/music1.mp3
+    out: music/music1.mp3
+    crossfade: 3
+  music2:         # mountain, swamp, chapel, chapel interior
+    raw: audio/raw/music2.mp3
+    out: music/music2.mp3
+    crossfade: 3

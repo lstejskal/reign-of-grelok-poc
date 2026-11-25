@@ -224,6 +224,8 @@ export interface TitleScreenConfig {
     background?: string;
     /** The game's name as a picture (transparent around it), drawn centred at the top instead of the text title. */
     logo?: string;
+    /** Music that loops on the title screen ("music/intro.mp3"). */
+    music?: string;
 }
 
 export interface UiConfig {

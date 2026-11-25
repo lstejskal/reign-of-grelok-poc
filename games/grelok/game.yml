@@ -18,6 +18,7 @@ player:
 titleScreen:
   background: backgrounds/title.png   # the whole screen, 640x400
   logo: ui/title_logo.png             # drawn centred at the top instead of the text title
+  music: music/intro.mp3              # plays on the title screen (and in the finale, see cutscenes.yml)
 ui:
   frame: ui/interface_frame.png       # over the interface strip, 640x112, see-through where the controls are
   cursor:

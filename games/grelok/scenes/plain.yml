@@ -2,7 +2,7 @@
 
 background: backgrounds/plain.png
 walkmask: walkmasks/plain.png   # white = walkable
-music: music/plain.mp3   # loops while the player is here; changing scene crossfades to the next tune
+music: music/music1.mp3   # loops while the player is here; changing scene crossfades to the next tune
 scale: {top: 0.6, bottom: 1.0}   # Grognak is drawn at 60% on the farthest floor row, 100% on the nearest
 
 # The floor, traced from the background: the crossroads clearing, the north road up to where it meets the fields, and

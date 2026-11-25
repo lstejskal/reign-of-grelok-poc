@@ -6,3 +6,4 @@ playwright-report/
 .env
 *.tsbuildinfo
 saved-games/
+audio/raw/

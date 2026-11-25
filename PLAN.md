@@ -11,7 +11,7 @@ step-by-step instructions are in `docs/HANDOFF.md`.
 |---|---|---|
 | 1–16 | Engine, scenes, verbs, inventory, walking, exits, dialogs, sprites, cutscenes, save/load, demo game, audio system, art pipeline | ✅ Done |
 | 17 | Art pass: all six screens, title and interface art, player animation system, perspective sizes | 🟡 Nearly done: only **Grognak's new animation sheet** (brief 07) is left: drafts in `art/wip/grognak-07/`, the side walk needs its second row redone, then import (HANDOFF Task 2) |
-| 18 | Music & SFX pass (real tracks instead of the generated placeholders) | ⬜ To do |
+| 18 | Music & SFX pass (real tracks instead of the generated placeholders) | ✅ Music done: intro (title + finale), music1 (plain, town), music2 (the rest); sound effects are still the generated ones |
 | 19 | Polish (cursor states, text speed, fullscreen, verb shortcuts, skip cutscene, credits…) | ✅ Done: cursor (custom, busy during cutscenes, name of what it points at), text speed, fullscreen, verb keys, Esc skips cutscenes, credits, return to title, mouse-only walkthrough test |
 | 20 | Builds & distribution (web zip for itch.io, desktop app) | ⬜ To do |
 
@@ -404,7 +404,12 @@ mirror left↔right, walk bob via tween, talk = 2-frame mouth swap, idle = slow 
 - `tools/import-audio.ts` (uses ffmpeg): trim silence, cut to a loop length, short crossfade at the loop seam,
   loudness normalize, encode OGG (+ M4A fallback for Safari), write to `games/grelok/assets/music/` with placeholder names.
 - **Output:** final soundtrack in game. **Test:** validator — every track exists, duration > 10 s, files < 3 MB.
-- **Status: to do.** (`ffmpeg` is installed; the game still plays the generated placeholder tunes.)
+- **Status: music done.** The user's three tracks: originals in `audio/raw/` (not in git), settings in `audio/tracks.yml`,
+  `npm run import-audio` (`tools/import-audio.ts`, ffmpeg): trims silence, evens loudness (-16 LUFS), folds the last 3 s
+  over the start so each loops without a jump, and encodes 96 kbps mp3 (12 MB -> 6 MB). intro = title screen
+  (`titleScreen.music` in game.yml) and the finale (`music: intro` in cutscenes.yml); music1 = plain, town;
+  music2 = mountain, swamp, chapel, chapel interior. A shared track keeps playing between its scenes. Still the
+  generated placeholders: the sound effects (`assets/sfx/*.wav`).
 
 ### Step 19 — Polish
 - Cursor states (crosshair / highlighted over hotspot / busy), hotspot name follows cursor (optional),

@@ -32,20 +32,20 @@ async function clickMenu(page: Page, label: string): Promise<void> {
 
 test('every sound file is loaded into Phaser, and each scene starts its own tune', async ({ page }) => {
   await boot(page, '/?title=off');
-  for (const key of ['music/plain.mp3', 'music/chapel_interior.mp3', 'sfx/click.wav', 'sfx/sword_hit.wav']) {
+  for (const key of ['music/intro.mp3', 'music/music1.mp3', 'music/music2.mp3', 'sfx/click.wav', 'sfx/sword_hit.wav']) {
     expect(await page.evaluate((k) => window.__adv.game.cache.audio.exists(`audio:${k}`), key), key).toBe(true);
   }
-  expect((await audio(page)).currentTrack).toBe('music/plain.mp3');
+  expect((await audio(page)).currentTrack).toBe('music/music1.mp3'); // plain and town share it
 });
 
 test('moving to another scene switches the tune (and the old one fades out while the new one fades in)', async ({ page }) => {
   await boot(page, '/?title=off');
   await page.evaluate(() => window.__adv.session.performText('north'));
-  await expect.poll(async () => (await audio(page)).currentTrack).toBe('music/mountain.mp3');
+  await expect.poll(async () => (await audio(page)).currentTrack).toBe('music/music2.mp3'); // mountain, swamp and the chapel share it
   // right after the switch both tunes exist: one on its way out, one on its way in
   expect(await page.evaluate(() => window.__adv.game.sound.sounds.length)).toBeGreaterThanOrEqual(1);
   // ...and a little later only the new one is left
-  await expect.poll(() => page.evaluate(() => window.__adv.game.sound.sounds.map((s: { key: string }) => s.key)), { timeout: 10_000 }).toEqual(['audio:music/mountain.mp3']);
+  await expect.poll(() => page.evaluate(() => window.__adv.game.sound.sounds.map((s: { key: string }) => s.key)), { timeout: 10_000 }).toEqual(['audio:music/music2.mp3']);
 });
 
 test('a second game has its own tunes', async ({ page }) => {
@@ -111,11 +111,23 @@ test('the menu has a Volume row that steps through the levels, and it is remembe
   expect((await audio(page)).volume).toBe(0);
 });
 
-test('quitting to the title fades the music out', async ({ page }) => {
+test('quitting to the title fades the scene music out and the title theme in', async ({ page }) => {
   await boot(page, '/?title=off');
   await page.keyboard.press('Escape');
   await clickMenu(page, 'Quit to title');
   await expect.poll(() => page.evaluate(() => window.__adv.scene)).toBe('TitleScene');
-  expect((await audio(page)).currentTrack).toBeUndefined();
-  await expect.poll(() => page.evaluate(() => window.__adv.game.sound.sounds.length), { timeout: 10_000 }).toBe(0);
+  expect((await audio(page)).currentTrack).toBe('music/intro.mp3');
+  await expect.poll(() => page.evaluate(() => window.__adv.game.sound.sounds.map((s: { key: string }) => s.key)), { timeout: 10_000 }).toEqual(['audio:music/intro.mp3']);
+});
+
+test('two scenes with the same tune: it keeps playing, it does not start again', async ({ page }) => {
+  await boot(page, '/?title=off');
+  const voice = () => page.evaluate(() => window.__adv.game.sound.sounds
+    .filter((s: { key: string }) => s.key.startsWith('audio:music/')) // (the door's sound effect plays too)
+    .map((s: { key: string; seek: number }) => [s.key, s.seek > 0]));
+  await page.waitForTimeout(300);
+  await page.evaluate(() => window.__adv.session.performText('south')); // plain -> town, both music1
+  await expect.poll(() => page.evaluate(() => window.__adv.engine.state.location)).toBe('town');
+  expect((await audio(page)).currentTrack).toBe('music/music1.mp3');
+  expect(await voice()).toEqual([['audio:music/music1.mp3', true]]); // the same one voice, already under way
 });

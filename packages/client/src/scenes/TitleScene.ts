@@ -33,6 +33,7 @@ export class TitleScene extends Phaser.Scene {
     useLogicalCamera(this);
     const { bundle } = this.session;
     const art = bundle.config.titleScreen;
+    this.session.audio.setMusic(art?.music); // the title theme, or silence (it starts once the browser allows sound)
     // the game's own title picture if it has one, otherwise the start scene; dimmed so the menu reads on top
     const backdrop = art?.background ?? bundle.scenes[bundle.config.start]?.background;
     if (backdrop !== undefined) this.add.image(0, 0, textureKey(backdrop)).setOrigin(0).setScale(artScale);

@@ -90,6 +90,7 @@ export function validateGame(
     };
     picture('titleScreen background', config?.titleScreen?.background, [TITLE_WIDTH, TITLE_HEIGHT]);
     picture('titleScreen logo', config?.titleScreen?.logo);
+    picture('titleScreen music', config?.titleScreen?.music); // (not a picture, but the same check: the file exists)
     picture('ui frame', config?.ui?.frame, [UI_FRAME_WIDTH, UI_FRAME_HEIGHT]);
     const cursor = config?.ui?.cursor;
     if (cursor !== undefined) {

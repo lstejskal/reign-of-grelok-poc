@@ -7,6 +7,7 @@ See `PLAN.md` for the full implementation plan.
 - `npm run dev` - start the game at http://localhost:5173 (press / for the debug console)
 - `npm run cli` - play the text version in the terminal (uses the pure engine)
 - `npm run validate` - check a game's data files (`npm run validate -- <game-id>`)
+- `npm run import-audio` - turn the music in `audio/raw/` into game-ready loops (needs ffmpeg; see `audio/tracks.yml`)
 - `npm run placeholders` - generate placeholder backgrounds/walkmasks for a game (never overwrites existing files)
 - `npm test` - unit tests (Vitest)
 - `npm run e2e` - browser tests (Playwright). Needs a Chromium: `npx playwright install chromium`,

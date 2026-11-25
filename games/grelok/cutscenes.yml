@@ -39,7 +39,7 @@ give_gemstone_shards_to_blacksmith:
 # The finale.
 use_shining_sword_on_grelok:
   - face: e
-  - music: stop
+  - music: intro   # the title theme plays the finale out
   - say: {speaker: grelok, text: "No! The legendary Eye of Grub! You can't beat me!"}
   - shake: 0.8
   - sfx: explosion
