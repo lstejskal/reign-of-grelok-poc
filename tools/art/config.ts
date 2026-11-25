@@ -39,6 +39,20 @@ export interface AssetSpec {
      */
     parts?: SheetPart[];
     columns?: number;
+    /**
+     * Sheets: also write the sheet at smaller sizes (<out>_<height>.png), every `step` picture pixels of figure height
+     * down to `min` of the full size, for perspective (the game picks one and draws it 1:1, see sizeHeights).
+     */
+    sizes?: { min: number; step: number };
+}
+
+/** The figure heights of a sheet's extra sizes, largest first: frame height 96, `{min: 0.6, step: 2}` -> 94, 92 .. 58. */
+export function sizeHeights(asset: AssetSpec): number[] {
+    if (!asset.sizes || !asset.frame) return [];
+    const full = asset.frame[1];
+    const heights: number[] = [];
+    for (let h = full - asset.sizes.step; h >= Math.ceil(full * asset.sizes.min); h -= asset.sizes.step) heights.push(h);
+    return heights;
 }
 
 /** One generated picture of a multi-part sheet: a grid of cells, read row by row, handed out to named animations. */

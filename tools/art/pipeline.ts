@@ -463,6 +463,23 @@ export interface FrameOptions {
     method?: ResizeMethod;
     anchor?: 'bottom' | 'center';
     key?: Rgb;
+    /**
+     * Draw the figure this much smaller (0..1, default 1) on the same frame-sized canvas, feet still at the bottom.
+     * Used to make a character's sheet in several sizes for perspective, each shrunk from the raw picture itself.
+     */
+    fit?: number;
+}
+
+/**
+ * The palette processFrames would choose for these pictures. Computed once and handed to every size of a sheet, so
+ * all sizes use exactly the same colours.
+ */
+export function framesPalette(raws: Raster[], o: Pick<FrameOptions, 'colors' | 'outlineColor' | 'key'>): Rgb[] | undefined {
+    const keyed = raws.map((r) => chromaKey(r, o.key));
+    const boxes = keyed.map(contentBox).filter((b): b is Box => b !== undefined);
+    if (boxes.length === 0) return undefined;
+    const union = unionBox(boxes);
+    return buildPalette(keyed.map((frame) => crop(frame, union)), o.colors ?? DEFAULT_SPRITE_COLORS, [o.outlineColor]);
 }
 
 /**
@@ -483,7 +500,7 @@ export function processFrames(raws: Raster[], o: FrameOptions): Raster[] | undef
     const cropped = keyed.map((frame) => crop(frame, union));
     const palette = o.palette ?? buildPalette(cropped, o.colors ?? DEFAULT_SPRITE_COLORS, [o.outlineColor]);
 
-    const scale = Math.min((o.frameW - 2) / union.w, (o.frameH - 2) / union.h);
+    const scale = Math.min((o.frameW - 2) / union.w, (o.frameH - 2) / union.h) * (o.fit ?? 1);
     const [w, h] = [Math.max(1, Math.round(union.w * scale)), Math.max(1, Math.round(union.h * scale))];
 
     return cropped.map((frame) => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { PlayerConfig } from '@grelok/engine';
-import { REACH_FRAME_MS, REACH_HOLD_MS, TALK_FRAME_MS, playerFrame, quantizeScale, reachTiming } from './playerAnimation';
+import { REACH_FRAME_MS, REACH_HOLD_MS, TALK_FRAME_MS, pickSize, playerFrame, quantizeScale, reachTiming } from './playerAnimation';
 
 const legacy: PlayerConfig = { sprite: 's.png', frameWidth: 64, frameHeight: 96 };
 const full: PlayerConfig = {
@@ -58,6 +58,16 @@ describe('reachTiming', () => {
     expect(reachTiming(full, 'e')).toEqual({ handOutMs: REACH_FRAME_MS, totalMs: REACH_FRAME_MS + REACH_HOLD_MS });
     expect(reachTiming(full, 's')).toEqual({ handOutMs: 0, totalMs: REACH_HOLD_MS });
     expect(reachTiming(legacy, 'e')).toEqual({ handOutMs: 0, totalMs: 0 });
+  });
+});
+
+describe('pickSize', () => {
+  const sizes = [94, 92, 90, 88];
+  it('picks the pre-made height nearest to the perspective, the full sheet included', () => {
+    expect(pickSize(1, 96, sizes)).toBe(96);
+    expect(pickSize(0.97, 96, sizes)).toBe(94); // wants 93.1
+    expect(pickSize(0.93, 96, sizes)).toBe(90); // wants 89.3
+    expect(pickSize(0.5, 96, sizes)).toBe(88); // smaller than any: the smallest there is
   });
 });
 

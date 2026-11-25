@@ -144,6 +144,18 @@ describe('validateGame', () => {
         const narrow = validateGame(bundle, everythingExists, (a) => (a === sheet ? { width: 64 * 3, height: 96 * 2 } : undefined)).join('\n');
         expect(narrow).toContain('player sprite sheet must be 384 pixels wide (6 columns of 64)');
     });
+    it('checks the player size sheets: order, existence, same dimensions as the main sheet', () => {
+        const bundle = fresh();
+        const sheet = bundle.config.player.sprite;
+        bundle.config.player.sizes = [94, 92, 90];
+        const sizeOf = (a: string) => (a === sheet ? { width: 192, height: 384 } : a.endsWith('_92.png') ? { width: 10, height: 10 } : { width: 192, height: 384 });
+        const errors = validateGame(bundle, (a) => !a.endsWith('_90.png'), sizeOf).join('\n');
+        expect(errors).toContain('player size 90 not found: assets/sprites/grognak_90.png');
+        expect(errors).toContain('assets/sprites/grognak_92.png must be the same size as assets/sprites/grognak.png (192x384), but is 10x10');
+        expect(errors).not.toContain('@94');
+        bundle.config.player.sizes = [90, 94];
+        expect(validateGame(bundle, everythingExists).join('\n')).toContain('player sizes must be whole numbers below frameHeight (96), largest first');
+    });
     it('reports bad verb buttons: too many, duplicate, bad name, long label, missing preposition', () => {
         const bundle = fresh();
         bundle.config.verbs = [

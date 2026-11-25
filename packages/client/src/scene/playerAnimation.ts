@@ -88,6 +88,15 @@ export function playerFrame(config: PlayerConfig, s: PlayerPoseState): PlayerPos
 }
 
 /**
+ * With pre-made sizes (game.yml `sizes:`), the figure height to show for a perspective scale: the available one
+ * (the full `frameHeight` or one of `sizes`) nearest to scale x frameHeight. It is then drawn 1:1, never scaled.
+ */
+export function pickSize(scale: number, frameHeight: number, sizes: readonly number[]): number {
+  const wanted = scale * frameHeight;
+  return [frameHeight, ...sizes].reduce((best, h) => (Math.abs(h - wanted) < Math.abs(best - wanted) ? h : best));
+}
+
+/**
  * Round the perspective scale to a few steps. Nearest-neighbour scaling by a slightly different factor drops
  * different pixel rows, so a scale that changes every frame makes the sprite "boil"; steps of 5% change it rarely.
  */

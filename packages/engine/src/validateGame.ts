@@ -1,4 +1,4 @@
-import { ART_SCALE, ICON_HEIGHT, ICON_WIDTH, MAX_VERBS, MAX_VERB_LABEL, PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS, REQUIRED_PLAYER_ANIMATIONS, SCENE_HEIGHT, SCENE_WIDTH, iconPath, musicPath, sfxPath } from './sceneTypes';
+import { ART_SCALE, ICON_HEIGHT, ICON_WIDTH, MAX_VERBS, MAX_VERB_LABEL, PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS, REQUIRED_PLAYER_ANIMATIONS, playerSizeSheet, SCENE_HEIGHT, SCENE_WIDTH, iconPath, musicPath, sfxPath } from './sceneTypes';
 import type { GameBundle, VerbSpec } from './sceneTypes';
 import { parseStep } from './cutscene';
 
@@ -54,6 +54,23 @@ export function validateGame(
             for (const [name, list] of Object.entries(player.animations)) {
                 if (!Array.isArray(list) || list.length === 0) problem('game.yml', `player animation "${name}" needs a list of frame numbers`);
                 else if (!list.every((i) => Number.isInteger(i) && i >= 0 && i < frames)) problem('game.yml', `player animation "${name}" uses frames outside the sheet (it has ${frames})`);
+            }
+        }
+        if (player.sizes !== undefined) {
+            const sizes = player.sizes;
+            const ok = Array.isArray(sizes) && sizes.every((h, i) => Number.isInteger(h) && h > 0 && h < frameHeight && (i === 0 || h < sizes[i - 1]!));
+            if (!ok) problem('game.yml', `player sizes must be whole numbers below frameHeight (${frameHeight}), largest first`);
+            const main = assetExists(sprite) ? imageSize?.(sprite) : undefined;
+            for (const h of Array.isArray(sizes) ? sizes : []) {
+                const file = playerSizeSheet(sprite, h);
+                if (!assetExists(file)) {
+                    problem('game.yml', `player size ${h} not found: assets/${file} (npm run import-art writes it)`);
+                    continue;
+                }
+                const size = imageSize?.(file);
+                if (main && size && (size.width !== main.width || size.height !== main.height)) {
+                    problem('game.yml', `assets/${file} must be the same size as assets/${sprite} (${main.width}x${main.height}), but is ${size.width}x${size.height}`);
+                }
             }
         }
         if (player.walkStride !== undefined && !(typeof player.walkStride === 'number' && player.walkStride > 0)) {

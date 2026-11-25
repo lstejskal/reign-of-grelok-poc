@@ -22,7 +22,7 @@ export { validateGame } from './validateGame';
 export { parseStep } from './cutscene';
 export type { CutsceneStep } from './cutscene';
 export { SCENE_WIDTH, SCENE_HEIGHT, ART_SCALE, ICON_WIDTH, ICON_HEIGHT, iconPath, sfxPath, musicPath, STANDARD_SFX } from './sceneTypes';
-export { PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS, REQUIRED_PLAYER_ANIMATIONS, DEFAULT_WALK_STRIDE, playerAnimations, DEFAULT_VERBS, MAX_VERBS, MAX_VERB_LABEL } from './sceneTypes';
+export { PLAYER_FACING_ROWS, PLAYER_SHEET_COLUMNS, REQUIRED_PLAYER_ANIMATIONS, DEFAULT_WALK_STRIDE, playerAnimations, playerSizeSheet, DEFAULT_VERBS, MAX_VERBS, MAX_VERB_LABEL } from './sceneTypes';
 export { DEFAULT_GIBBERISH } from './Engine';
 export type { VerbSpec } from './sceneTypes';
 export type { ExitData, Facing, GameBundle, GameConfig, HotspotData, PlayerAnimations, PlayerConfig, Point, SceneData, SceneScale, SceneSpriteData, SpeakerData, SpeakersConfig, SpriteState, WalkAreaData } from './sceneTypes';

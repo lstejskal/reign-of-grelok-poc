@@ -121,7 +121,16 @@ export interface PlayerConfig {
     animations?: PlayerAnimations;
     /** Scene pixels one whole walk cycle covers at full size, so the feet don't slide (default DEFAULT_WALK_STRIDE). */
     walkStride?: number;
+    /**
+     * Smaller copies of the sheet for perspective, by figure height in picture pixels (e.g. [94, 92, .. 58]), each
+     * at playerSizeSheet(sprite, height) with the same layout. The game picks the nearest and draws it 1:1, because
+     * scaling pixel art by an uneven factor breaks it. Without `sizes` the sheet is scaled at runtime.
+     */
+    sizes?: number[];
 }
+
+/** The file of one smaller size of the player's sheet: sprites/grognak.png, 94 -> sprites/grognak_94.png. */
+export const playerSizeSheet = (sprite: string, height: number): string => sprite.replace(/\.png$/, `_${height}.png`);
 export const PLAYER_SHEET_COLUMNS = 3;
 export const PLAYER_FACING_ROWS: readonly Facing[] = ['s', 'n', 'e', 'w'];
 

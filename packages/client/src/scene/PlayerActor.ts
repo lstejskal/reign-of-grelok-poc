@@ -1,10 +1,10 @@
 import Phaser from 'phaser';
-import { ART_SCALE } from '@grelok/engine';
+import { ART_SCALE, playerSizeSheet } from '@grelok/engine';
 import type { Facing, PlayerConfig, Point } from '@grelok/engine';
 import { textureKey } from '../data/assets';
 import { PathFollower } from '../walk/PathFollower';
 import type { WalkArea } from '../walk/WalkArea';
-import { playerFrame, quantizeScale, reachTiming } from './playerAnimation';
+import { pickSize, playerFrame, quantizeScale, reachTiming } from './playerAnimation';
 
 /** Walking speed in scene pixels per second at full size; far away (smaller) he walks proportionally slower. */
 export const WALK_SPEED = 64;
@@ -33,6 +33,8 @@ export class PlayerActor {
   /** A reach in progress: how long it has run, and the action to do once the hand is out (if not done yet). */
   private reaching: { ms: number; handOutMs: number; totalMs: number; then?: () => void } | undefined;
   private lastPose = { frame: 0, flipX: false, anim: '' };
+  /** The perspective size he is shown at (1 = full size). */
+  private shownScale = 1;
 
   constructor(
     scene: Phaser.Scene,
@@ -49,7 +51,7 @@ export class PlayerActor {
   get state() {
     const [x, y] = this.follower.position;
     const { frame, flipX, anim } = this.lastPose;
-    return { x, y, facing: this.follower.facing, walking: this.follower.walking, scale: this.sprite.scaleX * ART_SCALE, depth: this.sprite.depth, frame, flipX, anim };
+    return { x, y, facing: this.follower.facing, walking: this.follower.walking, scale: this.shownScale, depth: this.sprite.depth, frame, flipX, anim };
   }
 
   /** Move into another scene's floor and stand at `point`, looking `facing`. */
@@ -129,10 +131,28 @@ export class PlayerActor {
     arrival?.then?.();
   }
 
-  /** Put the sprite where the follower says: position, size (perspective, in steps), frame (see playerAnimation), depth. */
+  /**
+   * Put the sprite where the follower says: position, size (perspective), frame (see playerAnimation), depth.
+   * Size: with pre-made sizes (game.yml `sizes:`) the nearest one is drawn 1:1 - pixel art scaled by an uneven factor
+   * loses pixel rows and shimmers as it moves. Without them the sheet is scaled, in 5% steps.
+   */
   private sync(): void {
     const [x, y] = this.follower.position;
-    const scale = quantizeScale(this.area.scaleAt(y));
+    const { sprite, frameHeight, sizes } = this.config;
+    let scale: number;
+    let drawScale: number;
+    let sheet = sprite;
+    if (sizes && sizes.length > 0) {
+      const h = pickSize(this.area.scaleAt(y), frameHeight, sizes);
+      if (h !== frameHeight) sheet = playerSizeSheet(sprite, h);
+      scale = h / frameHeight;
+      drawScale = 1;
+    } else {
+      scale = quantizeScale(this.area.scaleAt(y));
+      drawScale = scale;
+    }
+    if (this.sprite.texture.key !== textureKey(sheet)) this.sprite.setTexture(textureKey(sheet));
+    this.shownScale = scale;
     const pose = playerFrame(this.config, {
       facing: this.follower.facing,
       walking: this.follower.walking,
@@ -143,11 +163,11 @@ export class PlayerActor {
     });
     this.lastPose = pose;
     // Snap to whole PICTURE pixels (half a scene pixel at ART_SCALE 2), like everything in a pixel-art game. The sheet
-    // has ART_SCALE times the detail, so it is drawn at 1/ART_SCALE of its size (times the perspective).
+    // has ART_SCALE times the detail, so it is drawn at 1/ART_SCALE of its size.
     const snap = (v: number) => Math.round(v * ART_SCALE) / ART_SCALE;
     this.sprite
       .setPosition(snap(x), snap(y) - pose.lift / ART_SCALE)
-      .setScale(scale / ART_SCALE)
+      .setScale(drawScale / ART_SCALE)
       .setFrame(pose.frame)
       .setFlipX(pose.flipX)
       .setDepth(y);

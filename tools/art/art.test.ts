@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import { PNG } from 'pngjs';
-import { colorsFor, expandPrompt, loadArtConfig, outputPath, projectPath, decodePng, rawPathsOf, sheetLayout } from './config';
+import { colorsFor, expandPrompt, loadArtConfig, outputPath, projectPath, decodePng, rawPathsOf, sheetLayout, sizeHeights } from './config';
 import type { AssetSpec } from './config';
 import { loadGameBundle } from '../../packages/engine/node/loadGameBundle';
 
@@ -83,6 +83,25 @@ describe('art/assets.yml', () => {
     });
 
     // A multi-part sheet's frame numbers come from its parts; the game reads them from game.yml, so the two must agree.
+    it('an imported sheet with sizes has every smaller copy: same dimensions, only the full sheet\'s colours', () => {
+        const colours = (img: { data: Uint8Array }) => {
+            const set = new Set<string>();
+            for (let i = 0; i < img.data.length; i += 4) if (img.data[i + 3]) set.add(`${img.data[i]},${img.data[i + 1]},${img.data[i + 2]}`);
+            return set;
+        };
+        for (const a of assets) {
+            if (!a.sizes || !imported(a)) continue;
+            const full = decodePng(fs.readFileSync(outputPath(a)));
+            const allowed = colours(full);
+            for (const h of sizeHeights(a)) {
+                const file = outputPath(a).replace(/\.png$/, `_${h}.png`);
+                const small = decodePng(fs.readFileSync(file));
+                expect([small.width, small.height], file).toEqual([full.width, full.height]);
+                expect([...colours(small)].filter((c) => !allowed.has(c)), `${file} has colours the full sheet doesn't`).toEqual([]);
+            }
+        }
+    });
+
     it('a game whose player sheet is an imported multi-part sheet has the matching animations in game.yml', () => {
         for (const a of assets) {
             if (!a.parts || !imported(a)) continue;

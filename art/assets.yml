@@ -22,10 +22,13 @@ assets:
   # (6 frames of 64x96 per row); `frames` hands its cells, read row by row, to named animations. Walking left is the
   # walking-right picture mirrored by the game. After importing, game.yml needs the animation table the importer prints.
   # Full prompts: art/briefs/07-grognak-animation.md.
+  # `sizes`: the importer also writes the sheet at smaller sizes (grognak_94.png .. _58.png), each shrunk from the raw
+  # pictures, so in perspective the game draws him 1:1 instead of scaling pixel art (which breaks it).
   grognak:
     type: sheet
     out: sprites/grognak.png
     frame: [64, 96]
+    sizes: {min: 0.6, step: 2}
     columns: 6
     parts:
       - name: walk_e
@@ -57,6 +60,18 @@ assets:
         frames: {reach_e: 2, reach_s: 1, reach_n: 1}
         prompt: '{style} {cutout} {grognak} Reaching for something, 2 x 2: side (facing right) arm half out, side arm out
           low, front bending to reach down, back reaching forward.'
+  # TEMPORARY: today's Grognak (one 3x4 picture, the original layout) with the same sizes, until brief 07's parts
+  # exist. Then delete this entry and import `grognak` (both write sprites/grognak.png).
+  grognak_v1:
+    type: sheet
+    out: sprites/grognak.png
+    raw: art/raw/grognak.png
+    prompt: '{style} {cutout} Character sheet of {grognak} 4 rows (facing front, back, right, left) by 3 columns (standing,
+      walking step one, walking step two). Same size in every cell.'
+    frame: [64, 96]
+    grid: [3, 4]
+    animations: {idle_s: [0], walk_s: [0, 1, 0, 2], idle_n: [3], walk_n: [3, 4, 3, 5], idle_e: [6], walk_e: [6, 7, 6, 8], idle_w: [9], walk_w: [9, 10, 9, 11]}
+    sizes: {min: 0.6, step: 2}
   standing_stone:
     type: sprite
     out: sprites/standing_stone.png

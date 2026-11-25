@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
     blank, buildPalette, chromaKey, composeGrid, contentBox, coverCrop, crop, despeckle, hexOf, makeAtlas, MEGA_DRIVE_LEVELS, nearestIndex, outline, pad,
-    parsePalette, place, processBackground, processFrames, processPartsSheet, quantize, resize, resizeDominant, sliceGrid, snapToMegaDrive,
+    parsePalette, place, processBackground, processFrames, processPartsSheet, framesPalette, quantize, resize, resizeDominant, sliceGrid, snapToMegaDrive,
 } from './pipeline';
 import type { Raster, Rgb } from './pipeline';
 
@@ -197,6 +197,16 @@ describe('processFrames (the whole recipe)', () => {
         const empty = blank(8, 8);
         for (let i = 0; i < empty.data.length; i += 4) empty.data.set([255, 0, 255, 255], i);
         expect(processFrames([empty], options)).toBeUndefined();
+    });
+
+    it('fit draws the figure smaller on the same canvas, feet still on the bottom row, same colours', () => {
+        const palette = framesPalette([raw()], options)!;
+        const [full] = processFrames([raw()], { ...options, palette })!;
+        const [small] = processFrames([raw()], { ...options, palette, fit: 0.6 })!;
+        expect([small!.width, small!.height]).toEqual([10, 14]);
+        const [a, b] = [contentBox(full!)!, contentBox(small!)!];
+        expect(b.h).toBeLessThan(a.h);
+        expect(b.y + b.h).toBe(14);
     });
 
     it('builds a sheet from several pictures: every frame treated alike, unused frames transparent', () => {

@@ -355,6 +355,10 @@ mirror left↔right, walk bob via tween, talk = 2-frame mouth swap, idle = slow 
   from several pictures (`parts:` in `art/assets.yml`) with one common scale and palette. Grognak's art for it is
   brief 07 (also fixes his colours against the dirt road); the e2e tests for walk/talk/reach skip until it is
   imported. See `docs/learn/19-character-animation.md`.
+- **Perspective sizes:** the player is no longer scaled at runtime (it broke the pixel art and made it shimmer). The
+  importer writes his sheet in 2-pixel steps down to 60% (`sizes:` in assets.yml and game.yml, files
+  `grognak_<height>.png`); the game draws the nearest 1:1. Today's art comes from the temporary `grognak_v1` entry
+  in assets.yml; delete it when brief 07's parts are imported.
 
 ### Step 18 — Music & SFX pass (AI-generated)
 - `audio/prompts.md`: one prompt per track with a shared prefix ("instrumental, 16-bit Sega Mega Drive FM synth,

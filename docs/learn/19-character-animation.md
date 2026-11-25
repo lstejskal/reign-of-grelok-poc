@@ -14,6 +14,12 @@ and never skate, at any speed. Talking and reaching move on by **time**.
   `talking` is set every frame while his own words are on screen.
 - A good walk cycle: contact (legs apart, heel down), down (lowest), passing (legs together, highest), then the same
   with the other leg. The up-and-down is drawn into the frames.
+- **Never scale pixel art at runtime.** Shrinking a sprite to 83% with nearest-neighbour drops arbitrary pixel rows
+  (broken outline, mushy face), and as he moves different rows drop each frame (shimmer). So the importer writes the
+  player's sheet in many sizes (`sizes:` in `art/assets.yml` -> `grognak_94.png` .. `grognak_58.png`, each shrunk
+  from the raw picture with one shared palette), game.yml lists them (`sizes:`), and `pickSize()` chooses the
+  nearest; it is drawn 1:1. Steps of 2 picture pixels keep the size change smooth. (Vite only sees new picture files
+  after the dev server restarts.)
 - Art: an image generator keeps one character consistent in a small strip far better than in a big grid, so each
   animation is its own picture (`parts:` in `art/assets.yml`); `processPartsSheet` treats all frames together (one
   scale, one palette) and the importer prints the matching `animations:` table.

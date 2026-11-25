@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Engine, iconPath } from '@grelok/engine';
+import { Engine, iconPath, playerSizeSheet } from '@grelok/engine';
 import type { GameBundle } from '@grelok/engine';
 import { GAME_WIDTH, GAME_HEIGHT, useLogicalCamera } from '../config';
 import { registerPixelFont, PIXEL_FONT } from '../gfx/pixelFont';
@@ -63,10 +63,13 @@ export class BootScene extends Phaser.Scene {
     }
 
     // the player's sprite sheet: a spritesheet is an image the loader cuts into equally sized frames
-    const { sprite, frameWidth, frameHeight } = bundle.config.player;
-    const spriteUrl = assetUrl(bundle.id, sprite);
-    if (spriteUrl === undefined) throw new Error(`Missing picture: ${sprite}`);
-    this.load.spritesheet(textureKey(sprite), spriteUrl, { frameWidth, frameHeight });
+    // (and its smaller copies for perspective, if the game has them: same layout, smaller figure)
+    const { sprite, frameWidth, frameHeight, sizes = [] } = bundle.config.player;
+    for (const sheet of [sprite, ...sizes.map((h) => playerSizeSheet(sprite, h))]) {
+      const url = assetUrl(bundle.id, sheet);
+      if (url === undefined) throw new Error(`Missing picture: ${sheet}`);
+      this.load.spritesheet(textureKey(sheet), url, { frameWidth, frameHeight });
+    }
 
     // pictures of the scene sprites: every look of every sprite (several sprites may share one picture)
     const spritePictures = new Set(Object.values(bundle.scenes).flatMap((s) => (s.sprites ?? []).flatMap((sp) => sp.states.map((st) => st.image))));

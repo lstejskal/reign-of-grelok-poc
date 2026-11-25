@@ -310,6 +310,19 @@ test('he is drawn smaller in the distance (perspective) and always in front of w
   expect(far.depth).toBeLessThan(near.depth);
 });
 
+test('in the distance he is drawn from a smaller pre-made sheet at 1:1, not scaled (game.yml sizes)', async ({ page }) => {
+  test.skip(!(await page.evaluate(() => window.__adv.bundle.config.player.sizes)), 'the game has no pre-made sizes');
+  await clickAt(page, 196, 92); // the far end of the clearing
+  await waitUntilStopped(page);
+  const { key, scaleX, shown } = await page.evaluate(() => {
+    const sprite = (window.__adv.game.scene.getScene('RoomScene') as any).player.sprite;
+    return { key: sprite.texture.key as string, scaleX: sprite.scaleX as number, shown: window.__adv.player.scale as number };
+  });
+  expect(key).toMatch(/grognak_\d+\.png$/);
+  expect(scaleX).toBe(0.5); // one picture pixel per canvas pixel (art is drawn at 1/ART_SCALE, nothing more)
+  expect(shown).toBeLessThan(1);
+});
+
 test('he walks around the base of the standing stone instead of through it', async ({ page }) => {
   await walkSpeed(page, 3); // slow enough to sample his path every frame
   await page.evaluate(() => {
