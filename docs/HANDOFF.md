@@ -55,7 +55,11 @@ size **anchored bottom-centre** (feet stay on the bottom line), so the shared cr
 unit test in `tools/art/pipeline.test.ts` with two parts of different cell heights: the figures' bottoms must land
 on the same row and both keep the same size. Run `npm test`.
 
-### Task 2 - Import Grognak's new animation sheet (brief 07; Claude preferred, Codex can do it carefully)
+### Task 2 - DONE (Claude, 2026-11-27): Grognak's brief 07 sheet is imported and wired (`game.yml` `columns: 6`,
+`animations:`, `walkStride: 35`); `grognak_v1` is gone from `art/assets.yml`. For a read-only listing use
+`npx tsx tools/import-art.ts --list` (through npm, `--list` gets eaten and the full import runs).
+
+Original description, kept for reference:
 Precondition: the six pictures are final. Today they wait in `art/wip/grognak-07/` (kept out of `art/raw/` so the art
 tests don't treat them as ready); the side walk `grognak_walk_e.png` still needs its second row redone
 (`art/briefs/07-walk-e-far-step-repair.md`). Then **move all six into `art/raw/`** (same names) and check that
@@ -161,3 +165,8 @@ Codex's instructions: `art/briefs/08-ui-handoff.md` (positions, scales, cursor h
   is held by a stale dev server, pid 27780 at 18:00, which no longer answers; not stopped).
 
 - 2026-11-27 Codex: archived accepted brief 07 WIP correction sources and selected assemblies in a separate artwork-provenance commit, with art/wip/grognak-07/README.md distinguishing accepted inputs from local rejected drafts and the excluded recovery snapshot. No runtime, code, or sound-effects changes.
+- 2026-11-27 Claude: Task 2 done. Imported `grognak` (456x696 + 23 sizes), wired game.yml, removed `grognak_v1`.
+  The sprites Codex's accidental full import rewrote were checked pixel by pixel against HEAD: identical (only PNG
+  compression differs), so nothing was lost. `walkStride: 35` comes from measuring walk_e: the planted foot moves
+  ~35 picture px back per step. The art moves it unevenly (2, 18, 15 px), so a little slide within a step remains.
+  typecheck, 190 unit tests, validate, and all 79 e2e (mirror, reach, talk now run) pass; walks filmed in the game.

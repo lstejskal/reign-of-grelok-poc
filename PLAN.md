@@ -10,7 +10,7 @@ step-by-step instructions are in `docs/HANDOFF.md`.
 | Step | What | Status |
 |---|---|---|
 | 1–16 | Engine, scenes, verbs, inventory, walking, exits, dialogs, sprites, cutscenes, save/load, demo game, audio system, art pipeline | ✅ Done |
-| 17 | Art pass: all six screens, title and interface art, player animation system, perspective sizes | 🟡 Art ready: six selected brief 07 raws are staged; Claude integration (`game.yml`, import sizing, e2e and in-game validation) remains. See `docs/HANDOFF.md` Log. |
+| 17 | Art pass: all six screens, title and interface art, player animation system, perspective sizes | ✅ Done: Grognak's brief 07 sheet imported (6 columns: walk e/s/n, idle, talk, reach), `walkStride: 35` |
 | 18 | Music & SFX pass (real tracks instead of the generated placeholders) | ✅ Music done: intro (title + finale), music1 (plain, town), music2 (the rest). Sound effects synthesised (`npm run make-sfx`), waiting for the user to listen |
 | 19 | Polish (cursor states, text speed, fullscreen, verb shortcuts, skip cutscene, credits…) | ✅ Done: cursor (custom, busy during cutscenes, name of what it points at), text speed, fullscreen, verb keys, Esc skips cutscenes, credits, return to title, mouse-only walkthrough test |
 | 20 | Builds & distribution (web zip for itch.io, desktop app) | 🟡 Web zip done (`npm run package:web`); not uploaded yet (needs the user's itch.io account); desktop app to do |
@@ -338,8 +338,8 @@ Verbs: Look at, Pick up, Use, Give, Talk to, Walk to. "Attack" = Use X on Y (sam
 - **Status: done.** `docs/art-style.md`, `art/palette.hex` (32 Mega Drive-level colours), `art/prompts/fragments.yml` (shared style + one brief per character; YAML instead of `characters.md` so the tool can read it), `art/assets.yml` (25 assets with prompts). `tools/art/pipeline.ts` (pure, tested: chroma key, crop-to-union, resize nearest/box, despeckle, quantize with optional ordered dithering, outline, grid slice/compose, Phaser atlas JSON), `npm run import-art`, `npm run gen-image` (prints prompts, or calls any OpenAI-style image API when `.env` has a key; tested with a fake service only). Shipped in game: `standing_stone` (new plain sprite) and the Grognak sheet (+ `grognak.json` atlas). Deviations: (1) I cannot generate images, so the two raw pictures are stand-ins drawn by `npm run sample-raw` (replace `art/raw/*.png` with real ones and re-import); (2) the client does not read the atlas yet (Step 17); (3) the palette test checks every asset that has an `art/raw` picture. See `docs/learn/16-art-pipeline.md`.
 
 ### Step 17 — Art pass (sub-steps, one logical change each)
-- **Status: nearly done.** All screens, the title and the interface have final art; Grognak's new animation sheet
-  (brief 07) is still open. Details in the Progress notes at the end of this step.
+- **Status: done.** All screens, the title, the interface and Grognak's animation sheet (brief 07) have final art.
+  Details in the Progress notes at the end of this step.
 AI is bad at keeping a character consistent across many frames, so keep frame counts low and let code do the rest:
 mirror left↔right, walk bob via tween, talk = 2-frame mouth swap, idle = slow breathing scale tween.
 - 17a Grognak: generate a character sheet (front, back, side) → derive `idle` (3 dirs), `walk` (4 frames side,
@@ -390,7 +390,8 @@ mirror left↔right, walk bob via tween, talk = 2-frame mouth swap, idle = slow 
 - **Speech:** outlined in a dark colour on every side, so coloured words stay readable on any background.
 - **Status 2026-11-25 / next (details and step-by-step instructions in `docs/HANDOFF.md`):**
   1. Importer fix for sheet parts with different cell sizes (Codex found it; bottom-align cells before cropping).
-  2. Import Grognak's brief 07 sheet once its six pictures exist; wire `game.yml`; tune `walkStride`; drop `grognak_v1`.
+  2. DONE (2026-11-27): Grognak's brief 07 sheet imported (456x696, 6 columns, 23 smaller sizes), `game.yml` wired,
+     `grognak_v1` dropped, `walkStride: 35` measured from the side walk. All 79 e2e tests run and pass.
   3. DONE: Codex's title and interface art ("08") is used: title panorama and logo, interface frame, cursor
      (`titleScreen:` / `ui:` in game.yml, optional).
   Then step 17 is done; steps 18 (music), 19 (polish) and 20 (builds) remain.

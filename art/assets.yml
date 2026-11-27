@@ -60,18 +60,6 @@ assets:
         frames: {reach_e: 2, reach_s: 1, reach_n: 1}
         prompt: '{style} {cutout} {grognak} Reaching for something, 2 x 2: side (facing right) arm half out, side arm out
           low, front bending to reach down, back reaching forward.'
-  # TEMPORARY: today's Grognak (one 3x4 picture, the original layout) with the same sizes, until brief 07's parts
-  # exist. Then delete this entry and import `grognak` (both write sprites/grognak.png).
-  grognak_v1:
-    type: sheet
-    out: sprites/grognak.png
-    raw: art/raw/grognak.png
-    prompt: '{style} {cutout} Character sheet of {grognak} 4 rows (facing front, back, right, left) by 3 columns (standing,
-      walking step one, walking step two). Same size in every cell.'
-    frame: [76, 116]
-    grid: [3, 4]
-    animations: {idle_s: [0], walk_s: [0, 1, 0, 2], idle_n: [3], walk_n: [3, 4, 3, 5], idle_e: [6], walk_e: [6, 7, 6, 8], idle_w: [9], walk_w: [9, 10, 9, 11]}
-    sizes: {min: 0.6, step: 2}
   standing_stone:
     type: sprite
     out: sprites/standing_stone.png

@@ -5,12 +5,29 @@ start: plain
 startPosition: [160, 112]   # where Grognak stands when the game begins
 
 # Grognak's picture: a sheet of 76x116 frames (art has 2 picture pixels per scene pixel, so his frame is 58 scene pixels tall).
-# Columns: idle, walk 1, walk 2. Rows: facing south, north, east, west.
+# 6 frames per row, one row per animation part (brief 07, art/assets.yml `grognak`): walk east, walk south, walk north,
+# idle, talk, reach. Frames are counted row by row; facing west is facing east mirrored.
+# `npm run import-art -- grognak` prints `animations` and `sizes`.
 player:
   sprite: sprites/grognak.png
   frameWidth: 76
   frameHeight: 116
-  # smaller copies for perspective (grognak_114.png ..), drawn 1:1 instead of scaling him; npm run import-art prints this
+  columns: 6
+  animations:
+    walk_e: [0, 1, 2, 3, 4, 5]
+    walk_s: [6, 7, 8, 9]
+    walk_n: [12, 13, 14, 15]
+    idle_s: [18]
+    idle_n: [19]
+    idle_e: [20]
+    talk_s: [24, 25]
+    talk_e: [26, 27]
+    reach_e: [30, 31]
+    reach_s: [32]
+    reach_n: [33]
+  walkStride: 35   # scene pixels per whole walk cycle at full size; bigger = slower legs. Measured from walk_e: the
+                   # planted foot travels ~35 picture px back per step = 35 scene px per two-step cycle.
+  # smaller copies for perspective (grognak_114.png ..), drawn 1:1 instead of scaling him
   sizes: [114, 112, 110, 108, 106, 104, 102, 100, 98, 96, 94, 92, 90, 88, 86, 84, 82, 80, 78, 76, 74, 72, 70]
 
 # Title screen and interface art (brief 08). All optional: without them the title uses the start scene's picture and
