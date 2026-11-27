@@ -159,3 +159,5 @@ Codex's instructions: `art/briefs/08-ui-handoff.md` (positions, scales, cursor h
 - 2026-11-27 Claude: step 18 sound effects. `tools/make-sfx.ts` (`npm run make-sfx`) synthesises all seven Grelok
   sounds (FM, filtered noise, reverb); tweak a recipe and rerun. Audio and walkthrough e2e pass (on the build: port 5173
   is held by a stale dev server, pid 27780 at 18:00, which no longer answers; not stopped).
+
+- 2026-11-27 Codex: archived accepted brief 07 WIP correction sources and selected assemblies in a separate artwork-provenance commit, with art/wip/grognak-07/README.md distinguishing accepted inputs from local rejected drafts and the excluded recovery snapshot. No runtime, code, or sound-effects changes.
