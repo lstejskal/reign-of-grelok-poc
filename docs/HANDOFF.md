@@ -95,7 +95,7 @@ Codex's instructions: `art/briefs/08-ui-handoff.md` (positions, scales, cursor h
 ### Task 4 - Step 19 (polish) is DONE (see PLAN.md). Still possible later:
 - Grelok finale poses (laugh, death) and NPC talk animations: need art briefs first (Codex), then code.
 - Step 18: the music is done (`npm run import-audio`, originals in `audio/raw/`, not in git); the sound effects are
-  still the generated placeholders. Step 20 (builds) is open.
+  synthesised by `npm run make-sfx` (tools/make-sfx.ts). Step 20: the web zip is done, the desktop app is open.
 
 ## Division of work
 - **Codex:** art direction, briefs' pictures, imports of single assets, review; may take Tasks 1 and 3 (code) while
@@ -156,3 +156,6 @@ Codex's instructions: `art/briefs/08-ui-handoff.md` (positions, scales, cursor h
   was stopped; no unknown process was touched. Claude should resume integration and rerun the full checks.
 
 - 2026-11-27 Codex: committed the six selected animation sources as c624395, followed by a separate review/handoff commit. Only animation files and documentation are included; sound effects, package scripts, runtime sprite changes, and test screenshots remain outside these commits. Rechecked typecheck and validation (pass); unit tests 188 pass / 2 documented integration failures; e2e again stalled at server startup and was stopped. No in-game verification completed in this commit-only task.
+- 2026-11-27 Claude: step 18 sound effects. `tools/make-sfx.ts` (`npm run make-sfx`) synthesises all seven Grelok
+  sounds (FM, filtered noise, reverb); tweak a recipe and rerun. Audio and walkthrough e2e pass (on the build: port 5173
+  is held by a stale dev server, pid 27780 at 18:00, which no longer answers; not stopped).

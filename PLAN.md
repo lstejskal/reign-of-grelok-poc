@@ -11,7 +11,7 @@ step-by-step instructions are in `docs/HANDOFF.md`.
 |---|---|---|
 | 1–16 | Engine, scenes, verbs, inventory, walking, exits, dialogs, sprites, cutscenes, save/load, demo game, audio system, art pipeline | ✅ Done |
 | 17 | Art pass: all six screens, title and interface art, player animation system, perspective sizes | 🟡 Art ready: six selected brief 07 raws are staged; Claude integration (`game.yml`, import sizing, e2e and in-game validation) remains. See `docs/HANDOFF.md` Log. |
-| 18 | Music & SFX pass (real tracks instead of the generated placeholders) | ✅ Music done: intro (title + finale), music1 (plain, town), music2 (the rest); sound effects are still the generated ones |
+| 18 | Music & SFX pass (real tracks instead of the generated placeholders) | ✅ Music done: intro (title + finale), music1 (plain, town), music2 (the rest). Sound effects synthesised (`npm run make-sfx`), waiting for the user to listen |
 | 19 | Polish (cursor states, text speed, fullscreen, verb shortcuts, skip cutscene, credits…) | ✅ Done: cursor (custom, busy during cutscenes, name of what it points at), text speed, fullscreen, verb keys, Esc skips cutscenes, credits, return to title, mouse-only walkthrough test |
 | 20 | Builds & distribution (web zip for itch.io, desktop app) | 🟡 Web zip done (`npm run package:web`); not uploaded yet (needs the user's itch.io account); desktop app to do |
 
@@ -408,8 +408,12 @@ mirror left↔right, walk bob via tween, talk = 2-frame mouth swap, idle = slow 
   `npm run import-audio` (`tools/import-audio.ts`, ffmpeg): trims silence, evens loudness (-16 LUFS), folds the last 3 s
   over the start so each loops without a jump, and encodes 96 kbps mp3 (12 MB -> 6 MB). intro = title screen
   (`titleScreen.music` in game.yml) and the finale (`music: intro` in cutscenes.yml); music1 = plain, town;
-  music2 = mountain, swamp, chapel, chapel interior. A shared track keeps playing between its scenes. Still the
-  generated placeholders: the sound effects (`assets/sfx/*.wav`).
+  music2 = mountain, swamp, chapel, chapel interior. A shared track keeps playing between its scenes.
+  **Sound effects** (`tools/make-sfx.ts`, `npm run make-sfx [-- <name>] [--spectrum]`): synthesised in code, FM operators
+  for metal and bells, filtered noise, pitch-dropping thuds, a small room reverb, 44.1 kHz mono wav, loudness near the
+  music (-14 to -18 LUFS for the big ones, quieter UI sounds). click, pickup, door (any change of place), sword_hit,
+  zombie_fall (moan + fall into the grave), clang (anvil), explosion (magic swell + blast). The demo keeps the
+  placeholders. `--spectrum` writes spectrograms to test-results/sfx/. Not yet heard by the user.
 
 ### Step 19 — Polish
 - Cursor states (crosshair / highlighted over hotspot / busy), hotspot name follows cursor (optional),

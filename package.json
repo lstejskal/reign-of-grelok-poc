@@ -17,6 +17,7 @@
     "validate": "tsx tools/validate.ts",
     "placeholders": "tsx tools/make-placeholders.ts",
     "placeholder-music": "tsx tools/make-placeholder-music.ts",
+    "make-sfx": "tsx tools/make-sfx.ts",
     "walkmask": "tsx tools/make-walkmask.ts",
     "import-audio": "tsx tools/import-audio.ts",
     "gen-image": "tsx tools/gen-image.ts",
