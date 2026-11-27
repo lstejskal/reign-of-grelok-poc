@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { colorsFor, decodePng, encodePng, loadArtConfig, projectPath, sheetLayout, sizeHeights } from '../../tools/art/config.ts';
-import { blank, chromaKey, contentBox, framesPalette, processPartsSheet, sliceGrid, unionBox } from '../../tools/art/pipeline.ts';
+import { blank, chromaKey, contentBox, framesPalette, partCells, processPartsSheet, sliceGrid, unionBox } from '../../tools/art/pipeline.ts';
 import type { Box, Raster } from '../../tools/art/pipeline.ts';
 
 // Run from the repository root with node --import tsx art/briefs/07-preview-animations.ts.
@@ -11,6 +11,9 @@ const { values: args } = parseArgs({
     options: {
         partial: { type: 'boolean', default: false },
         'input-dir': { type: 'string' },
+        'substitute-idle': { type: 'string' },
+        'substitute-reach': { type: 'string' },
+        'substitute-walk-e': { type: 'string' },
         'output-dir': { type: 'string', default: import.meta.dirname },
     },
 });
@@ -53,7 +56,10 @@ const [frameW, frameH] = asset.frame;
 const layout = sheetLayout(asset);
 const options = { frameW, frameH, outlineColor: config.outline, method: asset.method, colors: colorsFor(asset, config.palette) };
 const parts = asset.parts.map(part => {
-    const filename = args['input-dir'] ? path.resolve(args['input-dir'], path.basename(part.rawPath)) : projectPath(part.rawPath);
+    const substitution = part.name === 'idle' ? args['substitute-idle'] : part.name === 'reach' ? args['substitute-reach'] : part.name === 'walk_e' ? args['substitute-walk-e'] : undefined;
+    const filename = substitution
+        ? path.resolve(substitution)
+        : args['input-dir'] ? path.resolve(args['input-dir'], path.basename(part.rawPath)) : projectPath(part.rawPath);
     const raw = fs.existsSync(filename) ? decodePng(fs.readFileSync(filename)) : undefined;
     return { ...part, filename, raw };
 });
@@ -64,8 +70,7 @@ if (!presentParts.size) throw Error('No raw sheets are available for preview.');
 
 const slots = layout.slots.filter(slot => presentParts.has(slot.part));
 const inputs = parts.map(({ raw, grid }) => ({ raw: raw ?? blank(...grid), grid }));
-const cells = inputs.map(({ raw, grid }) => sliceGrid(raw, ...grid));
-const rawFrames = slots.map(slot => cells[slot.part]![slot.cell]!);
+const rawFrames = partCells(inputs, slots, options.key);
 const rawBounds = rawFrames.map(frame => contentBox(chromaKey(frame)));
 const visibleBoxes = rawBounds.filter((box): box is Box => box !== undefined);
 if (!visibleBoxes.length) throw Error('All present cells are empty after chroma key.');
@@ -92,7 +97,7 @@ const report = {
     palette,
     parts: parts.map((part, index) => {
         if (!part.raw) return { name: part.name, path: part.rawPath, missing: true };
-        const [cellW, cellH] = [cells[index]![0]!.width, cells[index]![0]!.height];
+        const [cellW, cellH] = [part.raw.width / part.grid[0], part.raw.height / part.grid[1]];
         return {
             name: part.name,
             path: part.rawPath,
@@ -205,7 +210,8 @@ setInterval(() => { if (playing) { tick++; draw(); } }, 125);
 
 const outputDir = path.resolve(args['output-dir']!);
 fs.mkdirSync(outputDir, { recursive: true });
-const name = report.complete ? '07-animation-preview' : '07-animation-preview-partial';
+const candidateLabel = [args['substitute-idle'] && 'idle-candidate', args['substitute-reach'] && 'reach-candidate', args['substitute-walk-e'] && 'walk-e-candidate'].filter(Boolean).join('-');
+const name = report.complete ? (candidateLabel ? `07-animation-preview-${candidateLabel}` : '07-animation-preview') : '07-animation-preview-partial';
 for (const { height, png } of previews) fs.writeFileSync(path.join(outputDir, `${name}-${height}.png`), png);
 fs.writeFileSync(path.join(outputDir, `${name}.html`), html);
 fs.writeFileSync(path.join(outputDir, `${name}.json`), JSON.stringify(report, null, 2) + '\n');

@@ -10,7 +10,7 @@ step-by-step instructions are in `docs/HANDOFF.md`.
 | Step | What | Status |
 |---|---|---|
 | 1–16 | Engine, scenes, verbs, inventory, walking, exits, dialogs, sprites, cutscenes, save/load, demo game, audio system, art pipeline | ✅ Done |
-| 17 | Art pass: all six screens, title and interface art, player animation system, perspective sizes | 🟡 Nearly done: only **Grognak's new animation sheet** (brief 07) is left: drafts in `art/wip/grognak-07/`, the side walk needs its second row redone, then import (HANDOFF Task 2) |
+| 17 | Art pass: all six screens, title and interface art, player animation system, perspective sizes | 🟡 Art ready: six selected brief 07 raws are staged; Claude integration (`game.yml`, import sizing, e2e and in-game validation) remains. See `docs/HANDOFF.md` Log. |
 | 18 | Music & SFX pass (real tracks instead of the generated placeholders) | ✅ Music done: intro (title + finale), music1 (plain, town), music2 (the rest); sound effects are still the generated ones |
 | 19 | Polish (cursor states, text speed, fullscreen, verb shortcuts, skip cutscene, credits…) | ✅ Done: cursor (custom, busy during cutscenes, name of what it points at), text speed, fullscreen, verb keys, Esc skips cutscenes, credits, return to title, mouse-only walkthrough test |
 | 20 | Builds & distribution (web zip for itch.io, desktop app) | 🟡 Web zip done (`npm run package:web`); not uploaded yet (needs the user's itch.io account); desktop app to do |

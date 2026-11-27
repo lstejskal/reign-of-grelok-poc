@@ -1,5 +1,9 @@
 # Handoff: where the project stands and what to do next
 
+> Brief 07 update (2026-11-27): the six reviewed source sheets are committed in `art/raw/` (`c624395`).
+> Side-walk alternation is resolved; older open-art notes below are historical. Remaining work is Claude's coordinated
+> runtime import and animation-table integration. See `art/briefs/07-grognak-animation-handoff.md` and the final Log entry.
+
 Written 2026-11-25 for whoever continues: **Codex** (art, and code tasks while Claude is unavailable) or **Claude**.
 Read this first, then `PLAN.md` (the plan and every step's status) and the `docs/learn/` note named in a task.
 
@@ -111,3 +115,44 @@ Codex's instructions: `art/briefs/08-ui-handoff.md` (positions, scales, cursor h
 - 2026-11-27 Claude: step 20 web build while Codex works on brief 07. `npm run package:web` writes
   `release/reign-of-grelok-web.zip` for itch.io (see PLAN step 20); `E2E_BUILD=1 npm run e2e` tests the build.
   After Task 2, run `npm run package:web` again so the zip has the new animations.
+- 2026-11-27 Codex: updated `art/briefs/07-preview-animations.ts` to use the importer’s `partCells()` normalization
+  before palette selection and fitting; added `--substitute-idle` for isolated candidate review. The original six
+  WIP raws rendered as a complete 25-frame diagnostic preview at 76x116 and 70px: `art/wip/grognak-07/07-animation-preview.html`.
+  Generator supplied a braided-idle candidate plus walk-east and rear-reach attempts. Reviewer accepted the idle candidate
+  for user review conditional on import/in-scene validation; walk-east and rear-reach attempts failed their central pose
+  requirements. The candidate preview is `art/wip/grognak-07/idle-candidate-preview/07-animation-preview-idle-candidate.html`.
+  Originals remain unchanged; no files were moved to `art/raw/`. `npm run import-art -- --list` therefore still reports only
+  `grognak_v1`, and the game has not been validated with this candidate. Typecheck, unit tests (190), and validate pass.
+  E2E and live-game visual checks remain pending: Playwright cannot start its configured server because port 5173 is already
+  occupied by an unidentified process, and the CUA browser surface is unavailable. Side-walk and rear-reach repairs remain open.
+- 2026-11-27 Codex follow-up: reviewer approved the rear pose in `grognak_correction_plate.png` (rear view, sword on
+  viewer-right, free hand on viewer-left, paired braids). Assembled only that lower-right 627x627 cell into a new WIP
+  reach sheet, preserving all three original reach cells: `grognak_reach_rear_plate_candidate.png`. Combined normalized
+  idle + reach preview at 76x116 and 70px: `idle-reach-candidate-preview/07-animation-preview-idle-candidate-reach-candidate.html`.
+  Reviewer approved the combined preview: idle and rear reach have consistent helmet/braids/sword, clear free hand,
+  aligned feet, and no obvious clipping or fringe. Both candidates are ready for user review; actual import/in-scene
+  validation is still pending. Walk-east still fails the side-step leg-role requirement and is the sole identified core art
+  blocker; raw promotion/import remains with Claude after art acceptance. A fresh temporary
+  Playwright config on port 5175 also stalled without test output and was stopped; e2e is unverified. No process on port
+  5173 was stopped, and no runtime asset, manifest, or raw files were changed by this QA follow-up.
+- 2026-11-27 Codex final brief 07 handoff: Terra approved the combined wide-cell walk candidate at 76x116 and 70px;
+  the six selected raws are now staged in `art/raw/`: `grognak_walk_e.png` (assembled 3x2, 1536x1536), original
+  `grognak_walk_s.png`, original `grognak_walk_n.png`, braided `grognak_idle.png`, original `grognak_talk.png`, and
+  rear-plate `grognak_reach.png`. All source drafts/candidates remain in WIP. Final review path:
+  `art/wip/grognak-07/final-wide-candidate-preview/07-animation-preview-idle-candidate-reach-candidate-walk-e-candidate.html`.
+  Reviewer found scale and baseline consistent, leg roles alternate, and no obvious clipping/fringe. Current game has
+  not been reviewed in-scene.
+- Command incident and status: `npm run import-art -- --list` was intended as list-only, but Windows npm treated
+  `--list` as an unknown npm config argument and ran the full importer. It completed `grognak`, then `grognak_v1`
+  (which overwrote the shared output), and the other raw-backed assets. No pre-import bytes were available; the runtime
+  assets had already appeared modified in the initial worktree. No blind restore was attempted. The current runtime
+  copies of the 28 tracked changed game assets were snapshotted to `art/wip/grognak-07/runtime-import-recovery/`.
+  Read-only listing works as `npx tsx tools/import-art.ts --list` and shows all six selected raws as ready.
+  Current `grognak.png` and its JSON metadata are the legacy 3x4 output at 228x464 because `grognak_v1` imported last;
+  do not treat this as brief 07 integration. Unit tests now report 188 pass / 2 fail: expected transition failures until
+  Claude updates `game.yml` and imports the 6x6 sheet (the PNG size test expects 456x696 and the player columns test
+  expects 6; current game config has no `player.columns`). Typecheck (last run before the accidental import) and validate
+  passed. E2E was attempted with Edge but stalled without output on the occupied 5173 and temporary 5175 servers, then
+  was stopped; no unknown process was touched. Claude should resume integration and rerun the full checks.
+
+- 2026-11-27 Codex: committed the six selected animation sources as c624395, followed by a separate review/handoff commit. Only animation files and documentation are included; sound effects, package scripts, runtime sprite changes, and test screenshots remain outside these commits. Rechecked typecheck and validation (pass); unit tests 188 pass / 2 documented integration failures; e2e again stalled at server startup and was stopped. No in-game verification completed in this commit-only task.

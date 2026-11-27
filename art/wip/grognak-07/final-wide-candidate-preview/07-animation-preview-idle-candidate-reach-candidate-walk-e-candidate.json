@@ -1,0 +1,1776 @@
+{
+  "complete": true,
+  "purpose": "Diagnostic preview. Visual review is separate.",
+  "missing": [],
+  "frameSize": [
+    76,
+    116
+  ],
+  "atlasGrid": [
+    6,
+    6
+  ],
+  "sharedRawBounds": {
+    "x": 33,
+    "y": 353,
+    "w": 621,
+    "h": 663
+  },
+  "sharedImportScale": 0.11916264090177134,
+  "palette": [
+    [
+      52,
+      0,
+      52
+    ],
+    [
+      52,
+      0,
+      0
+    ],
+    [
+      87,
+      0,
+      52
+    ],
+    [
+      116,
+      52,
+      52
+    ],
+    [
+      87,
+      52,
+      87
+    ],
+    [
+      144,
+      52,
+      52
+    ],
+    [
+      206,
+      87,
+      52
+    ],
+    [
+      87,
+      116,
+      116
+    ],
+    [
+      144,
+      116,
+      87
+    ],
+    [
+      116,
+      144,
+      172
+    ],
+    [
+      206,
+      144,
+      87
+    ],
+    [
+      206,
+      172,
+      144
+    ],
+    [
+      255,
+      172,
+      116
+    ],
+    [
+      172,
+      172,
+      206
+    ],
+    [
+      255,
+      206,
+      172
+    ],
+    [
+      206,
+      206,
+      255
+    ]
+  ],
+  "parts": [
+    {
+      "name": "walk_e",
+      "path": "art/raw/grognak_walk_e.png",
+      "rawSize": [
+        1536,
+        1536
+      ],
+      "grid": [
+        3,
+        2
+      ],
+      "rawCellSize": [
+        512,
+        768
+      ],
+      "unusedTrailingColumns": 0,
+      "unusedTrailingRows": 0,
+      "cells": [
+        {
+          "cell": 0,
+          "atlasFrame": 0,
+          "rawBounds": {
+            "x": 170,
+            "y": 375,
+            "w": 359,
+            "h": 640
+          },
+          "rawMargins": {
+            "left": 170,
+            "top": 375,
+            "right": -17,
+            "bottom": -247
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 16,
+                "y": 38,
+                "w": 45,
+                "h": 78
+              },
+              "margins": {
+                "left": 16,
+                "top": 38,
+                "right": 15,
+                "bottom": 0
+              },
+              "opaquePixels": 2178,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 15
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 24,
+                "y": 68,
+                "w": 28,
+                "h": 48
+              },
+              "margins": {
+                "left": 24,
+                "top": 68,
+                "right": 24,
+                "bottom": 0
+              },
+              "opaquePixels": 857,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 14
+            }
+          ]
+        },
+        {
+          "cell": 1,
+          "atlasFrame": 1,
+          "rawBounds": {
+            "x": 193,
+            "y": 411,
+            "w": 335,
+            "h": 604
+          },
+          "rawMargins": {
+            "left": 193,
+            "top": 411,
+            "right": -16,
+            "bottom": -247
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 19,
+                "y": 42,
+                "w": 42,
+                "h": 74
+              },
+              "margins": {
+                "left": 19,
+                "top": 42,
+                "right": 15,
+                "bottom": 0
+              },
+              "opaquePixels": 2113,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 15
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 26,
+                "y": 70,
+                "w": 26,
+                "h": 46
+              },
+              "margins": {
+                "left": 26,
+                "top": 70,
+                "right": 24,
+                "bottom": 0
+              },
+              "opaquePixels": 828,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 15
+            }
+          ]
+        },
+        {
+          "cell": 2,
+          "atlasFrame": 2,
+          "rawBounds": {
+            "x": 203,
+            "y": 361,
+            "w": 314,
+            "h": 654
+          },
+          "rawMargins": {
+            "left": 203,
+            "top": 361,
+            "right": -5,
+            "bottom": -247
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 20,
+                "y": 36,
+                "w": 40,
+                "h": 80
+              },
+              "margins": {
+                "left": 20,
+                "top": 36,
+                "right": 16,
+                "bottom": 0
+              },
+              "opaquePixels": 1968,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 15
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 26,
+                "y": 67,
+                "w": 25,
+                "h": 49
+              },
+              "margins": {
+                "left": 26,
+                "top": 67,
+                "right": 25,
+                "bottom": 0
+              },
+              "opaquePixels": 778,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 14
+            }
+          ]
+        },
+        {
+          "cell": 3,
+          "atlasFrame": 3,
+          "rawBounds": {
+            "x": 124,
+            "y": 365,
+            "w": 438,
+            "h": 650
+          },
+          "rawMargins": {
+            "left": 124,
+            "top": 365,
+            "right": -50,
+            "bottom": -247
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 11,
+                "y": 36,
+                "w": 54,
+                "h": 80
+              },
+              "margins": {
+                "left": 11,
+                "top": 36,
+                "right": 11,
+                "bottom": 0
+              },
+              "opaquePixels": 2287,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 14
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 21,
+                "y": 67,
+                "w": 33,
+                "h": 49
+              },
+              "margins": {
+                "left": 21,
+                "top": 67,
+                "right": 22,
+                "bottom": 0
+              },
+              "opaquePixels": 908,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 13
+            }
+          ]
+        },
+        {
+          "cell": 4,
+          "atlasFrame": 4,
+          "rawBounds": {
+            "x": 152,
+            "y": 365,
+            "w": 382,
+            "h": 650
+          },
+          "rawMargins": {
+            "left": 152,
+            "top": 365,
+            "right": -22,
+            "bottom": -247
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 14,
+                "y": 36,
+                "w": 48,
+                "h": 80
+              },
+              "margins": {
+                "left": 14,
+                "top": 36,
+                "right": 14,
+                "bottom": 0
+              },
+              "opaquePixels": 2254,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 13
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 23,
+                "y": 67,
+                "w": 29,
+                "h": 49
+              },
+              "margins": {
+                "left": 23,
+                "top": 67,
+                "right": 24,
+                "bottom": 0
+              },
+              "opaquePixels": 891,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 12
+            }
+          ]
+        },
+        {
+          "cell": 5,
+          "atlasFrame": 5,
+          "rawBounds": {
+            "x": 182,
+            "y": 365,
+            "w": 323,
+            "h": 650
+          },
+          "rawMargins": {
+            "left": 182,
+            "top": 365,
+            "right": 7,
+            "bottom": -247
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 18,
+                "y": 36,
+                "w": 40,
+                "h": 80
+              },
+              "margins": {
+                "left": 18,
+                "top": 36,
+                "right": 18,
+                "bottom": 0
+              },
+              "opaquePixels": 2080,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 12
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 25,
+                "y": 67,
+                "w": 25,
+                "h": 49
+              },
+              "margins": {
+                "left": 25,
+                "top": 67,
+                "right": 26,
+                "bottom": 0
+              },
+              "opaquePixels": 825,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 12
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "walk_s",
+      "path": "art/raw/grognak_walk_s.png",
+      "rawSize": [
+        1254,
+        1254
+      ],
+      "grid": [
+        2,
+        2
+      ],
+      "rawCellSize": [
+        627,
+        627
+      ],
+      "unusedTrailingColumns": 0,
+      "unusedTrailingRows": 0,
+      "cells": [
+        {
+          "cell": 0,
+          "atlasFrame": 6,
+          "rawBounds": {
+            "x": 139,
+            "y": 361,
+            "w": 413,
+            "h": 653
+          },
+          "rawMargins": {
+            "left": 139,
+            "top": 361,
+            "right": 75,
+            "bottom": -387
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 13,
+                "y": 36,
+                "w": 51,
+                "h": 80
+              },
+              "margins": {
+                "left": 13,
+                "top": 36,
+                "right": 12,
+                "bottom": 0
+              },
+              "opaquePixels": 2690,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 14
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 22,
+                "y": 67,
+                "w": 32,
+                "h": 49
+              },
+              "margins": {
+                "left": 22,
+                "top": 67,
+                "right": 22,
+                "bottom": 0
+              },
+              "opaquePixels": 1067,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 12
+            }
+          ]
+        },
+        {
+          "cell": 1,
+          "atlasFrame": 7,
+          "rawBounds": {
+            "x": 125,
+            "y": 355,
+            "w": 424,
+            "h": 648
+          },
+          "rawMargins": {
+            "left": 125,
+            "top": 355,
+            "right": 78,
+            "bottom": -376
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 11,
+                "y": 35,
+                "w": 53,
+                "h": 79
+              },
+              "margins": {
+                "left": 11,
+                "top": 35,
+                "right": 12,
+                "bottom": 2
+              },
+              "opaquePixels": 2768,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 14
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 21,
+                "y": 66,
+                "w": 32,
+                "h": 49
+              },
+              "margins": {
+                "left": 21,
+                "top": 66,
+                "right": 23,
+                "bottom": 1
+              },
+              "opaquePixels": 1098,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 13
+            }
+          ]
+        },
+        {
+          "cell": 2,
+          "atlasFrame": 8,
+          "rawBounds": {
+            "x": 138,
+            "y": 362,
+            "w": 433,
+            "h": 652
+          },
+          "rawMargins": {
+            "left": 138,
+            "top": 362,
+            "right": 56,
+            "bottom": -387
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 13,
+                "y": 36,
+                "w": 53,
+                "h": 80
+              },
+              "margins": {
+                "left": 13,
+                "top": 36,
+                "right": 10,
+                "bottom": 0
+              },
+              "opaquePixels": 2741,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 14
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 22,
+                "y": 67,
+                "w": 33,
+                "h": 49
+              },
+              "margins": {
+                "left": 22,
+                "top": 67,
+                "right": 21,
+                "bottom": 0
+              },
+              "opaquePixels": 1085,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 13
+            }
+          ]
+        },
+        {
+          "cell": 3,
+          "atlasFrame": 9,
+          "rawBounds": {
+            "x": 127,
+            "y": 355,
+            "w": 422,
+            "h": 648
+          },
+          "rawMargins": {
+            "left": 127,
+            "top": 355,
+            "right": 78,
+            "bottom": -376
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 11,
+                "y": 35,
+                "w": 53,
+                "h": 79
+              },
+              "margins": {
+                "left": 11,
+                "top": 35,
+                "right": 12,
+                "bottom": 2
+              },
+              "opaquePixels": 2750,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 14
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 21,
+                "y": 66,
+                "w": 32,
+                "h": 49
+              },
+              "margins": {
+                "left": 21,
+                "top": 66,
+                "right": 23,
+                "bottom": 1
+              },
+              "opaquePixels": 1097,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 13
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "walk_n",
+      "path": "art/raw/grognak_walk_n.png",
+      "rawSize": [
+        1254,
+        1254
+      ],
+      "grid": [
+        2,
+        2
+      ],
+      "rawCellSize": [
+        627,
+        627
+      ],
+      "unusedTrailingColumns": 0,
+      "unusedTrailingRows": 0,
+      "cells": [
+        {
+          "cell": 0,
+          "atlasFrame": 12,
+          "rawBounds": {
+            "x": 142,
+            "y": 366,
+            "w": 419,
+            "h": 649
+          },
+          "rawMargins": {
+            "left": 142,
+            "top": 366,
+            "right": 66,
+            "bottom": -388
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 13,
+                "y": 37,
+                "w": 52,
+                "h": 79
+              },
+              "margins": {
+                "left": 13,
+                "top": 37,
+                "right": 11,
+                "bottom": 0
+              },
+              "opaquePixels": 2684,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 14
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 22,
+                "y": 67,
+                "w": 32,
+                "h": 49
+              },
+              "margins": {
+                "left": 22,
+                "top": 67,
+                "right": 22,
+                "bottom": 0
+              },
+              "opaquePixels": 1070,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 12
+            }
+          ]
+        },
+        {
+          "cell": 1,
+          "atlasFrame": 13,
+          "rawBounds": {
+            "x": 137,
+            "y": 361,
+            "w": 405,
+            "h": 654
+          },
+          "rawMargins": {
+            "left": 137,
+            "top": 361,
+            "right": 85,
+            "bottom": -388
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 12,
+                "y": 36,
+                "w": 51,
+                "h": 80
+              },
+              "margins": {
+                "left": 12,
+                "top": 36,
+                "right": 13,
+                "bottom": 0
+              },
+              "opaquePixels": 2700,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 14
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 22,
+                "y": 67,
+                "w": 31,
+                "h": 49
+              },
+              "margins": {
+                "left": 22,
+                "top": 67,
+                "right": 23,
+                "bottom": 0
+              },
+              "opaquePixels": 1069,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 11
+            }
+          ]
+        },
+        {
+          "cell": 2,
+          "atlasFrame": 14,
+          "rawBounds": {
+            "x": 142,
+            "y": 366,
+            "w": 419,
+            "h": 649
+          },
+          "rawMargins": {
+            "left": 142,
+            "top": 366,
+            "right": 66,
+            "bottom": -388
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 13,
+                "y": 37,
+                "w": 52,
+                "h": 79
+              },
+              "margins": {
+                "left": 13,
+                "top": 37,
+                "right": 11,
+                "bottom": 0
+              },
+              "opaquePixels": 2705,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 14
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 22,
+                "y": 67,
+                "w": 32,
+                "h": 49
+              },
+              "margins": {
+                "left": 22,
+                "top": 67,
+                "right": 22,
+                "bottom": 0
+              },
+              "opaquePixels": 1078,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 12
+            }
+          ]
+        },
+        {
+          "cell": 3,
+          "atlasFrame": 15,
+          "rawBounds": {
+            "x": 137,
+            "y": 361,
+            "w": 405,
+            "h": 654
+          },
+          "rawMargins": {
+            "left": 137,
+            "top": 361,
+            "right": 85,
+            "bottom": -388
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 12,
+                "y": 36,
+                "w": 51,
+                "h": 80
+              },
+              "margins": {
+                "left": 12,
+                "top": 36,
+                "right": 13,
+                "bottom": 0
+              },
+              "opaquePixels": 2708,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 13
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 22,
+                "y": 67,
+                "w": 31,
+                "h": 49
+              },
+              "margins": {
+                "left": 22,
+                "top": 67,
+                "right": 23,
+                "bottom": 0
+              },
+              "opaquePixels": 1070,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 11
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "idle",
+      "path": "art/raw/grognak_idle.png",
+      "rawSize": [
+        1536,
+        1024
+      ],
+      "grid": [
+        3,
+        1
+      ],
+      "rawCellSize": [
+        512,
+        1024
+      ],
+      "unusedTrailingColumns": 0,
+      "unusedTrailingRows": 0,
+      "cells": [
+        {
+          "cell": 0,
+          "atlasFrame": 18,
+          "rawBounds": {
+            "x": 136,
+            "y": 365,
+            "w": 427,
+            "h": 647
+          },
+          "rawMargins": {
+            "left": 136,
+            "top": 365,
+            "right": -51,
+            "bottom": 12
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 12,
+                "y": 36,
+                "w": 53,
+                "h": 80
+              },
+              "margins": {
+                "left": 12,
+                "top": 36,
+                "right": 11,
+                "bottom": 0
+              },
+              "opaquePixels": 2825,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 13
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 22,
+                "y": 67,
+                "w": 32,
+                "h": 49
+              },
+              "margins": {
+                "left": 22,
+                "top": 67,
+                "right": 22,
+                "bottom": 0
+              },
+              "opaquePixels": 1121,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 11
+            }
+          ]
+        },
+        {
+          "cell": 1,
+          "atlasFrame": 19,
+          "rawBounds": {
+            "x": 132,
+            "y": 365,
+            "w": 427,
+            "h": 646
+          },
+          "rawMargins": {
+            "left": 132,
+            "top": 365,
+            "right": -47,
+            "bottom": 13
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 12,
+                "y": 36,
+                "w": 53,
+                "h": 79
+              },
+              "margins": {
+                "left": 12,
+                "top": 36,
+                "right": 11,
+                "bottom": 1
+              },
+              "opaquePixels": 2828,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 14
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 21,
+                "y": 67,
+                "w": 33,
+                "h": 49
+              },
+              "margins": {
+                "left": 21,
+                "top": 67,
+                "right": 22,
+                "bottom": 0
+              },
+              "opaquePixels": 1135,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 14
+            }
+          ]
+        },
+        {
+          "cell": 2,
+          "atlasFrame": 20,
+          "rawBounds": {
+            "x": 181,
+            "y": 361,
+            "w": 302,
+            "h": 654
+          },
+          "rawMargins": {
+            "left": 181,
+            "top": 361,
+            "right": 29,
+            "bottom": 9
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 18,
+                "y": 36,
+                "w": 38,
+                "h": 80
+              },
+              "margins": {
+                "left": 18,
+                "top": 36,
+                "right": 20,
+                "bottom": 0
+              },
+              "opaquePixels": 2058,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 14
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 25,
+                "y": 67,
+                "w": 24,
+                "h": 49
+              },
+              "margins": {
+                "left": 25,
+                "top": 67,
+                "right": 27,
+                "bottom": 0
+              },
+              "opaquePixels": 808,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 13
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "talk",
+      "path": "art/raw/grognak_talk.png",
+      "rawSize": [
+        1254,
+        1254
+      ],
+      "grid": [
+        2,
+        2
+      ],
+      "rawCellSize": [
+        627,
+        627
+      ],
+      "unusedTrailingColumns": 0,
+      "unusedTrailingRows": 0,
+      "cells": [
+        {
+          "cell": 0,
+          "atlasFrame": 24,
+          "rawBounds": {
+            "x": 122,
+            "y": 364,
+            "w": 443,
+            "h": 650
+          },
+          "rawMargins": {
+            "left": 122,
+            "top": 364,
+            "right": 62,
+            "bottom": -387
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 11,
+                "y": 36,
+                "w": 54,
+                "h": 80
+              },
+              "margins": {
+                "left": 11,
+                "top": 36,
+                "right": 11,
+                "bottom": 0
+              },
+              "opaquePixels": 2982,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 13
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 21,
+                "y": 67,
+                "w": 34,
+                "h": 49
+              },
+              "margins": {
+                "left": 21,
+                "top": 67,
+                "right": 21,
+                "bottom": 0
+              },
+              "opaquePixels": 1185,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 12
+            }
+          ]
+        },
+        {
+          "cell": 1,
+          "atlasFrame": 25,
+          "rawBounds": {
+            "x": 122,
+            "y": 364,
+            "w": 503,
+            "h": 649
+          },
+          "rawMargins": {
+            "left": 122,
+            "top": 364,
+            "right": 2,
+            "bottom": -386
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 11,
+                "y": 36,
+                "w": 62,
+                "h": 80
+              },
+              "margins": {
+                "left": 11,
+                "top": 36,
+                "right": 3,
+                "bottom": 0
+              },
+              "opaquePixels": 2924,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 12
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 21,
+                "y": 67,
+                "w": 38,
+                "h": 49
+              },
+              "margins": {
+                "left": 21,
+                "top": 67,
+                "right": 17,
+                "bottom": 0
+              },
+              "opaquePixels": 1167,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 12
+            }
+          ]
+        },
+        {
+          "cell": 2,
+          "atlasFrame": 26,
+          "rawBounds": {
+            "x": 143,
+            "y": 361,
+            "w": 386,
+            "h": 655
+          },
+          "rawMargins": {
+            "left": 143,
+            "top": 361,
+            "right": 98,
+            "bottom": -389
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 13,
+                "y": 36,
+                "w": 48,
+                "h": 80
+              },
+              "margins": {
+                "left": 13,
+                "top": 36,
+                "right": 15,
+                "bottom": 0
+              },
+              "opaquePixels": 2618,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 13
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 22,
+                "y": 67,
+                "w": 30,
+                "h": 49
+              },
+              "margins": {
+                "left": 22,
+                "top": 67,
+                "right": 24,
+                "bottom": 0
+              },
+              "opaquePixels": 1024,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 11
+            }
+          ]
+        },
+        {
+          "cell": 3,
+          "atlasFrame": 27,
+          "rawBounds": {
+            "x": 143,
+            "y": 361,
+            "w": 460,
+            "h": 655
+          },
+          "rawMargins": {
+            "left": 143,
+            "top": 361,
+            "right": 24,
+            "bottom": -389
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 13,
+                "y": 36,
+                "w": 57,
+                "h": 80
+              },
+              "margins": {
+                "left": 13,
+                "top": 36,
+                "right": 6,
+                "bottom": 0
+              },
+              "opaquePixels": 2637,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 12
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 22,
+                "y": 67,
+                "w": 35,
+                "h": 49
+              },
+              "margins": {
+                "left": 22,
+                "top": 67,
+                "right": 19,
+                "bottom": 0
+              },
+              "opaquePixels": 1035,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 12
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "reach",
+      "path": "art/raw/grognak_reach.png",
+      "rawSize": [
+        1254,
+        1254
+      ],
+      "grid": [
+        2,
+        2
+      ],
+      "rawCellSize": [
+        627,
+        627
+      ],
+      "unusedTrailingColumns": 0,
+      "unusedTrailingRows": 0,
+      "cells": [
+        {
+          "cell": 0,
+          "atlasFrame": 30,
+          "rawBounds": {
+            "x": 33,
+            "y": 353,
+            "w": 569,
+            "h": 646
+          },
+          "rawMargins": {
+            "left": 33,
+            "top": 353,
+            "right": 25,
+            "bottom": -372
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 0,
+                "y": 35,
+                "w": 70,
+                "h": 79
+              },
+              "margins": {
+                "left": 0,
+                "top": 35,
+                "right": 6,
+                "bottom": 2
+              },
+              "opaquePixels": 3326,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 15
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 14,
+                "y": 66,
+                "w": 43,
+                "h": 49
+              },
+              "margins": {
+                "left": 14,
+                "top": 66,
+                "right": 19,
+                "bottom": 1
+              },
+              "opaquePixels": 1313,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 15
+            }
+          ]
+        },
+        {
+          "cell": 1,
+          "atlasFrame": 31,
+          "rawBounds": {
+            "x": 33,
+            "y": 402,
+            "w": 621,
+            "h": 597
+          },
+          "rawMargins": {
+            "left": 33,
+            "top": 402,
+            "right": -27,
+            "bottom": -372
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 0,
+                "y": 41,
+                "w": 76,
+                "h": 73
+              },
+              "margins": {
+                "left": 0,
+                "top": 41,
+                "right": 0,
+                "bottom": 2
+              },
+              "opaquePixels": 3413,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 15
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 14,
+                "y": 70,
+                "w": 47,
+                "h": 45
+              },
+              "margins": {
+                "left": 14,
+                "top": 70,
+                "right": 15,
+                "bottom": 1
+              },
+              "opaquePixels": 1343,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 15
+            }
+          ]
+        },
+        {
+          "cell": 2,
+          "atlasFrame": 32,
+          "rawBounds": {
+            "x": 38,
+            "y": 361,
+            "w": 542,
+            "h": 654
+          },
+          "rawMargins": {
+            "left": 38,
+            "top": 361,
+            "right": 47,
+            "bottom": -388
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 1,
+                "y": 36,
+                "w": 66,
+                "h": 80
+              },
+              "margins": {
+                "left": 1,
+                "top": 36,
+                "right": 9,
+                "bottom": 0
+              },
+              "opaquePixels": 3557,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 15
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 14,
+                "y": 67,
+                "w": 42,
+                "h": 49
+              },
+              "margins": {
+                "left": 14,
+                "top": 67,
+                "right": 20,
+                "bottom": 0
+              },
+              "opaquePixels": 1409,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 14
+            }
+          ]
+        },
+        {
+          "cell": 3,
+          "atlasFrame": 33,
+          "rawBounds": {
+            "x": 102,
+            "y": 366,
+            "w": 418,
+            "h": 617
+          },
+          "rawMargins": {
+            "left": 102,
+            "top": 366,
+            "right": 107,
+            "bottom": -356
+          },
+          "outputs": [
+            {
+              "height": 116,
+              "bounds": {
+                "x": 8,
+                "y": 37,
+                "w": 52,
+                "h": 75
+              },
+              "margins": {
+                "left": 8,
+                "top": 37,
+                "right": 16,
+                "bottom": 4
+              },
+              "opaquePixels": 2536,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 15
+            },
+            {
+              "height": 70,
+              "bounds": {
+                "x": 19,
+                "y": 67,
+                "w": 32,
+                "h": 47
+              },
+              "margins": {
+                "left": 19,
+                "top": 67,
+                "right": 25,
+                "bottom": 2
+              },
+              "opaquePixels": 1015,
+              "partialAlphaPixels": 0,
+              "opaqueColors": 12
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "animations": {
+    "walk_e": {
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "loopChanges": [
+        {
+          "from": 0,
+          "to": 1,
+          "changedPixels": 1957
+        },
+        {
+          "from": 1,
+          "to": 2,
+          "changedPixels": 2205
+        },
+        {
+          "from": 2,
+          "to": 3,
+          "changedPixels": 2004
+        },
+        {
+          "from": 3,
+          "to": 4,
+          "changedPixels": 1974
+        },
+        {
+          "from": 4,
+          "to": 5,
+          "changedPixels": 2247
+        },
+        {
+          "from": 5,
+          "to": 0,
+          "changedPixels": 2051
+        }
+      ]
+    },
+    "walk_s": {
+      "frames": [
+        6,
+        7,
+        8,
+        9
+      ],
+      "loopChanges": [
+        {
+          "from": 6,
+          "to": 7,
+          "changedPixels": 2203
+        },
+        {
+          "from": 7,
+          "to": 8,
+          "changedPixels": 2367
+        },
+        {
+          "from": 8,
+          "to": 9,
+          "changedPixels": 2341
+        },
+        {
+          "from": 9,
+          "to": 6,
+          "changedPixels": 2190
+        }
+      ]
+    },
+    "walk_n": {
+      "frames": [
+        12,
+        13,
+        14,
+        15
+      ],
+      "loopChanges": [
+        {
+          "from": 12,
+          "to": 13,
+          "changedPixels": 1994
+        },
+        {
+          "from": 13,
+          "to": 14,
+          "changedPixels": 2099
+        },
+        {
+          "from": 14,
+          "to": 15,
+          "changedPixels": 2095
+        },
+        {
+          "from": 15,
+          "to": 12,
+          "changedPixels": 1991
+        }
+      ]
+    },
+    "idle_s": {
+      "frames": [
+        18
+      ],
+      "loopChanges": []
+    },
+    "idle_n": {
+      "frames": [
+        19
+      ],
+      "loopChanges": []
+    },
+    "idle_e": {
+      "frames": [
+        20
+      ],
+      "loopChanges": []
+    },
+    "talk_s": {
+      "frames": [
+        24,
+        25
+      ],
+      "loopChanges": [
+        {
+          "from": 24,
+          "to": 25,
+          "changedPixels": 744
+        },
+        {
+          "from": 25,
+          "to": 24,
+          "changedPixels": 744
+        }
+      ]
+    },
+    "talk_e": {
+      "frames": [
+        26,
+        27
+      ],
+      "loopChanges": [
+        {
+          "from": 26,
+          "to": 27,
+          "changedPixels": 564
+        },
+        {
+          "from": 27,
+          "to": 26,
+          "changedPixels": 564
+        }
+      ]
+    },
+    "reach_e": {
+      "frames": [
+        30,
+        31
+      ],
+      "loopChanges": [
+        {
+          "from": 30,
+          "to": 31,
+          "changedPixels": 2572
+        },
+        {
+          "from": 31,
+          "to": 30,
+          "changedPixels": 2572
+        }
+      ]
+    },
+    "reach_s": {
+      "frames": [
+        32
+      ],
+      "loopChanges": []
+    },
+    "reach_n": {
+      "frames": [
+        33
+      ],
+      "loopChanges": []
+    }
+  },
+  "atlasStats": [
+    {
+      "height": 116,
+      "opaquePixels": 66330,
+      "partialAlphaPixels": 0,
+      "opaqueColors": 15
+    },
+    {
+      "height": 70,
+      "opaquePixels": 26276,
+      "partialAlphaPixels": 0,
+      "opaqueColors": 15
+    }
+  ]
+}

@@ -1,13 +1,13 @@
 # Grognak animation handoff
 
-> **Where the raws are now (Claude, after Codex ran out of credits):** the six candidate pictures were moved from
-> `art/raw/` to `art/wip/grognak-07/` (same names) so they are safe in git without the art tests treating them as
-> ready to import. Paths below that say `art/raw/grognak_*.png` mean that folder until they are final. Still to do:
-> the side walk's second row (`07-walk-e-far-step-repair.md`) and a review of all six; then move them back to
-> `art/raw/` and Claude imports them (see `docs/HANDOFF.md`, Task 2). The importer now normalises the parts' cell
-> sizes and figure scales itself (`partCells()`), so `07-stage-normalized-animations.ts` is no longer needed.
+The six selected sheets are committed in `art/raw/` (source commit `c624395`). The side-walk alternation, rear braids,
+and rear-reaching hand placement have passed visual review at 76×116 and the smaller perspective size. Original WIP
+sources remain preserved. The importer now normalizes cell sizes and figure scales with `partCells()`; the old custom
+normalization script is unnecessary. Claude still needs to integrate the new layout and verify it in-game.
 
-Production and review are in progress. This file will be finalized after all six sheets pass review.
+Final review evidence is in `art/wip/grognak-07/final-wide-candidate-preview/`. Current frames are **76×116**;
+the layout is six columns by six rows, with 25 used poses. Two art tests fail until the runtime import and animation
+table update are coordinated. Do not run a blanket import while the temporary `grognak_v1` entry remains.
 
 ## Approved design
 
@@ -21,7 +21,7 @@ Before import, read `07-grognak-import-preflight.md` and the final geometry note
 
 Remove the temporary `grognak_v1` manifest entry when integrating: it writes the same runtime sprite path as `grognak`. Then import the new `grognak` and update `games/grelok/game.yml` together. Tune walk stride and review actual gameplay transitions, mirrored left walking, talking and reaching.
 
-Current manifest layout is six columns and six rows of 64×96 frames. Eleven unused cells are intentional. Use the animation table emitted by the importer; current expected indices are:
+Current manifest layout is six columns and six rows of 76×116 frames. Eleven unused cells are intentional. Use the animation table emitted by the importer; current expected indices are:
 
 ```yaml
 columns: 6
