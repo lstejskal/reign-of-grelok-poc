@@ -108,3 +108,6 @@ Codex's instructions: `art/briefs/08-ui-handoff.md` (positions, scales, cursor h
   frame). NPCs sized against Grognak at the spot where they stand: blacksmith 62x84 (about his height), priest 56x54
   (sitting, a little smaller), zombie 52x78 (about his size; lying 64x30), zombie moved to x 252 to stand in the
   doorway. Hotspots fitted to the new pictures. Validator tests now read the frame size from game.yml.
+- 2026-11-27 Claude: step 20 web build while Codex works on brief 07. `npm run package:web` writes
+  `release/reign-of-grelok-web.zip` for itch.io (see PLAN step 20); `E2E_BUILD=1 npm run e2e` tests the build.
+  After Task 2, run `npm run package:web` again so the zip has the new animations.

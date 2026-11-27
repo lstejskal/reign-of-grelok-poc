@@ -13,7 +13,7 @@ step-by-step instructions are in `docs/HANDOFF.md`.
 | 17 | Art pass: all six screens, title and interface art, player animation system, perspective sizes | 🟡 Nearly done: only **Grognak's new animation sheet** (brief 07) is left: drafts in `art/wip/grognak-07/`, the side walk needs its second row redone, then import (HANDOFF Task 2) |
 | 18 | Music & SFX pass (real tracks instead of the generated placeholders) | ✅ Music done: intro (title + finale), music1 (plain, town), music2 (the rest); sound effects are still the generated ones |
 | 19 | Polish (cursor states, text speed, fullscreen, verb shortcuts, skip cutscene, credits…) | ✅ Done: cursor (custom, busy during cutscenes, name of what it points at), text speed, fullscreen, verb keys, Esc skips cutscenes, credits, return to title, mouse-only walkthrough test |
-| 20 | Builds & distribution (web zip for itch.io, desktop app) | ⬜ To do |
+| 20 | Builds & distribution (web zip for itch.io, desktop app) | 🟡 Web zip done (`npm run package:web`); not uploaded yet (needs the user's itch.io account); desktop app to do |
 
 ---
 
@@ -428,7 +428,14 @@ mirror left↔right, walk bob via tween, talk = 2-frame mouth swap, idle = slow 
 - `npm run build` → static web build (itch.io-ready zip).
 - Desktop wrapper (Electron; `steamworks.js` later for achievements) → `npm run package` for macOS/Windows.
 - **Output:** downloadable zip + runnable desktop app. **Test:** e2e smoke against the production build.
-- **Status: to do.**
+- **Status: web zip done, desktop app to do.** `vite.config.ts` builds with `base: './'` (relative paths, so the game
+  runs from itch.io's sub-folder). `npm run package:web` builds and writes `release/reign-of-grelok-web.zip`
+  (`tools/package-web.ts`: a small built-in zip writer that first checks itch.io's HTML5 rules: index.html at the top,
+  relative paths, ≤ 1000 files, ≤ 500 MB). About 57 files, 7.8 MB. `E2E_BUILD=1 npm run e2e` runs the whole e2e suite
+  against the build (`vite preview`, port 4173); it passes. The zip was also played from an `/html/<id>/` sub-path.
+  The build still contains the demo game and the debug keys (F1 outlines, `/` console, `window.__adv`).
+  Upload: free itch.io account → new project, Kind "HTML", upload the zip, tick "played in the browser"; keep
+  Visibility on **Draft** and share the secret link (not listed anywhere) until it goes public.
 
 ---
 

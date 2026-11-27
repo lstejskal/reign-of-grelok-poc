@@ -792,7 +792,7 @@ test('the game\'s title and interface art is used: title picture and logo, inter
   const shown = (scene: string) => page.evaluate((key) => (window.__adv.game.scene.getScene(key) as any).children.list
     .filter((c: any) => c.type === 'Image').map((c: any) => c.texture.key), scene);
   expect(await shown('TitleScene')).toEqual(['asset:backgrounds/title.png', 'asset:ui/title_logo.png']);
-  expect(await page.evaluate(() => (window.__adv.game.canvas as HTMLCanvasElement).style.cursor)).toMatch(/^url\(.*cursor.*\) 5 3, auto$/);
+  expect(await page.evaluate(() => (window.__adv.game.canvas as HTMLCanvasElement).style.cursor)).toMatch(/^url\(.*(cursor|data:image\/png).*\) 5 3, auto$/); // the build inlines small pictures
   await page.screenshot({ path: 'tests/e2e/screenshots/title.png' });
 
   await page.goto('/?title=off');

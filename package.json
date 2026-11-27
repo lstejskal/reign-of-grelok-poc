@@ -8,6 +8,8 @@
   "scripts": {
     "dev": "npm run dev -w @grelok/client",
     "build": "npm run build -w @grelok/client",
+    "preview": "npm run preview -w @grelok/client",
+    "package:web": "npm run build && tsx tools/package-web.ts",
     "typecheck": "tsc -p packages/engine/tsconfig.json && tsc -p packages/engine/tsconfig.node.json && tsc -p tools/tsconfig.json && tsc -b packages/client",
     "test": "vitest run",
     "e2e": "playwright test",
