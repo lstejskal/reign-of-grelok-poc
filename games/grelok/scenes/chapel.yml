@@ -26,8 +26,8 @@ hotspots:   # later entries are on top; a hotspot with `when` is only there whil
     facing: n
   - id: zombie   # standing in front of the door
     when: {zombie_blocks_chapel_door: true}
-    polygon: [[225, 58], [265, 58], [265, 120], [225, 120]]
-    walkTo: [205, 124]
+    polygon: [[239, 81], [265, 81], [265, 120], [239, 120]]
+    walkTo: [228, 124]
     facing: e
   - id: zombie   # fallen into the grave
     when: {zombie_blocks_chapel_door: false}
@@ -43,7 +43,7 @@ sprites:   # follow the game state; the first state whose "when" holds is drawn
     image: sprites/open_grave.png
   - id: zombie
     thing: zombie              # only drawn while the zombie is visible here
-    x: 245
+    x: 252   # in the doorway, in front of the door leaf
     y: 120
     states:
       - when: {zombie_blocks_chapel_door: true}

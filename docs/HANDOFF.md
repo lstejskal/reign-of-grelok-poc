@@ -17,7 +17,7 @@ Read this first, then `PLAN.md` (the plan and every step's status) and the `docs
 - Engine (`packages/engine`) stays pure: no DOM, Phaser or Node. Client (`packages/client`) has no Grelok-specific
   content; everything game-specific lives in `games/<id>/`.
 - **Coordinates are logical 320x200** (scene 320x144). **Art has 2 picture pixels per logical pixel** (`ART_SCALE`):
-  backgrounds 640x288, Grognak frames 64x96, icons 48x32. Walkmasks stay 320x144. See `docs/learn/18`.
+  backgrounds 640x288, Grognak frames 76x116 (enlarged 20% from 64x96), icons 48x32. Walkmasks stay 320x144. See `docs/learn/18`.
 - Floors are polygons in the scene file (`walkArea:`) -> `npm run walkmask -- grelok <scene>`; a test fails if the
   PNG is stale. See `docs/learn/17`.
 - Scene data features: sprite `states` with `when`, `x/y`, `depth`; sprite `depth`; hotspot `when` (a thing that
@@ -103,3 +103,8 @@ Codex's instructions: `art/briefs/08-ui-handoff.md` (positions, scales, cursor h
 - Claude: Task 1 done (importer normalises sheet parts). Codex's brief 07 is unfinished: all six raws exist, the
   reference is approved, but the side walk's second row needs the repair prompt and no picture has been reviewed.
   Brief 08 art is complete and waits for Task 3 (code).
+- 2026-11-27 Claude: size pass after the user played the game. Grognak 20% bigger (frames 64x96 -> 76x116, sizes
+  `_114` .. `_70`, the old `_58` .. `_68` deleted; `grognak` and `grognak_v1` in `art/assets.yml` both use the new
+  frame). NPCs sized against Grognak at the spot where they stand: blacksmith 62x84 (about his height), priest 56x54
+  (sitting, a little smaller), zombie 52x78 (about his size; lying 64x30), zombie moved to x 252 to stand in the
+  doorway. Hotspots fitted to the new pictures. Validator tests now read the frame size from game.yml.

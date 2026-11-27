@@ -16,9 +16,9 @@ test('the imported standing stone is drawn in the plain, with Grognak (imported 
   const stone = sprites.find((s) => s.id === 'standing_stone');
   expect(stone?.image).toBe('sprites/standing_stone.png');
   expect(await page.evaluate(() => window.__adv.game.textures.get('asset:sprites/standing_stone.png').getSourceImage().height)).toBe(140); // 40x70 on screen, art at 2 picture pixels per scene pixel
-  // the player sheet is as wide as game.yml says: `columns` frames of 64x96 (3 for the original layout)
-  const columns: number = await page.evaluate(() => window.__adv.bundle.config.player.columns ?? 3);
-  expect(await page.evaluate(() => window.__adv.game.textures.get('asset:sprites/grognak.png').getSourceImage().width)).toBe(64 * columns);
+  // the player sheet is as wide as game.yml says: `columns` frames of frameWidth x frameHeight (3 for the original layout)
+  const { columns, frameWidth } = await page.evaluate(() => ({ columns: window.__adv.bundle.config.player.columns ?? 3, frameWidth: window.__adv.bundle.config.player.frameWidth }));
+  expect(await page.evaluate(() => window.__adv.game.textures.get('asset:sprites/grognak.png').getSourceImage().width)).toBe(frameWidth * columns);
 
   await page.screenshot({ path: 'tests/e2e/screenshots/art-imported.png' });
 });

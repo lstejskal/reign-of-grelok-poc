@@ -138,13 +138,14 @@ describe('validateGame', () => {
         const bundle = fresh();
         const sheet = bundle.config.player.sprite;
         Object.assign(bundle.config.player, { columns: 6, walkStride: 0, animations: { idle_s: [0], idle_n: [1], idle_e: [2], walk_s: [3], walk_e: [6, 7, 99] } });
-        const errors = validateGame(bundle, everythingExists, (a) => (a === sheet ? { width: 64 * 6, height: 96 * 2 } : undefined)).join('\n');
+        const { frameWidth: fw, frameHeight: fh } = bundle.config.player;
+        const errors = validateGame(bundle, everythingExists, (a) => (a === sheet ? { width: fw * 6, height: fh * 2 } : undefined)).join('\n');
         expect(errors).toContain('player animations: missing "walk_n"');
         expect(errors).toContain('player animation "walk_e" uses frames outside the sheet (it has 12)');
         expect(errors).toContain('player walkStride must be a number above 0');
         expect(errors).not.toContain('pixels wide');
-        const narrow = validateGame(bundle, everythingExists, (a) => (a === sheet ? { width: 64 * 3, height: 96 * 2 } : undefined)).join('\n');
-        expect(narrow).toContain('player sprite sheet must be 384 pixels wide (6 columns of 64)');
+        const narrow = validateGame(bundle, everythingExists, (a) => (a === sheet ? { width: fw * 3, height: fh * 2 } : undefined)).join('\n');
+        expect(narrow).toContain(`player sprite sheet must be ${fw * 6} pixels wide (6 columns of ${fw})`);
     });
     it('lets a thing have several hotspots only if each says when it applies, with known constraints', () => {
         const bundle = fresh();
@@ -174,14 +175,16 @@ describe('validateGame', () => {
     it('checks the player size sheets: order, existence, same dimensions as the main sheet', () => {
         const bundle = fresh();
         const sheet = bundle.config.player.sprite;
-        bundle.config.player.sizes = [94, 92, 90];
-        const sizeOf = (a: string) => (a === sheet ? { width: 192, height: 384 } : a.endsWith('_92.png') ? { width: 10, height: 10 } : { width: 192, height: 384 });
-        const errors = validateGame(bundle, (a) => !a.endsWith('_90.png'), sizeOf).join('\n');
-        expect(errors).toContain('player size 90 not found: assets/sprites/grognak_90.png');
-        expect(errors).toContain('assets/sprites/grognak_92.png must be the same size as assets/sprites/grognak.png (192x384), but is 10x10');
-        expect(errors).not.toContain('@94');
-        bundle.config.player.sizes = [90, 94];
-        expect(validateGame(bundle, everythingExists).join('\n')).toContain('player sizes must be whole numbers below frameHeight (96), largest first');
+        const { frameWidth: fw, frameHeight: fh } = bundle.config.player;
+        const [w, h] = [fw * 3, fh * 4]; // the original 3x4 layout
+        bundle.config.player.sizes = [fh - 2, fh - 4, fh - 6];
+        const sizeOf = (a: string) => (a.endsWith(`_${fh - 4}.png`) ? { width: 10, height: 10 } : { width: w, height: h });
+        const errors = validateGame(bundle, (a) => !a.endsWith(`_${fh - 6}.png`), sizeOf).join('\n');
+        expect(errors).toContain(`player size ${fh - 6} not found: assets/sprites/grognak_${fh - 6}.png`);
+        expect(errors).toContain(`assets/sprites/grognak_${fh - 4}.png must be the same size as assets/sprites/grognak.png (${w}x${h}), but is 10x10`);
+        expect(errors).not.toContain(`@${fh - 2}`);
+        bundle.config.player.sizes = [fh - 6, fh - 2];
+        expect(validateGame(bundle, everythingExists).join('\n')).toContain(`player sizes must be whole numbers below frameHeight (${fh}), largest first`);
     });
     it('reports bad verb buttons: too many, duplicate, bad name, long label, missing preposition', () => {
         const bundle = fresh();

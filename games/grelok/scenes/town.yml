@@ -18,11 +18,11 @@ walkArea:
 
 hotspots:   # later entries are on top
   - id: blacksmith
-    polygon: [[60, 67], [98, 67], [98, 125], [60, 125]]
+    polygon: [[64, 83], [94, 83], [94, 125], [64, 125]]
     walkTo: [108, 128]
     facing: w
   - id: priest
-    polygon: [[272, 95], [302, 95], [302, 125], [272, 125]]
+    polygon: [[273, 98], [301, 98], [301, 125], [273, 125]]
     walkTo: [262, 128]
     facing: e
 

@@ -30,7 +30,7 @@ before any frame is drawn.
 | 5 | Talking | `art/raw/grognak_talk.png` | 1024x1024 | 2 x 2 |
 | 6 | Reaching | `art/raw/grognak_reach.png` | 1024x1024 | 2 x 2 |
 
-In the game each pose becomes a 64x96 frame (Grognak stands 48 screen pixels tall). So: **big, simple, bold shapes**,
+In the game each pose becomes a 76x116 frame (Grognak stands about 49 screen pixels tall). So: **big, simple, bold shapes**,
 a strong silhouette, legs and arms clearly separated from the body.
 
 ## Step 0: the revised reference (needs the user's approval)

@@ -34,7 +34,7 @@ Keep the successful prompt, attached reference names, generation settings when a
 |---|---|
 | Overall look | Original 16-bit Sega Mega Drive fantasy arcade art, adapted to a point-and-click adventure. Chunky, bold shapes and readable silhouettes. |
 | Screen | 320x200 logical pixels: 320x144 scene plus 56 px interface. Art has 2 picture pixels per logical pixel (ART_SCALE), so all picture sizes below are twice the logical size. |
-| Asset sizes | Follow `art/assets.yml`. Grognak uses 64x96 frames; inventory icons are 48x32; backgrounds are 640x288. Props and NPCs have individual sizes. |
+| Asset sizes | Follow `art/assets.yml`. Grognak uses 76x116 frames; inventory icons are 48x32; backgrounds are 640x288. Props and NPCs have individual sizes. |
 | Pixel treatment | Crisp square pixels; no blur, anti-aliasing, smooth gradients, or painterly rendering. Use whole-number nearest-neighbour enlargement for inspection. |
 | Outlines | Characters and objects have a hard 1 px dark plum outline (`#340034`) at final resolution. Backgrounds have no added silhouette outline. |
 | Shading | Two or three tones per material, upper-left light, large flat areas. Sparse deliberate dithering only; avoid noisy surface texture. |

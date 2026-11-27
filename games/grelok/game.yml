@@ -4,14 +4,14 @@ subtitle: From the adventures of Grognak the Barbarian   # the line under the ti
 start: plain
 startPosition: [160, 112]   # where Grognak stands when the game begins
 
-# Grognak's picture: a sheet of 64x96 frames (art has 2 picture pixels per scene pixel, so he stands 48 scene pixels tall).
+# Grognak's picture: a sheet of 76x116 frames (art has 2 picture pixels per scene pixel, so his frame is 58 scene pixels tall).
 # Columns: idle, walk 1, walk 2. Rows: facing south, north, east, west.
 player:
   sprite: sprites/grognak.png
-  frameWidth: 64
-  frameHeight: 96
-  # smaller copies for perspective (grognak_94.png ..), drawn 1:1 instead of scaling him; npm run import-art prints this
-  sizes: [94, 92, 90, 88, 86, 84, 82, 80, 78, 76, 74, 72, 70, 68, 66, 64, 62, 60, 58]
+  frameWidth: 76
+  frameHeight: 116
+  # smaller copies for perspective (grognak_114.png ..), drawn 1:1 instead of scaling him; npm run import-art prints this
+  sizes: [114, 112, 110, 108, 106, 104, 102, 100, 98, 96, 94, 92, 90, 88, 86, 84, 82, 80, 78, 76, 74, 72, 70]
 
 # Title screen and interface art (brief 08). All optional: without them the title uses the start scene's picture and
 # the pixel font, the interface strip is plain, and the system cursor shows.

@@ -7,7 +7,7 @@ is deliberate. This page is the reference for anyone (human or AI image generato
 ## The rules
 1. **Size.** The game thinks in a 320x200 screen: the scene is 320x144, the bottom 56 px is the interface. Pictures have
    **2 pixels per screen pixel** (ART_SCALE), so they keep more detail: backgrounds are exactly 640x288, Grognak's frames
-   64x96 (he stands 48 screen pixels tall), inventory icons 48x32, scene objects twice the size of their hotspot
+   76x116 (he stands about 49 screen pixels tall at the front of a scene), inventory icons 48x32, scene objects twice the size of their hotspot
    (see `scenes/*.yml`). Exact sizes are in `art/assets.yml`.
 2. **Palette.** Every picture has its own small palette chosen to suit it (sprites 16 colours including the outline,
    backgrounds 32), and every colour is a Mega Drive colour: each of R, G, B is one of 0, 52, 87, 116, 144, 172, 206, 255
@@ -32,12 +32,17 @@ is deliberate. This page is the reference for anyone (human or AI image generato
 ## Characters
 | Who | Brief |
 |---|---|
-| **Grognak** (player, 64x96) | A tall barbarian crossed with a stocky dwarf warrior: broad torso, powerful legs, braided brown beard, horned helmet, fur loincloth, big sword. |
+| **Grognak** (player, 76x116 frames) | A tall barbarian crossed with a stocky dwarf warrior: broad torso, powerful legs, braided brown beard, horned helmet, fur loincloth, big sword. |
 | **Grelok** (villain, ~80x128) | Gaunt, hooded evil wizard. Flowing cape and cloak in **wine red**, dark armour pieces, skull-topped staff, glowing eyes. |
-| Blacksmith (~80x140) | Stout, sweaty, leather apron, hammer. |
-| Priest (~30x40) | Small and chubby, tipsy, sits under a tree with a jug. |
+| Blacksmith (62x84: about Grognak's height where he stands) | Stout, sweaty, leather apron, hammer. |
+| Priest (56x54, sitting: a little smaller than Grognak) | Small and chubby, tipsy, sits under a tree with a jug. |
 | Wizard (~25x20 in a window) | Tall and bespectacled, lost in thought; we only see him in the tower window. |
-| Zombie (~40x60) | Ragged, green-grey, arms forward; a second picture lying down. |
+| Zombie (52x78, about Grognak's size; lying down 64x30) | Ragged, green-grey, arms forward; a second picture lying down. |
+
+**Sizing a character against Grognak.** Grognak shrinks with distance (scene `scale:`), the other characters do not.
+So size a character for the spot where it stands: Grognak's height there is about 97 x his scale at that `y` (see
+`WalkArea.scaleAt`), in picture pixels. Example: the blacksmith stands at y 125 in the town, where Grognak is drawn at
+0.85, so about 83 pixels; the blacksmith's box is 84 high. After resizing, fit the hotspot to the new picture.
 
 The same briefs, as reusable prompt text, live in `art/prompts/fragments.yml`.
 

@@ -2,7 +2,7 @@
 
 **Concept:** logical resolution and art resolution don't have to be the same. The game still thinks in 320x200: every
 position, hotspot, walkmask, exit and piece of interface is in those units. Pictures have 2 pixels per game pixel
-(`ART_SCALE` in `packages/engine/src/sceneTypes.ts`): a background is 640x288, Grognak's frames 64x96, icons 48x32.
+(`ART_SCALE` in `packages/engine/src/sceneTypes.ts`): a background is 640x288, Grognak's frames 76x116 (64x96 until the size pass of November 2026), icons 48x32.
 Why: AI-generated art has much more detail than 32x48 can hold. Squeezing it that small turned Grognak into speckle;
 at 64x96 the face, beard, belt and legs survive.
 

@@ -500,7 +500,7 @@ const dialog = (page: Page) => page.evaluate(() => window.__adv.dialog);
 async function talkToBlacksmith(page: Page): Promise<void> {
   await say(page, 'south');
   await clickVerb(page, 'talk_to');
-  await clickAt(page, 80, 70);
+  await clickAt(page, 80, 100); // his apron
   await expect.poll(() => page.evaluate(() => window.__adv.answer), { timeout: 15_000 }).toContain('Blacksmith smiles');
   await walkSpeed(page, 0.05); // speech stays up 20 times longer, so tests can look at it
   await dismissAnswer(page);
@@ -586,7 +586,7 @@ test('the world changes visibly as the puzzle is solved: zombie falls, door open
 
   expect(await sprites(page)).toEqual([
     { id: 'open_grave', image: 'sprites/open_grave.png', x: 145, y: 125, depth: 125 },
-    { id: 'zombie', image: 'sprites/zombie_standing.png', x: 245, y: 120, depth: 120 },
+    { id: 'zombie', image: 'sprites/zombie_standing.png', x: 252, y: 120, depth: 120 },
   ]);
   await page.screenshot({ path: 'tests/e2e/screenshots/sprite-zombie-standing.png' });
 

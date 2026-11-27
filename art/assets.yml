@@ -19,15 +19,15 @@ game: grelok
 assets:
   # Grognak is made of several pictures (art/raw/grognak_<part>.png), one per animation: an image generator keeps
   # a character consistent far better in a small strip than in one big grid. Each part becomes a row of the sheet
-  # (6 frames of 64x96 per row); `frames` hands its cells, read row by row, to named animations. Walking left is the
+  # (6 frames of 76x116 per row); `frames` hands its cells, read row by row, to named animations. Walking left is the
   # walking-right picture mirrored by the game. After importing, game.yml needs the animation table the importer prints.
   # Full prompts: art/briefs/07-grognak-animation.md.
-  # `sizes`: the importer also writes the sheet at smaller sizes (grognak_94.png .. _58.png), each shrunk from the raw
+  # `sizes`: the importer also writes the sheet at smaller sizes (grognak_114.png .. _70.png), each shrunk from the raw
   # pictures, so in perspective the game draws him 1:1 instead of scaling pixel art (which breaks it).
   grognak:
     type: sheet
     out: sprites/grognak.png
-    frame: [64, 96]
+    frame: [76, 116]
     sizes: {min: 0.6, step: 2}
     columns: 6
     parts:
@@ -68,7 +68,7 @@ assets:
     raw: art/raw/grognak.png
     prompt: '{style} {cutout} Character sheet of {grognak} 4 rows (facing front, back, right, left) by 3 columns (standing,
       walking step one, walking step two). Same size in every cell.'
-    frame: [64, 96]
+    frame: [76, 116]
     grid: [3, 4]
     animations: {idle_s: [0], walk_s: [0, 1, 0, 2], idle_n: [3], walk_n: [3, 4, 3, 5], idle_e: [6], walk_e: [6, 7, 6, 8], idle_w: [9], walk_w: [9, 10, 9, 11]}
     sizes: {min: 0.6, step: 2}
@@ -81,12 +81,12 @@ assets:
     type: sprite
     out: sprites/zombie_standing.png
     prompt: '{style} {cutout} {zombie} Standing.'
-    size: [96, 128]
+    size: [52, 78]
   zombie_down:
     type: sprite
     out: sprites/zombie_down.png
     prompt: '{style} {cutout} {zombie} Lying flat on the ground, defeated.'
-    size: [120, 48]
+    size: [64, 30]
   open_grave:   # a separate sprite, so it sits exactly under its hotspot (the zombie falls into it)
     type: sprite
     out: sprites/open_grave.png
@@ -133,12 +133,12 @@ assets:
     type: sprite
     out: sprites/blacksmith.png
     prompt: '{style} {cutout} {blacksmith}'
-    size: [80, 140]
+    size: [62, 84]
   priest:
     type: sprite
     out: sprites/priest.png
     prompt: '{style} {cutout} {priest}'
-    size: [60, 80]
+    size: [56, 54]
   wizard:
     type: sprite
     out: sprites/wizard.png

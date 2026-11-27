@@ -16,7 +16,7 @@ and never skate, at any speed. Talking and reaching move on by **time**.
   with the other leg. The up-and-down is drawn into the frames.
 - **Never scale pixel art at runtime.** Shrinking a sprite to 83% with nearest-neighbour drops arbitrary pixel rows
   (broken outline, mushy face), and as he moves different rows drop each frame (shimmer). So the importer writes the
-  player's sheet in many sizes (`sizes:` in `art/assets.yml` -> `grognak_94.png` .. `grognak_58.png`, each shrunk
+  player's sheet in many sizes (`sizes:` in `art/assets.yml` -> `grognak_114.png` .. `grognak_70.png`, each shrunk
   from the raw picture with one shared palette), game.yml lists them (`sizes:`), and `pickSize()` chooses the
   nearest; it is drawn 1:1. Steps of 2 picture pixels keep the size change smooth. (Vite only sees new picture files
   after the dev server restarts.)
